@@ -1,0 +1,763 @@
+<title>겹 — 시스템 아키텍처 &amp; ERD 참고 도면</title>
+<style>
+  :root {
+    --bg: #F2F4EF;
+    --bg-raised: #FFFFFF;
+    --bg-inset: #E9ECE3;
+    --ink: #14181B;
+    --ink-soft: #4A5450;
+    --ink-faint: #7C867E;
+    --line: #C6CDBF;
+    --line-soft: #DEE3D6;
+    --accent-a: #33518F;
+    --accent-a-soft: #DCE3F1;
+    --accent-b: #B96F1F;
+    --accent-b-soft: #F1E2CD;
+    --accent-g: #66783A;
+    --accent-g-soft: #E1E7CC;
+    --shadow: 0 1px 0 rgba(20,24,27,0.04), 0 8px 24px -16px rgba(20,24,27,0.25);
+
+    --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+                 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
+    --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+    --fs-2xs: 0.6875rem;
+    --fs-xs: 0.75rem;
+    --fs-sm: 0.8125rem;
+    --fs-base: 0.9375rem;
+    --fs-md: 1.0625rem;
+    --fs-lg: 1.3125rem;
+    --fs-xl: 1.75rem;
+    --fs-2xl: clamp(1.9rem, 1.5rem + 1.6vw, 2.6rem);
+
+    --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+    --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171A;
+      --bg-raised: #1B1F20;
+      --bg-inset: #1F2422;
+      --ink: #ECEFEA;
+      --ink-soft: #A9B2AA;
+      --ink-faint: #6E7873;
+      --line: #333B35;
+      --line-soft: #262C27;
+      --accent-a: #7C9BE5;
+      --accent-a-soft: #212B42;
+      --accent-b: #E3A455;
+      --accent-b-soft: #382A17;
+      --accent-g: #A3BD5E;
+      --accent-g-soft: #2A311C;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14171A; --bg-raised: #1B1F20; --bg-inset: #1F2422;
+    --ink: #ECEFEA; --ink-soft: #A9B2AA; --ink-faint: #6E7873;
+    --line: #333B35; --line-soft: #262C27;
+    --accent-a: #7C9BE5; --accent-a-soft: #212B42;
+    --accent-b: #E3A455; --accent-b-soft: #382A17;
+    --accent-g: #A3BD5E; --accent-g-soft: #2A311C;
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --bg: #F2F4EF; --bg-raised: #FFFFFF; --bg-inset: #E9ECE3;
+    --ink: #14181B; --ink-soft: #4A5450; --ink-faint: #7C867E;
+    --line: #C6CDBF; --line-soft: #DEE3D6;
+    --accent-a: #33518F; --accent-a-soft: #DCE3F1;
+    --accent-b: #B96F1F; --accent-b-soft: #F1E2CD;
+    --accent-g: #66783A; --accent-g-soft: #E1E7CC;
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: var(--fs-base);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-g-soft); color: var(--ink); }
+
+  a { color: var(--accent-a); }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent-g);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--sp-7) var(--sp-5) var(--sp-8);
+  }
+
+  /* ---------- 상단 index bar ---------- */
+  .indexbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-3) var(--sp-5);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line-soft);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.02em;
+  }
+  .indexbar .logomark { flex: none; }
+  .indexbar-name { color: var(--ink-soft); margin-right: auto; }
+  .indexbar nav { display: flex; gap: var(--sp-4); }
+  .indexbar nav a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    padding: var(--sp-1) 0;
+    border-bottom: 1px solid transparent;
+  }
+  .indexbar nav a:hover { color: var(--ink); border-color: var(--line); }
+
+  /* ---------- 로고마크 (겹침 = 브랜드) ---------- */
+  .logomark circle:first-child { fill: var(--accent-a); }
+  .logomark circle:last-child { fill: var(--accent-b); mix-blend-mode: multiply; }
+  @media (prefers-color-scheme: dark) {
+    .logomark circle:last-child { mix-blend-mode: screen; }
+  }
+  :root[data-theme="dark"] .logomark circle:last-child { mix-blend-mode: screen; }
+  :root[data-theme="light"] .logomark circle:last-child { mix-blend-mode: multiply; }
+
+  /* ---------- 헤더 ---------- */
+  header.masthead {
+    padding: var(--sp-8) 0 var(--sp-7);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: var(--sp-7);
+  }
+  .eyebrow {
+    display: flex; align-items: center; gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: var(--sp-4);
+  }
+  h1 {
+    font-size: var(--fs-2xl);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 var(--sp-3);
+  }
+  header.masthead p.lede {
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: var(--fs-md);
+    margin: 0 0 var(--sp-5);
+  }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: var(--sp-5);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--ink-faint);
+  }
+  .meta-row dt { display: inline; color: var(--ink-faint); }
+  .meta-row dd { display: inline; margin: 0 0 0 var(--sp-1); color: var(--ink-soft); }
+  .meta-item + .meta-item { border-left: 1px solid var(--line); padding-left: var(--sp-5); }
+
+  /* ---------- 도면 시트 ---------- */
+  .sheet { margin-bottom: var(--sp-8); scroll-margin-top: 64px; }
+  .sheet-titleblock {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: var(--sp-4);
+    padding-bottom: var(--sp-3);
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: var(--sp-5);
+  }
+  .sheet-titleblock .num {
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+  .sheet-titleblock h2 {
+    font-size: var(--fs-xl);
+    margin: var(--sp-1) 0 0;
+    letter-spacing: -0.005em;
+  }
+  .sheet-titleblock .scale {
+    font-family: var(--font-mono);
+    font-size: var(--fs-2xs);
+    color: var(--ink-faint);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  figure.diagram {
+    margin: 0;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: var(--sp-5);
+  }
+  figure.diagram svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .diagram-scroll { overflow-x: auto; }
+  figcaption {
+    font-size: var(--fs-sm);
+    color: var(--ink-soft);
+    max-width: 68ch;
+    margin: var(--sp-4) 0 0;
+  }
+
+  /* ---------- 범례 ---------- */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: var(--sp-4) var(--sp-5);
+    margin: var(--sp-4) 0 0;
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--bg-inset);
+    border-radius: 6px;
+    font-size: var(--fs-xs);
+    color: var(--ink-soft);
+  }
+  .legend-item { display: flex; align-items: center; gap: var(--sp-2); white-space: nowrap; }
+  .swatch { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+  .swatch.line { width: 20px; height: 2px; border-radius: 0; background: var(--ink-faint); }
+  .swatch.line.dashed {
+    background: repeating-linear-gradient(90deg, var(--ink-faint) 0 5px, transparent 5px 9px);
+  }
+
+  /* ---------- 그리는 법 패널 ---------- */
+  .tips {
+    margin-top: var(--sp-5);
+    border-left: 3px solid var(--accent-g);
+    padding: var(--sp-3) var(--sp-5);
+    background: var(--accent-g-soft);
+    border-radius: 0 6px 6px 0;
+  }
+  .tips h3 {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent-g);
+    margin: 0 0 var(--sp-3);
+  }
+  .tips ol { margin: 0; padding-left: 1.15em; }
+  .tips li { margin-bottom: var(--sp-3); max-width: 68ch; }
+  .tips li:last-child { margin-bottom: 0; }
+  .tips li b { color: var(--ink); }
+
+  /* ---------- 노트 (ERD 하단) ---------- */
+  .notes {
+    margin-top: var(--sp-5);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--sp-4);
+  }
+  .note-card {
+    background: var(--bg-raised);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    padding: var(--sp-4);
+  }
+  .note-card h4 {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--ink-faint);
+    margin: 0 0 var(--sp-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .note-card p { margin: 0; font-size: var(--fs-sm); color: var(--ink-soft); }
+  .note-card code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--bg-inset);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--ink);
+  }
+
+  footer.colophon {
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: var(--fs-2xs);
+    color: var(--ink-faint);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--sp-2);
+  }
+
+  @media (max-width: 640px) {
+    .wrap { padding: var(--sp-5) var(--sp-4) var(--sp-7); }
+    .sheet-titleblock { flex-direction: column; gap: var(--sp-1); }
+    .sheet-titleblock .scale { text-align: left; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    figure.diagram { animation: rise 0.5s ease-out both; }
+    .sheet:nth-of-type(2) figure.diagram { animation-delay: 0.06s; }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<div class="indexbar">
+  <svg class="logomark" width="22" height="16" viewBox="0 0 22 16" aria-hidden="true">
+    <circle cx="8" cy="8" r="7.5"></circle>
+    <circle cx="14" cy="8" r="7.5"></circle>
+  </svg>
+  <span class="indexbar-name">GYEOP · 참고 도면</span>
+  <nav>
+    <a href="#sheet-architecture">01 아키텍처</a>
+    <a href="#sheet-erd">02 ERD</a>
+  </nav>
+</div>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">
+      <svg class="logomark" width="18" height="13" viewBox="0 0 22 16" aria-hidden="true">
+        <circle cx="8" cy="8" r="7.5"></circle>
+        <circle cx="14" cy="8" r="7.5"></circle>
+      </svg>
+      GYEOP — REFERENCE DRAWING SET
+    </div>
+    <h1>시스템 아키텍처 &amp; ERD 참고 도면</h1>
+    <p class="lede">
+      직접 아키텍처를 그리기 전에 참고할 두 장의 도면. 01은 러너 두 명의 기기가 오프라인으로
+      먼저 만나고(P2P) 나중에 서버에서 합쳐지는(동기화) 흐름을, 02는 그 만남이 남기는
+      데이터 모델을 보여준다.
+    </p>
+    <dl class="meta-row">
+      <div class="meta-item"><dt>PROJECT</dt> <dd>겹 (Gyeop) · v0.1</dd></div>
+      <div class="meta-item"><dt>SHEETS</dt> <dd>02</dd></div>
+      <div class="meta-item"><dt>STATUS</dt> <dd>개발 착수 전 · 초안</dd></div>
+    </dl>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- SHEET 01 — 시스템 아키텍처                                     -->
+  <!-- ============================================================ -->
+  <section class="sheet" id="sheet-architecture">
+    <div class="sheet-titleblock">
+      <div>
+        <div class="num">SHEET 01 / 02</div>
+        <h2>시스템 아키텍처 — 맞대기에서 동기화까지</h2>
+      </div>
+      <div class="scale">클라이언트 2대 · Firebase · APNs</div>
+    </div>
+
+    <figure class="diagram">
+      <div class="diagram-scroll">
+        <svg viewBox="0 0 1600 1200" role="img"
+             aria-label="러너 A와 러너 B의 기기가 View, ViewModel, UseCase 레이어를 거쳐 GyeopKit에서 서버 없이 직접 카드를 교환하고, 각자 독립적으로 Firestore에 동기화되며 idempotent GyeopID로 중복이 제거된 뒤 Cloud Functions가 매칭·TTL·푸시를 처리해 두 기기에 알림과 Live Activity 갱신으로 돌아오는 전체 흐름">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
+            </marker>
+            <marker id="arrowG" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--accent-g)"></path>
+            </marker>
+          </defs>
+
+          <g fill="none" stroke="var(--ink-faint)" stroke-width="1.4" font-family="var(--font-mono)">
+
+            <!-- 컬럼 라벨 -->
+            <text x="100" y="48" font-size="16" fill="var(--accent-a)" stroke="none" font-weight="600">러너 A 기기</text>
+            <text x="1100" y="48" font-size="16" fill="var(--accent-b)" stroke="none" font-weight="600" text-anchor="start">러너 B 기기</text>
+
+            <!-- ===== 좌측 클라이언트 스택 ===== -->
+            <g stroke="var(--accent-a)">
+              <rect x="100" y="80" width="373" height="53" rx="4" fill="var(--bg-raised)"></rect>
+              <rect x="100" y="150" width="373" height="53" rx="4" fill="var(--bg-raised)"></rect>
+              <rect x="100" y="220" width="373" height="53" rx="4" fill="var(--bg-raised)"></rect>
+              <line x1="287" y1="133" x2="287" y2="150" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+              <line x1="287" y1="203" x2="287" y2="220" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+              <line x1="287" y1="273" x2="287" y2="299" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+            </g>
+            <text x="120" y="113" font-size="15" fill="var(--ink)" stroke="none">SwiftUI View</text>
+            <text x="120" y="183" font-size="15" fill="var(--ink)" stroke="none">@Observable ViewModel</text>
+            <text x="120" y="253" font-size="15" fill="var(--ink)" stroke="none">UseCase (Domain)</text>
+            <text x="475" y="100" font-size="11" fill="var(--ink-faint)" stroke="none" text-anchor="end">App</text>
+            <text x="475" y="240" font-size="11" fill="var(--ink-faint)" stroke="none" text-anchor="end">Core</text>
+
+            <!-- ===== 우측 클라이언트 스택 ===== -->
+            <g stroke="var(--accent-b)">
+              <rect x="1127" y="80" width="373" height="53" rx="4" fill="var(--bg-raised)"></rect>
+              <rect x="1127" y="150" width="373" height="53" rx="4" fill="var(--bg-raised)"></rect>
+              <rect x="1127" y="220" width="373" height="53" rx="4" fill="var(--bg-raised)"></rect>
+              <line x1="1313" y1="133" x2="1313" y2="150" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+              <line x1="1313" y1="203" x2="1313" y2="220" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+              <line x1="1313" y1="273" x2="1313" y2="299" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+            </g>
+            <text x="1147" y="113" font-size="15" fill="var(--ink)" stroke="none">SwiftUI View</text>
+            <text x="1147" y="183" font-size="15" fill="var(--ink)" stroke="none">@Observable ViewModel</text>
+            <text x="1147" y="253" font-size="15" fill="var(--ink)" stroke="none">UseCase (Domain)</text>
+            <text x="1502" y="100" font-size="11" fill="var(--ink-faint)" stroke="none" text-anchor="start">App</text>
+            <text x="1502" y="240" font-size="11" fill="var(--ink-faint)" stroke="none" text-anchor="start">Core</text>
+
+            <!-- ===== GyeopKit — P2P 교환 레인 (하이라이트) ===== -->
+            <rect x="100" y="299" width="373" height="67" rx="4" fill="var(--accent-g-soft)" stroke="var(--accent-g)"></rect>
+            <rect x="1127" y="299" width="373" height="67" rx="4" fill="var(--accent-g-soft)" stroke="var(--accent-g)"></rect>
+            <text x="120" y="327" font-size="15" fill="var(--ink)" stroke="none">GyeopKit</text>
+            <text x="120" y="348" font-size="12" fill="var(--ink-soft)" stroke="none">MultipeerConnectivity + NearbyInteraction</text>
+            <text x="1147" y="327" font-size="15" fill="var(--ink)" stroke="none">GyeopKit</text>
+            <text x="1147" y="348" font-size="12" fill="var(--ink-soft)" stroke="none">MultipeerConnectivity + NearbyInteraction</text>
+
+            <line x1="473" y1="332" x2="1127" y2="332" stroke="var(--accent-g)" stroke-width="2.5"
+                  marker-start="url(#arrowG)" marker-end="url(#arrowG)"></line>
+            <text x="800" y="295" font-size="14" fill="var(--accent-g)" stroke="none" text-anchor="middle" font-weight="600">맞대기 — 서버 경유 없음, 오프라인 가능</text>
+            <text x="800" y="380" font-size="12" fill="var(--ink-soft)" stroke="none" text-anchor="middle">발견 → 연결 → 전송 · UWB 30cm 트리거</text>
+
+            <!-- 아래로 -->
+            <line x1="287" y1="366" x2="287" y2="400" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+            <line x1="1313" y1="366" x2="1313" y2="400" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+
+            <!-- ===== Repository 경계 ===== -->
+            <line x1="60" y1="400" x2="1540" y2="400" stroke="var(--ink-faint)" stroke-width="1.2" stroke-dasharray="5 5"></line>
+            <text x="70" y="392" font-size="12" fill="var(--ink-faint)" stroke="none">Repository 프로토콜 경계 — 도메인은 Firebase를 모른다</text>
+
+            <!-- ===== 로컬 저장 + 동기화 큐 (좌) ===== -->
+            <rect x="100" y="427" width="173" height="67" rx="4" fill="var(--bg-raised)" stroke="var(--ink-faint)"></rect>
+            <rect x="293" y="427" width="173" height="67" rx="4" fill="var(--bg-raised)" stroke="var(--ink-faint)"></rect>
+            <text x="118" y="459" font-size="13" fill="var(--ink)" stroke="none">SwiftData</text>
+            <text x="118" y="477" font-size="11" fill="var(--ink-soft)" stroke="none">(로컬)</text>
+            <text x="311" y="459" font-size="13" fill="var(--ink)" stroke="none">동기화 큐</text>
+            <text x="311" y="477" font-size="11" fill="var(--ink-soft)" stroke="none">(오프라인 대응)</text>
+            <line x1="273" y1="461" x2="293" y2="461" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+
+            <!-- ===== 로컬 저장 + 동기화 큐 (우) ===== -->
+            <rect x="1127" y="427" width="173" height="67" rx="4" fill="var(--bg-raised)" stroke="var(--ink-faint)"></rect>
+            <rect x="1320" y="427" width="173" height="67" rx="4" fill="var(--bg-raised)" stroke="var(--ink-faint)"></rect>
+            <text x="1145" y="459" font-size="13" fill="var(--ink)" stroke="none">SwiftData</text>
+            <text x="1145" y="477" font-size="11" fill="var(--ink-soft)" stroke="none">(로컬)</text>
+            <text x="1338" y="459" font-size="13" fill="var(--ink)" stroke="none">동기화 큐</text>
+            <text x="1338" y="477" font-size="11" fill="var(--ink-soft)" stroke="none">(오프라인 대응)</text>
+            <line x1="1300" y1="461" x2="1320" y2="461" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+
+            <!-- ===== 수렴 → Firestore ===== -->
+            <line x1="380" y1="494" x2="653" y2="558" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+            <line x1="1420" y1="494" x2="947" y2="558" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+            <text x="800" y="536" font-size="13" fill="var(--accent-g)" stroke="none" text-anchor="middle" font-weight="600">idempotent GyeopID → 중복 자동 제거</text>
+
+            <rect x="603" y="560" width="347" height="80" rx="4" fill="var(--bg-raised)" stroke="var(--ink)" stroke-width="1.4"></rect>
+            <text x="800" y="600" font-size="16" fill="var(--ink)" stroke="none" text-anchor="middle" font-weight="600">Firestore</text>
+            <text x="800" y="623" font-size="12" fill="var(--ink-soft)" stroke="none" text-anchor="middle">gyeop · signal · runner 컬렉션</text>
+
+            <line x1="800" y1="640" x2="800" y2="693" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+
+            <rect x="603" y="693" width="347" height="67" rx="4" fill="var(--bg-raised)" stroke="var(--ink)"></rect>
+            <text x="800" y="735" font-size="15" fill="var(--ink)" stroke="none" text-anchor="middle">Cloud Functions</text>
+
+            <!-- ===== 분기 3개 ===== -->
+            <line x1="800" y1="760" x2="553" y2="800" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+            <line x1="800" y1="760" x2="800" y2="800" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+            <line x1="800" y1="760" x2="1047" y2="800" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+
+            <rect x="440" y="800" width="227" height="67" rx="4" fill="var(--bg-raised)" stroke="var(--ink-faint)"></rect>
+            <rect x="687" y="800" width="227" height="67" rx="4" fill="var(--bg-raised)" stroke="var(--ink-faint)"></rect>
+            <rect x="934" y="800" width="227" height="67" rx="4" fill="var(--bg-raised)" stroke="var(--ink-faint)"></rect>
+            <text x="553" y="830" font-size="13" fill="var(--ink)" stroke="none" text-anchor="middle">매칭 계산</text>
+            <text x="553" y="851" font-size="11" fill="var(--ink-soft)" stroke="none" text-anchor="middle">(주간 크론)</text>
+            <text x="800" y="830" font-size="13" fill="var(--ink)" stroke="none" text-anchor="middle">TTL 스케줄러</text>
+            <text x="800" y="851" font-size="11" fill="var(--ink-soft)" stroke="none" text-anchor="middle">(신호 소멸)</text>
+            <text x="1047" y="830" font-size="13" fill="var(--ink)" stroke="none" text-anchor="middle">APNs 호출</text>
+            <text x="1047" y="851" font-size="11" fill="var(--ink-soft)" stroke="none" text-anchor="middle">(p8 직접)</text>
+
+            <!-- ===== 푸시 → 다시 기기로 ===== -->
+            <line x1="1047" y1="867" x2="287" y2="1010" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+            <line x1="1047" y1="867" x2="1313" y2="1010" marker-end="url(#arrow)" stroke="var(--ink-faint)"></line>
+
+            <rect x="100" y="1013" width="373" height="80" rx="4" fill="var(--bg-raised)" stroke="var(--accent-a)"></rect>
+            <rect x="1127" y="1013" width="373" height="80" rx="4" fill="var(--bg-raised)" stroke="var(--accent-b)"></rect>
+            <text x="287" y="1045" font-size="14" fill="var(--ink)" stroke="none" text-anchor="middle">Device A</text>
+            <text x="287" y="1068" font-size="12" fill="var(--ink-soft)" stroke="none" text-anchor="middle">신호 알림 · Live Activity 갱신</text>
+            <text x="1313" y="1045" font-size="14" fill="var(--ink)" stroke="none" text-anchor="middle">Device B</text>
+            <text x="1313" y="1068" font-size="12" fill="var(--ink-soft)" stroke="none" text-anchor="middle">신호 알림 · Live Activity 갱신</text>
+
+          </g>
+        </svg>
+      </div>
+      <figcaption>
+        위: 두 기기는 <b>GyeopKit</b>에서 서버 없이 직접 만난다(맞대기). 중간: 각 기기는 독립적으로
+        만든 겹 기록을 각자 Firestore로 올리고, 결정적 <code>GyeopID</code>가 같은 만남을 자동으로
+        하나로 합친다. 아래: Cloud Functions가 매칭·TTL·푸시를 처리해 다시 두 기기로 돌아온다.
+      </figcaption>
+    </figure>
+
+    <div class="legend">
+      <div class="legend-item"><span class="swatch" style="background:var(--accent-a)"></span>러너 A 경로</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--accent-b)"></span>러너 B 경로</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--accent-g)"></span>겹침 지점 — P2P 교환 · 서버 병합</div>
+      <div class="legend-item"><span class="swatch line dashed"></span>추상화 경계 (Repository 프로토콜)</div>
+    </div>
+
+    <div class="tips">
+      <h3>이 도면을 직접 그릴 때</h3>
+      <ol>
+        <li><b>레이어는 세로로, 대등한 통신은 가로로.</b> View→ViewModel→UseCase처럼 누가 누구를
+          호출하는 구조는 세로 스택으로, GyeopKit처럼 두 기기가 대등하게 통신하는 지점은 가로
+          화살표로 그리면 “호출”과 “교신”이 한 그림 안에서 구분된다.</li>
+        <li><b>경계는 실선이 아니라 점선으로.</b> Repository 프로토콜처럼 그 선을 넘으면 무엇이
+          안 보이게 되는 지점(도메인이 Firebase를 모르는 경계)은 점선으로 표시해, 실제 데이터
+          흐름(실선)과 시각적으로 구분한다.</li>
+        <li><b>합쳐지는 지점엔 이유를 적어라.</b> 두 화살표가 하나로 모이는 곳은 “동기화”라고만
+          쓰지 말고, 무엇이 중복을 막는지(idempotent GyeopID) 그 자리에 바로 적어야 나중에
+          코드를 안 봐도 설계가 기억난다.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SHEET 02 — ERD                                                -->
+  <!-- ============================================================ -->
+  <section class="sheet" id="sheet-erd">
+    <div class="sheet-titleblock">
+      <div>
+        <div class="num">SHEET 02 / 02</div>
+        <h2>ERD — 겹을 중심으로 한 데이터 모델</h2>
+      </div>
+      <div class="scale">8 entities · Runner 허브</div>
+    </div>
+
+    <figure class="diagram">
+      <div class="diagram-scroll">
+        <svg viewBox="0 0 1800 1300" role="img"
+             aria-label="Runner를 중심 허브로 Season, Card가 위쪽에서 연결되고, 오른쪽 열에 Gyeop과 Signal이 각각 Runner에 두 번(runnerA, runnerB 또는 host) 연결되며, SignalParticipant가 Runner와 Signal의 다대다를 해소하는 조인 테이블로 존재하고, 왼쪽의 Match도 Runner에 두 번 연결되며 성사되면 점선으로 Gyeop을 가리키고, Spot은 Gyeop과 Signal에서 점선(선택적)으로 연결되는 전체 관계도">
+          <defs>
+            <marker id="e-arrow" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"></path>
+            </marker>
+          </defs>
+
+          <!-- ===== 관계선 (엔티티보다 먼저 그려 뒤로 보내기) ===== -->
+          <g fill="none" stroke="var(--ink-faint)" stroke-width="1.3" font-family="var(--font-mono)">
+
+            <!-- Season - Runner -->
+            <line x1="895" y1="293" x2="895" y2="494" marker-end="url(#e-arrow)"></line>
+            <text x="882" y="283" font-size="11" stroke="none" fill="var(--ink-faint)" text-anchor="end">1</text>
+            <text x="882" y="487" font-size="11" stroke="none" fill="var(--ink-faint)" text-anchor="end">*</text>
+
+            <!-- Card - Runner -->
+            <line x1="1120" y1="215" x2="1040" y2="546" marker-end="url(#e-arrow)"></line>
+            <text x="1105" y="206" font-size="11" stroke="none" fill="var(--ink-faint)">1</text>
+            <text x="1056" y="538" font-size="11" stroke="none" fill="var(--ink-faint)">*(버전이력)</text>
+
+            <!-- Gyeop - Runner (A/B) -->
+            <line x1="1453" y1="468" x2="1040" y2="533" marker-end="url(#e-arrow)"></line>
+            <text x="1437" y="457" font-size="11" stroke="none" fill="var(--accent-g)" font-weight="600">A</text>
+            <line x1="1453" y1="598" x2="1040" y2="677" marker-end="url(#e-arrow)"></line>
+            <text x="1437" y="616" font-size="11" stroke="none" fill="var(--accent-g)" font-weight="600">B</text>
+
+            <!-- Signal - Runner (host) -->
+            <line x1="1453" y1="793" x2="1040" y2="702" marker-end="url(#e-arrow)"></line>
+            <text x="1270" y="767" font-size="11" stroke="none" fill="var(--ink-faint)">host: 1 — *</text>
+
+            <!-- SignalParticipant - Runner / Signal -->
+            <line x1="1055" y1="910" x2="1040" y2="746" marker-end="url(#e-arrow)"></line>
+            <text x="1063" y="832" font-size="11" stroke="none" fill="var(--ink-faint)">* — 1</text>
+            <line x1="1346" y1="910" x2="1453" y2="858" marker-end="url(#e-arrow)"></line>
+            <text x="1354" y="897" font-size="11" stroke="none" fill="var(--ink-faint)">* — 1</text>
+
+            <!-- Match - Runner (A/B) -->
+            <line x1="635" y1="832" x2="750" y2="611" marker-end="url(#e-arrow)"></line>
+            <text x="641" y="822" font-size="11" stroke="none" fill="var(--accent-g)" font-weight="600">A</text>
+            <line x1="635" y1="910" x2="750" y2="702" marker-end="url(#e-arrow)"></line>
+            <text x="641" y="927" font-size="11" stroke="none" fill="var(--accent-g)" font-weight="600">B</text>
+
+            <!-- Match -> Gyeop (선택적, 점선, 우회 라우팅) -->
+            <polyline points="635,845 635,1118 1525,1118 1525,673"
+                      stroke-dasharray="5 5" marker-end="url(#e-arrow)"></polyline>
+            <text x="900" y="1137" font-size="11" stroke="none" fill="var(--ink-faint)" text-anchor="middle">fulfilledGyeopID (0..1) — 매칭이 실제 겹으로 이어지면</text>
+
+            <!-- Signal -> Spot (선택적, 점선) -->
+            <line x1="1598" y1="981" x2="1598" y2="1040" stroke-dasharray="5 5" marker-end="url(#e-arrow)"></line>
+            <text x="1607" y="1015" font-size="11" stroke="none" fill="var(--ink-faint)">spotID (0..1)</text>
+
+            <!-- Gyeop -> Spot (선택적, 점선, 우측 우회) -->
+            <polyline points="1737,533 1768,533 1768,1152 1737,1152"
+                      stroke-dasharray="5 5" marker-end="url(#e-arrow)"></polyline>
+            <text x="1772" y="843" font-size="11" stroke="none" fill="var(--ink-faint)"
+                  transform="rotate(90 1772 843)" text-anchor="middle">spotID (0..1)</text>
+          </g>
+
+          <!-- ===== 엔티티 박스 ===== -->
+          <g font-family="var(--font-mono)">
+
+            <!-- Season -->
+            <g>
+              <rect x="750" y="104" width="307" height="190" rx="5" fill="var(--bg-raised)" stroke="var(--line)"></rect>
+              <rect x="750" y="104" width="307" height="39" rx="5" fill="var(--bg-inset)" stroke="var(--line)"></rect>
+              <text x="904" y="130" font-size="15" fill="var(--ink)" text-anchor="middle" font-weight="700">Season</text>
+              <text x="766" y="169" font-size="13" fill="var(--ink)">id <tspan fill="var(--ink-faint)">PK</tspan></text>
+              <text x="766" y="198" font-size="13" fill="var(--ink)">name</text>
+              <text x="766" y="227" font-size="13" fill="var(--ink)">startDate</text>
+              <text x="766" y="256" font-size="13" fill="var(--ink)">endDate</text>
+            </g>
+
+            <!-- Runner (허브) -->
+            <g>
+              <rect x="750" y="494" width="307" height="252" rx="5" fill="var(--bg-raised)" stroke="var(--ink)" stroke-width="1.6"></rect>
+              <rect x="750" y="494" width="307" height="39" rx="5" fill="var(--ink)"></rect>
+              <text x="904" y="520" font-size="15" fill="var(--bg-raised)" text-anchor="middle" font-weight="700">Runner</text>
+              <text x="766" y="560" font-size="13" fill="var(--ink)">id <tspan fill="var(--ink-faint)">PK</tspan></text>
+              <text x="766" y="589" font-size="13" fill="var(--ink)">appleUserID</text>
+              <text x="766" y="618" font-size="13" fill="var(--ink)">academyEmail</text>
+              <text x="766" y="647" font-size="13" fill="var(--ink)">nickname</text>
+              <text x="766" y="676" font-size="13" fill="var(--ink)">seasonID <tspan fill="var(--ink-faint)">FK</tspan></text>
+              <text x="766" y="705" font-size="13" fill="var(--ink)">createdAt</text>
+            </g>
+
+            <!-- Card -->
+            <g>
+              <rect x="1120" y="104" width="307" height="221" rx="5" fill="var(--bg-raised)" stroke="var(--line)"></rect>
+              <rect x="1120" y="104" width="307" height="39" rx="5" fill="var(--bg-inset)" stroke="var(--line)"></rect>
+              <text x="1274" y="130" font-size="15" fill="var(--ink)" text-anchor="middle" font-weight="700">Card</text>
+              <text x="1136" y="169" font-size="13" fill="var(--ink)">id <tspan fill="var(--ink-faint)">PK</tspan></text>
+              <text x="1136" y="198" font-size="13" fill="var(--ink)">runnerID <tspan fill="var(--ink-faint)">FK</tspan></text>
+              <text x="1136" y="227" font-size="13" fill="var(--ink)">interests[] (seed)</text>
+              <text x="1136" y="256" font-size="13" fill="var(--ink)">visualSeed</text>
+              <text x="1136" y="285" font-size="13" fill="var(--ink)">version</text>
+            </g>
+
+            <!-- Gyeop -->
+            <g>
+              <rect x="1453" y="390" width="307" height="283" rx="5" fill="var(--bg-raised)" stroke="var(--accent-g)" stroke-width="1.6"></rect>
+              <rect x="1453" y="390" width="307" height="39" rx="5" fill="var(--accent-g)"></rect>
+              <text x="1607" y="416" font-size="15" fill="var(--bg-raised)" text-anchor="middle" font-weight="700">Gyeop</text>
+              <text x="1469" y="455" font-size="13" fill="var(--ink)">id <tspan fill="var(--ink-faint)">PK · 결정적 해시</tspan></text>
+              <text x="1469" y="484" font-size="13" fill="var(--ink)">runnerAID <tspan fill="var(--ink-faint)">FK</tspan></text>
+              <text x="1469" y="513" font-size="13" fill="var(--ink)">runnerBID <tspan fill="var(--ink-faint)">FK</tspan></text>
+              <text x="1469" y="542" font-size="13" fill="var(--ink)">method (uwb/mpc/signal)</text>
+              <text x="1469" y="571" font-size="13" fill="var(--ink)">spotID <tspan fill="var(--ink-faint)">FK, null</tspan></text>
+              <text x="1469" y="600" font-size="13" fill="var(--ink)">occurredAt</text>
+              <text x="1469" y="629" font-size="13" fill="var(--ink)">syncedAt</text>
+            </g>
+
+            <!-- Signal -->
+            <g>
+              <rect x="1453" y="728" width="307" height="252" rx="5" fill="var(--bg-raised)" stroke="var(--line)"></rect>
+              <rect x="1453" y="728" width="307" height="39" rx="5" fill="var(--bg-inset)" stroke="var(--line)"></rect>
+              <text x="1607" y="754" font-size="15" fill="var(--ink)" text-anchor="middle" font-weight="700">Signal</text>
+              <text x="1469" y="793" font-size="13" fill="var(--ink)">id <tspan fill="var(--ink-faint)">PK</tspan></text>
+              <text x="1469" y="822" font-size="13" fill="var(--ink)">hostRunnerID <tspan fill="var(--ink-faint)">FK</tspan></text>
+              <text x="1469" y="851" font-size="13" fill="var(--ink)">activity</text>
+              <text x="1469" y="880" font-size="13" fill="var(--ink)">spotID <tspan fill="var(--ink-faint)">FK, null</tspan></text>
+              <text x="1469" y="909" font-size="13" fill="var(--ink)">ttlExpiresAt</text>
+              <text x="1469" y="938" font-size="13" fill="var(--ink)">status</text>
+            </g>
+
+            <!-- SignalParticipant (join) -->
+            <g>
+              <rect x="1055" y="910" width="307" height="159" rx="5" fill="var(--bg-raised)" stroke="var(--line)" stroke-dasharray="3 3"></rect>
+              <rect x="1055" y="910" width="307" height="39" rx="5" fill="var(--bg-inset)" stroke="var(--line)"></rect>
+              <text x="1209" y="936" font-size="14" fill="var(--ink)" text-anchor="middle" font-weight="700">SignalParticipant</text>
+              <text x="1071" y="975" font-size="13" fill="var(--ink)">signalID <tspan fill="var(--ink-faint)">FK·PK</tspan></text>
+              <text x="1071" y="1004" font-size="13" fill="var(--ink)">runnerID <tspan fill="var(--ink-faint)">FK·PK</tspan></text>
+              <text x="1071" y="1033" font-size="13" fill="var(--ink)">joinedAt</text>
+            </g>
+
+            <!-- Match -->
+            <g>
+              <rect x="345" y="780" width="307" height="252" rx="5" fill="var(--bg-raised)" stroke="var(--accent-g)"></rect>
+              <rect x="345" y="780" width="307" height="39" rx="5" fill="var(--accent-g-soft)" stroke="var(--accent-g)"></rect>
+              <text x="499" y="806" font-size="15" fill="var(--ink)" text-anchor="middle" font-weight="700">Match</text>
+              <text x="361" y="845" font-size="13" fill="var(--ink)">id <tspan fill="var(--ink-faint)">PK</tspan></text>
+              <text x="361" y="874" font-size="13" fill="var(--ink)">runnerAID <tspan fill="var(--ink-faint)">FK</tspan></text>
+              <text x="361" y="903" font-size="13" fill="var(--ink)">runnerBID <tspan fill="var(--ink-faint)">FK</tspan></text>
+              <text x="361" y="932" font-size="13" fill="var(--ink)">weekOf</text>
+              <text x="361" y="961" font-size="13" fill="var(--ink)">statusA / statusB</text>
+              <text x="361" y="990" font-size="13" fill="var(--ink)">fulfilledGyeopID <tspan fill="var(--ink-faint)">FK, null</tspan></text>
+            </g>
+
+            <!-- Spot -->
+            <g>
+              <rect x="1453" y="1040" width="307" height="221" rx="5" fill="var(--bg-raised)" stroke="var(--line)"></rect>
+              <rect x="1453" y="1040" width="307" height="39" rx="5" fill="var(--bg-inset)" stroke="var(--line)"></rect>
+              <text x="1607" y="1066" font-size="15" fill="var(--ink)" text-anchor="middle" font-weight="700">Spot</text>
+              <text x="1469" y="1105" font-size="13" fill="var(--ink)">id <tspan fill="var(--ink-faint)">PK</tspan></text>
+              <text x="1469" y="1134" font-size="13" fill="var(--ink)">name</text>
+              <text x="1469" y="1163" font-size="13" fill="var(--ink)">category</text>
+              <text x="1469" y="1192" font-size="13" fill="var(--ink)">lat / lng</text>
+              <text x="1469" y="1221" font-size="13" fill="var(--ink)">visitCount</text>
+            </g>
+
+          </g>
+        </svg>
+      </div>
+      <figcaption>
+        <b>Runner</b>가 허브다. <b>Gyeop</b>과 <b>Match</b>는 둘 다 Runner에 두 번(A/B) 연결되는
+        자기참조 관계 — 사람과 사람 사이의 사건이라는 걸 그림으로 보여준다. 점선은 전부
+        <b>선택적(0..1) 관계</b>다: Spot 연결과 Match→Gyeop 성사 여부는 없을 수 있다.
+      </figcaption>
+    </figure>
+
+    <div class="legend">
+      <div class="legend-item"><span class="swatch" style="background:var(--ink)"></span>허브 엔티티</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--accent-g)"></span>겹(만남)과 직결된 엔티티</div>
+      <div class="legend-item"><span class="swatch line"></span>필수 관계</div>
+      <div class="legend-item"><span class="swatch line dashed"></span>선택적 관계 (0..1)</div>
+    </div>
+
+    <div class="tips">
+      <h3>이 도면을 직접 그릴 때</h3>
+      <ol>
+        <li><b>허브를 먼저 놓아라.</b> 가장 많은 엔티티와 연결되는 것(Runner)을 중앙에 놓고
+          나머지를 방사형으로 배치하면 관계선이 덜 꼬인다. 배치를 먼저 정하고 선을 나중에
+          그으면 이미 절반은 정리된 것이다.</li>
+        <li><b>조인 테이블은 숨기지 마라.</b> SignalParticipant처럼 다대다를 해소하는 테이블은
+          별도 박스로 그려야 “왜 Runner와 Signal이 직접 연결되지 않는지”가 보인다. 점선
+          테두리로 “이건 순수 관계 테이블”이라는 것도 표시했다.</li>
+        <li><b>점선은 nullable에게만 줘라.</b> 관계선의 실선/점선을 일관되게 쓰면(점선 = 선택적
+          FK) 범례 없이도 그림만 보고 필수/선택을 구분할 수 있다. 하나라도 예외를 두면
+          전체 인코딩이 무의미해진다.</li>
+      </ol>
+    </div>
+
+    <div class="notes">
+      <div class="note-card">
+        <h4>왜 Gyeop가 조인 테이블이 아니라 독립 엔티티인가</h4>
+        <p>단순히 “두 러너가 만났다”는 사실만이 아니라 <code>method</code>, <code>spotID</code>,
+          <code>occurredAt</code>처럼 그 자체로 의미 있는 속성을 갖기 때문이다. 조인 테이블이었다면
+          이 속성들을 담을 자리가 없다.</p>
+      </div>
+      <div class="note-card">
+        <h4>GyeopID는 왜 auto-increment가 아닌가</h4>
+        <p>오프라인 P2P로 양쪽 기기가 독립적으로 만든다. 정렬된 러너 ID 쌍 + 5분 타임슬롯을
+          해시해 <b>같은 만남이면 양쪽이 같은 ID를 계산</b>하게 해, 서버에서 자연스럽게
+          중복이 제거된다.</p>
+      </div>
+      <div class="note-card">
+        <h4>Match와 Gyeop의 관계가 이 모델의 핵심</h4>
+        <p>제안된 매칭(Match)이 실제 인증된 만남(Gyeop)으로 이어지는 순간이 이 앱이 증명하려는
+          가설 그 자체다. 이 링크의 채움 여부가 곧 “룰렛이 실제로 작동하는가”의 지표가 된다.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <span>겹(Gyeop) 참고 도면 · 실제 구현 시 Xcode/모델러 산출물로 갱신할 것</span>
+    <span>초안 · 개발 착수 전</span>
+  </footer>
+
+</div>
