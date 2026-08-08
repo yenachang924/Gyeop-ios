@@ -126,7 +126,7 @@ struct StyleStepView: View {
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
             Button("다음") { onNext() }
-                .buttonStyle(.borderedProminent)
+                .dsProminentButton()
                 .controlSize(.large)
                 .frame(maxWidth: .infinity)
                 .padding(DS.Spacing.m)

@@ -65,7 +65,7 @@ public struct ClipReceptionView: View {
                         .font(DS.Typo.headline)
                         .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
                 }
-                .buttonStyle(.borderedProminent)
+                .dsProminentButton()
                 .accessibilityIdentifier("clip.reception.createCard")
 
                 Button {
@@ -75,7 +75,7 @@ public struct ClipReceptionView: View {
                         .font(DS.Typo.body)
                         .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
                 }
-                .buttonStyle(.bordered)
+                .dsGlassButton()
                 .accessibilityIdentifier("clip.reception.how")
             }
         }
@@ -108,7 +108,7 @@ public struct ClipReceptionView: View {
                     .font(DS.Typo.headline)
                     .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
             }
-            .buttonStyle(.bordered)
+            .dsGlassButton()
             .accessibilityIdentifier("clip.reception.how.close")
         }
         .padding(DS.Spacing.m)

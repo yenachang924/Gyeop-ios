@@ -93,7 +93,7 @@ public struct ClipKeepView: View {
                         .font(DS.Typo.headline)
                         .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
                 }
-                .buttonStyle(.borderedProminent)
+                .dsProminentButton()
                 .accessibilityIdentifier("clip.keep.install")
 
                 Button {
@@ -103,7 +103,7 @@ public struct ClipKeepView: View {
                         .font(DS.Typo.body)
                         .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
                 }
-                .buttonStyle(.bordered)
+                .dsGlassButton()
                 .accessibilityIdentifier("clip.keep.later")
             }
             .padding(.horizontal, DS.Spacing.m)

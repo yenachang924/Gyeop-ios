@@ -39,7 +39,7 @@ public struct ClipFailureView: View {
                     .font(DS.Typo.headline)
                     .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
             }
-            .buttonStyle(.borderedProminent)
+            .dsProminentButton()
             .accessibilityIdentifier("clip.failure.retry")
             .padding(.horizontal, DS.Spacing.m)
         }

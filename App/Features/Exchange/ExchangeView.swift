@@ -185,7 +185,7 @@ struct ExchangeView: View {
                     .font(DS.Typo.headline)
                     .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
             }
-            .buttonStyle(.borderedProminent)
+            .dsProminentButton()
             .accessibilityIdentifier("exchange.done")
         }
     }
@@ -214,7 +214,7 @@ struct ExchangeView: View {
                     .font(DS.Typo.headline)
                     .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
             }
-            .buttonStyle(.borderedProminent)
+            .dsProminentButton()
             .accessibilityIdentifier("exchange.retry")
         }
     }

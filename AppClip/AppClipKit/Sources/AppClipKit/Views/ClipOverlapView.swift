@@ -61,7 +61,7 @@ public struct ClipOverlapView: View {
                     .font(DS.Typo.headline)
                     .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
             }
-            .buttonStyle(.borderedProminent)
+            .dsProminentButton()
             .accessibilityIdentifier("clip.overlap.accept")
             .padding(.horizontal, DS.Spacing.m)
         }

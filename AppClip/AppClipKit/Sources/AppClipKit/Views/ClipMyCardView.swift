@@ -41,7 +41,7 @@ public struct ClipMyCardView: View {
                     .font(DS.Typo.headline)
                     .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
             }
-            .buttonStyle(.borderedProminent)
+            .dsProminentButton()
             .accessibilityIdentifier("clip.card.bump")
             .padding(.horizontal, DS.Spacing.m)
         }

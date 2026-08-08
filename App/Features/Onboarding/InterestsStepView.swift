@@ -45,7 +45,7 @@ struct InterestsStepView: View {
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
             Button("다음 · \(selected.count)/\(UserProfile.maxInterests)") { onNext() }
-                .buttonStyle(.borderedProminent)
+                .dsProminentButton()
                 .controlSize(.large)
                 .frame(maxWidth: .infinity)
                 .padding(DS.Spacing.m)
@@ -113,11 +113,11 @@ struct InterestsStepView: View {
         return Group {
             if isSelected {
                 chipButton(icon, isSelected: true)
-                    .buttonStyle(.borderedProminent)
+                    .dsProminentButton()
                     .tint(DS.Palette.selection)
             } else {
                 chipButton(icon, isSelected: false)
-                    .buttonStyle(.bordered)
+                    .dsGlassButton()
                     .tint(.secondary)
             }
         }

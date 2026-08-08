@@ -150,8 +150,7 @@ private struct OverlapPillRow: View {
                     .foregroundStyle(DS.Palette.overlapInk)
                     .padding(.horizontal, DS.Spacing.s)
                     .padding(.vertical, DS.Spacing.xs)
-                    .background(DS.Palette.overlapBg, in: Capsule())
-                    .overlay(Capsule().strokeBorder(DS.Palette.overlapLine))
+                    .modifier(PillSurface())
                     .fixedSize()
                     .opacity(shown ? 1 : 0)
                     .animation(
@@ -166,6 +165,22 @@ private struct OverlapPillRow: View {
         .onAppear { shown = true }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("겹치는 관심사 \(items.joined(separator: ", "))")
+    }
+}
+
+/// 알약 표면 — iOS 26은 Liquid Glass(와인 톤 틴트)로 카드가 비쳐 보이고 (F20),
+/// 이전 OS는 기존 솔리드 배경으로 폴백. 테두리는 두 경로 공통.
+private struct PillSurface: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content
+                .glassEffect(.regular.tint(DS.Palette.overlapBg), in: Capsule())
+                .overlay(Capsule().strokeBorder(DS.Palette.overlapLine))
+        } else {
+            content
+                .background(DS.Palette.overlapBg, in: Capsule())
+                .overlay(Capsule().strokeBorder(DS.Palette.overlapLine))
+        }
     }
 }
 

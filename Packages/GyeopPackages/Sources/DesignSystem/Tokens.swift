@@ -175,3 +175,28 @@ public enum DS {
         public static let shimmer: Double = 0.04
     }
 }
+
+// F20 — Liquid Glass 전면 적용 (2026-08-08 소유자 지시). 시스템 컴포넌트(툴바·시트·
+// 내비게이션)는 iOS 26 SDK 빌드에서 자동으로 글라스가 되고, 앱이 직접 그리는 버튼은
+// 아래 두 헬퍼로 통일한다. 배포 타깃이 iOS 18이라 이전 OS는 기존 스타일로 폴백.
+public extension View {
+    /// 프라이머리 CTA — Liquid Glass prominent, iOS 26 미만은 borderedProminent.
+    @ViewBuilder
+    func dsProminentButton() -> some View {
+        if #available(iOS 26.0, *) {
+            buttonStyle(.glassProminent)
+        } else {
+            buttonStyle(.borderedProminent)
+        }
+    }
+
+    /// 보조·미선택 컨트롤 — Liquid Glass, iOS 26 미만은 bordered.
+    @ViewBuilder
+    func dsGlassButton() -> some View {
+        if #available(iOS 26.0, *) {
+            buttonStyle(.glass)
+        } else {
+            buttonStyle(.bordered)
+        }
+    }
+}

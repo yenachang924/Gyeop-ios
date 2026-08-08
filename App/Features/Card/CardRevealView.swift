@@ -52,7 +52,7 @@ struct CardRevealView: View {
                     .font(DS.Typo.headline)
                     .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
             }
-            .buttonStyle(.borderedProminent)
+            .dsProminentButton()
             .accessibilityIdentifier("reveal.toCollection")
             .padding(.horizontal, DS.Spacing.m)
         }
