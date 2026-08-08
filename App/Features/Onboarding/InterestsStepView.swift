@@ -7,6 +7,10 @@ struct InterestsStepView: View {
     @Binding var selected: [String]
     let onNext: () -> Void
 
+    /// 칩 그리드 최소 폭 — Dynamic Type이 커질수록 함께 늘어나 칸이 텍스트를 뭉개지 않게 한다.
+    /// 칩 자체 확대는 `compactDynamicTypeCap()`으로 상한을 둬서, 이 값도 무한정 커지지 않는다.
+    @ScaledMetric(relativeTo: .body) private var chipMinWidth: CGFloat = 104
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.m) {
@@ -32,7 +36,7 @@ struct InterestsStepView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
             Text("관심사를 골라주세요")
-                .font(DS.Typo.largeTitle)
+                .heroTitleStyle()
             Text("최대 \(UserProfile.maxInterests)개 — 겹치는 관심사가 첫 대화가 됩니다")
                 .font(DS.Typo.body)
                 .foregroundStyle(DS.Palette.secondaryText)
@@ -41,7 +45,7 @@ struct InterestsStepView: View {
 
     private var interestGrid: some View {
         LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: 104), spacing: DS.Spacing.s)],
+            columns: [GridItem(.adaptive(minimum: chipMinWidth), spacing: DS.Spacing.s)],
             spacing: DS.Spacing.s
         ) {
             ForEach(EmojiCatalog.all) { icon in
@@ -66,6 +70,7 @@ struct InterestsStepView: View {
                 Text(icon.name)
                     .font(DS.Typo.body)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
         }

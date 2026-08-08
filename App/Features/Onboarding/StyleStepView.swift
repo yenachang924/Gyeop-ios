@@ -18,7 +18,7 @@ struct StyleStepView: View {
         VStack(alignment: .leading, spacing: DS.Spacing.l) {
             VStack(alignment: .leading, spacing: DS.Spacing.s) {
                 Text("여가 성향은 어느 쪽인가요?")
-                    .font(DS.Typo.largeTitle)
+                    .heroTitleStyle()
                 Text("하나만 — 카드의 결이 됩니다")
                     .font(DS.Typo.body)
                     .foregroundStyle(DS.Palette.secondaryText)

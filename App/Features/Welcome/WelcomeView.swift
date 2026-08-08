@@ -15,7 +15,7 @@ struct WelcomeView: View {
 
             VStack(spacing: DS.Spacing.s) {
                 Text("겹")
-                    .font(DS.Typo.largeTitle)
+                    .heroTitleStyle()
                 Text("아이폰을 맞대면, 만남이 쌓입니다")
                     .font(DS.Typo.body)
                     .foregroundStyle(DS.Palette.secondaryText)

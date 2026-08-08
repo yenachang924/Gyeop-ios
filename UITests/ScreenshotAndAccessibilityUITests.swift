@@ -13,6 +13,29 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         try runFullFlow(app, prefix: "default")
     }
 
+    /// 로그인 게이트(SIWA) — 디자인 QA 전 화면 인벤토리용. `-uitest-reset` 없이 launch해
+    /// (프레시 설치 = 토큰 없음) Welcome이 실제로 뜨는 경로를 그대로 캡처한다.
+    @MainActor
+    func testWelcomeScreenDefault() throws {
+        let app = XCUIApplication()
+        app.launch()
+        let signIn = app.buttons["welcome.signInWithApple"]
+        XCTAssertTrue(signIn.waitForExistence(timeout: 5))
+        snap(app, "default-0-welcome")
+    }
+
+    @MainActor
+    func testWelcomeScreenAtMaxDynamicType() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+        ]
+        app.launch()
+        let signIn = app.buttons["welcome.signInWithApple"]
+        XCTAssertTrue(signIn.waitForExistence(timeout: 5))
+        snap(app, "ax5-0-welcome")
+    }
+
     /// Dynamic Type 최대(AX5) — 레이아웃이 깨져 버튼이 사라지면 여기서 실패한다.
     @MainActor
     func testFullFlowAtMaxDynamicType() throws {

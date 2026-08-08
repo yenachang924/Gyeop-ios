@@ -39,7 +39,7 @@ struct CardDetailView: View {
                 }
                 .padding(DS.Spacing.m)
             }
-            .background(DS.Palette.background)
+            .background(CardAmbientBackground(seed: card.seed))
             .navigationTitle(card.nickname)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

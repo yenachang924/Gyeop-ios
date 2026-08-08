@@ -10,6 +10,9 @@ struct CollectionView: View {
     @State private var showingExchange = false
     @State private var showingSettings = false
 
+    /// 받은 카드 그리드 최소 폭 — Dynamic Type에 비례해 함께 늘어난다 (칩 그리드와 동일 원칙).
+    @ScaledMetric(relativeTo: .body) private var cardMinWidth: CGFloat = 150
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -24,7 +27,13 @@ struct CollectionView: View {
                 }
                 .padding(DS.Spacing.m)
             }
-            .background(DS.Palette.background)
+            .background {
+                if let myCard = model.myCard {
+                    CardAmbientBackground(seed: myCard.seed)
+                } else {
+                    DS.Palette.background
+                }
+            }
             .navigationTitle("컬렉션")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -101,7 +110,7 @@ struct CollectionView: View {
                 )
             } else {
                 LazyVGrid(
-                    columns: [GridItem(.adaptive(minimum: 150), spacing: DS.Spacing.s)],
+                    columns: [GridItem(.adaptive(minimum: cardMinWidth), spacing: DS.Spacing.s)],
                     spacing: DS.Spacing.s
                 ) {
                     ForEach(model.gyeops) { gyeop in

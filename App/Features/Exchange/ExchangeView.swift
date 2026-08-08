@@ -98,7 +98,7 @@ struct ExchangeView: View {
             VStack(spacing: DS.Spacing.l) {
                 VStack(spacing: DS.Spacing.s) {
                     Text("겹이 쌓였어요")
-                        .font(DS.Typo.largeTitle)
+                        .heroTitleStyle()
                         .foregroundStyle(DS.Palette.success)
                     Text("\(record.counterpartCard.nickname)님의 카드를 받았습니다")
                         .font(DS.Typo.body)

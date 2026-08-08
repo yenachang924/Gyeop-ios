@@ -11,6 +11,9 @@ struct GyeopApp: App {
             RootView()
                 .environment(model)
                 .tint(DS.Palette.accent)
+                // 2026-08-08 디자인 QA 세션: 제품 결정으로 접근성 확대 범위(AX1~5)를 앱 전체에서
+                // 뺀다 — CLAUDE.md "Dynamic Type 대응" 원칙의 명시적 예외. 사용자 직접 지시.
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         }
     }
 }

@@ -80,6 +80,8 @@ struct FlowingChips: View {
             ForEach(row, id: \.self) { item in
                 Text(item)
                     .font(DS.Typo.caption)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                     .padding(.horizontal, DS.Spacing.s)
                     .padding(.vertical, DS.Spacing.xs)
                     .background(.thinMaterial, in: Capsule())

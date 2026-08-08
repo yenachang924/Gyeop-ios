@@ -15,7 +15,7 @@ struct CardRevealView: View {
             VStack(spacing: DS.Spacing.l) {
                 VStack(spacing: DS.Spacing.s) {
                     Text("당신의 카드가 완성됐어요")
-                        .font(DS.Typo.largeTitle)
+                        .heroTitleStyle()
                         .multilineTextAlignment(.center)
                     Text("같은 입력이면 언제나 같은 카드 — 카드가 곧 당신입니다")
                         .font(DS.Typo.body)
@@ -40,7 +40,7 @@ struct CardRevealView: View {
             .accessibilityIdentifier("reveal.toCollection")
             .padding(.horizontal, DS.Spacing.m)
         }
-        .background(DS.Palette.background)
+        .background(CardAmbientBackground(seed: card.seed))
         .navigationBarBackButtonHidden()
     }
 }
