@@ -1,0 +1,49 @@
+<svg width="393" height="852" viewBox="0 0 393 852" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gyou" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8A54B"/><stop offset="55%" stop-color="#E06A5A"/><stop offset="100%" stop-color="#8F5AB0"/>
+    </linearGradient>
+  </defs>
+  <g font-family="-apple-system, 'SF Pro Text', 'Apple SD Gothic Neo', sans-serif">
+    <rect width="393" height="852" fill="#F2F2F7"/>
+    <!-- status bar -->
+    <text x="38" y="33" font-size="15" font-weight="600" fill="#111114">9:41</text>
+    <rect x="132.5" y="12" width="128" height="36" rx="18" fill="#0B0B0D"/>
+    <rect x="325" y="22" width="25" height="13" rx="4" stroke="#111114" stroke-width="1.2"/>
+    <rect x="327.5" y="24.5" width="17" height="8" rx="2" fill="#111114"/>
+    <!-- app clip pill -->
+    <rect x="99" y="72" width="195" height="30" rx="15" fill="#E8EEFB"/>
+    <circle cx="117" cy="87" r="3.5" fill="#3A6DD8"/>
+    <text x="128" y="91" font-size="11" font-weight="600" fill="#3A6DD8">App Clip · 설치 없이 실행 중</text>
+    <!-- title -->
+    <text x="24" y="156" font-size="28" font-weight="800" fill="#111114" letter-spacing="-0.5">지수님이</text>
+    <text x="24" y="190" font-size="28" font-weight="800" fill="#111114" letter-spacing="-0.5">카드를 건넸어요</text>
+    <text x="24" y="220" font-size="13" fill="#6C6C72">내 카드를 만들어 맞대면, 서로 겹치는 관심사가</text>
+    <text x="24" y="239" font-size="13" fill="#6C6C72">그 자리에서 보여요. 15초면 됩니다.</text>
+    <!-- jisu card -->
+    <rect x="24" y="270" width="345" height="190" rx="18" fill="url(#gyou)"/>
+    <text x="46" y="312" font-size="17" font-weight="800" fill="#FFFFFF">지수</text>
+    <text x="46" y="334" font-size="12" fill="#FFFFFF" opacity="0.92">주말마다 새로운 원두를 찾아다녀요</text>
+    <g>
+      <rect x="46" y="412" width="46" height="24" rx="12" fill="#FFFFFF" opacity="0.25"/>
+      <rect x="100" y="412" width="46" height="24" rx="12" fill="#FFFFFF" opacity="0.25"/>
+      <rect x="154" y="412" width="46" height="24" rx="12" fill="#FFFFFF" opacity="0.25"/>
+      <rect x="208" y="412" width="46" height="24" rx="12" fill="#FFFFFF" opacity="0.25"/>
+      <rect x="262" y="412" width="46" height="24" rx="12" fill="#FFFFFF" opacity="0.25"/>
+    </g>
+    <g font-size="11" font-weight="600" fill="#FFFFFF" text-anchor="middle">
+      <text x="69" y="428">러닝</text>
+      <text x="123" y="428">커피</text>
+      <text x="177" y="428">전시</text>
+      <text x="231" y="428">캠핑</text>
+      <text x="285" y="428">요리</text>
+    </g>
+    <circle cx="330" cy="300" r="9" fill="#FFFFFF" opacity="0.85"/>
+    <circle cx="341" cy="300" r="9" fill="#FFFFFF" opacity="0.45"/>
+    <!-- buttons -->
+    <rect x="24" y="726" width="345" height="54" rx="14" fill="#17171A"/>
+    <text x="196" y="759" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">내 카드 만들기</text>
+    <text x="196" y="808" font-size="14" font-weight="600" fill="#6C6C72" text-anchor="middle">카드는 어떻게 만들어지나요?</text>
+    <rect x="129.5" y="840" width="134" height="5" rx="2.5" fill="#111114" opacity="0.28"/>
+  </g>
+</svg>

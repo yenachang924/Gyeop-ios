@@ -1,0 +1,31 @@
+<svg width="393" height="852" viewBox="0 0 393 852" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gyou" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8A54B"/><stop offset="55%" stop-color="#E06A5A"/><stop offset="100%" stop-color="#8F5AB0"/>
+    </linearGradient>
+  </defs>
+  <g font-family="-apple-system, 'SF Pro Text', 'Apple SD Gothic Neo', sans-serif">
+    <rect width="393" height="852" fill="#F2F2F7"/>
+    <text x="38" y="33" font-size="15" font-weight="600" fill="#111114">9:41</text>
+    <rect x="132.5" y="12" width="128" height="36" rx="18" fill="#0B0B0D"/>
+    <rect x="325" y="22" width="25" height="13" rx="4" stroke="#111114" stroke-width="1.2"/>
+    <rect x="327.5" y="24.5" width="17" height="8" rx="2" fill="#111114"/>
+    <!-- title -->
+    <text x="24" y="122" font-size="26" font-weight="800" fill="#111114" letter-spacing="-0.5">겹 1 — 첫 기록</text>
+    <text x="24" y="150" font-size="13" fill="#6C6C72">지수님과의 만남이 기록됐어요.</text>
+    <!-- jisu mini card -->
+    <rect x="24" y="182" width="345" height="140" rx="18" fill="url(#gyou)"/>
+    <text x="46" y="224" font-size="17" font-weight="800" fill="#FFFFFF">지수</text>
+    <text x="46" y="246" font-size="12" fill="#FFFFFF" opacity="0.92">오늘 · 겹친 관심사 2개</text>
+    <!-- keep note -->
+    <rect x="24" y="346" width="345" height="112" rx="16" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <text x="44" y="382" font-size="15" font-weight="700" fill="#111114">이 카드, 계속 간직할까요?</text>
+    <text x="44" y="408" font-size="12" fill="#6C6C72">App Clip에서 받은 카드는 30일 뒤 사라져요.</text>
+    <text x="44" y="426" font-size="12" fill="#6C6C72">전체 앱에서는 겹이 계속 쌓입니다.</text>
+    <!-- buttons -->
+    <rect x="24" y="726" width="345" height="54" rx="14" fill="#17171A"/>
+    <text x="196" y="759" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">전체 앱 받기</text>
+    <text x="196" y="808" font-size="14" font-weight="600" fill="#6C6C72" text-anchor="middle">나중에 할게요</text>
+    <rect x="129.5" y="840" width="134" height="5" rx="2.5" fill="#111114" opacity="0.28"/>
+  </g>
+</svg>

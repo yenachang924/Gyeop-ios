@@ -1,0 +1,35 @@
+<svg width="393" height="852" viewBox="0 0 393 852" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gme" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2E4E9E"/><stop offset="55%" stop-color="#3F9FC0"/><stop offset="100%" stop-color="#7FC98F"/>
+    </linearGradient>
+  </defs>
+  <g font-family="-apple-system, 'SF Pro Text', 'Apple SD Gothic Neo', sans-serif">
+    <rect width="393" height="852" fill="#F2F2F7"/>
+    <text x="38" y="33" font-size="15" font-weight="600" fill="#111114">9:41</text>
+    <rect x="132.5" y="12" width="128" height="36" rx="18" fill="#0B0B0D"/>
+    <rect x="325" y="22" width="25" height="13" rx="4" stroke="#111114" stroke-width="1.2"/>
+    <rect x="327.5" y="24.5" width="17" height="8" rx="2" fill="#111114"/>
+    <!-- step dots 3/3 -->
+    <rect x="24" y="74" width="22" height="4" rx="2" fill="#111114"/>
+    <rect x="52" y="74" width="22" height="4" rx="2" fill="#111114"/>
+    <rect x="80" y="74" width="22" height="4" rx="2" fill="#111114"/>
+    <!-- live preview card -->
+    <rect x="24" y="96" width="345" height="96" rx="16" fill="url(#gme)"/>
+    <!-- title -->
+    <text x="24" y="248" font-size="24" font-weight="800" fill="#111114" letter-spacing="-0.4">마지막 한 줄</text>
+    <text x="24" y="276" font-size="13" fill="#6C6C72">유일한 자유 입력이에요. 비워도 괜찮아요.</text>
+    <!-- field: nickname -->
+    <text x="24" y="316" font-size="11" font-weight="700" fill="#6C6C72" letter-spacing="0.3">닉네임</text>
+    <rect x="24" y="326" width="345" height="50" rx="12" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <text x="40" y="357" font-size="15" fill="#111114">예나</text>
+    <!-- field: one-liner -->
+    <text x="24" y="408" font-size="11" font-weight="700" fill="#6C6C72" letter-spacing="0.3">요즘의 나, 한 줄</text>
+    <rect x="24" y="418" width="345" height="50" rx="12" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <text x="40" y="449" font-size="15" fill="#B4B4BC">새벽 러닝에 빠졌어요</text>
+    <!-- button -->
+    <rect x="24" y="756" width="345" height="54" rx="14" fill="#17171A"/>
+    <text x="196" y="789" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">카드 완성</text>
+    <rect x="129.5" y="840" width="134" height="5" rx="2.5" fill="#111114" opacity="0.28"/>
+  </g>
+</svg>

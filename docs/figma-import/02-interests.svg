@@ -1,0 +1,61 @@
+<svg width="393" height="852" viewBox="0 0 393 852" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gme" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2E4E9E"/><stop offset="55%" stop-color="#3F9FC0"/><stop offset="100%" stop-color="#7FC98F"/>
+    </linearGradient>
+  </defs>
+  <g font-family="-apple-system, 'SF Pro Text', 'Apple SD Gothic Neo', sans-serif">
+    <rect width="393" height="852" fill="#F2F2F7"/>
+    <text x="38" y="33" font-size="15" font-weight="600" fill="#111114">9:41</text>
+    <rect x="132.5" y="12" width="128" height="36" rx="18" fill="#0B0B0D"/>
+    <rect x="325" y="22" width="25" height="13" rx="4" stroke="#111114" stroke-width="1.2"/>
+    <rect x="327.5" y="24.5" width="17" height="8" rx="2" fill="#111114"/>
+    <!-- step dots 1/3 -->
+    <rect x="24" y="74" width="22" height="4" rx="2" fill="#111114"/>
+    <rect x="52" y="74" width="22" height="4" rx="2" fill="#D9D9DF"/>
+    <rect x="80" y="74" width="22" height="4" rx="2" fill="#D9D9DF"/>
+    <!-- live preview card -->
+    <rect x="24" y="96" width="345" height="96" rx="16" fill="url(#gme)"/>
+    <text x="196" y="150" font-size="11" fill="#FFFFFF" opacity="0.85" text-anchor="middle">고르는 순간, 카드가 물들어요</text>
+    <!-- title -->
+    <text x="24" y="248" font-size="24" font-weight="800" fill="#111114" letter-spacing="-0.4">요즘 나를 이루는 것</text>
+    <text x="24" y="276" font-size="13" fill="#6C6C72">최대 5개 — 이 선택이 곧 카드의 색이 됩니다.</text>
+    <!-- chips row 1 (러닝·커피 selected) -->
+    <rect x="24" y="308" width="58" height="38" rx="19" fill="#17171A"/>
+    <rect x="90" y="308" width="44" height="38" rx="19" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <rect x="142" y="308" width="58" height="38" rx="19" fill="#17171A"/>
+    <rect x="208" y="308" width="58" height="38" rx="19" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <rect x="274" y="308" width="58" height="38" rx="19" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <g font-size="13" font-weight="600" text-anchor="middle">
+      <text x="53" y="332" fill="#FFFFFF">러닝</text>
+      <text x="112" y="332" fill="#111114">책</text>
+      <text x="171" y="332" fill="#FFFFFF">커피</text>
+      <text x="237" y="332" fill="#111114">사진</text>
+      <text x="303" y="332" fill="#111114">음악</text>
+    </g>
+    <!-- chips row 2 (전시 selected) -->
+    <rect x="24" y="354" width="58" height="38" rx="19" fill="#17171A"/>
+    <rect x="90" y="354" width="58" height="38" rx="19" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <rect x="156" y="354" width="58" height="38" rx="19" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <rect x="222" y="354" width="58" height="38" rx="19" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <rect x="288" y="354" width="58" height="38" rx="19" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <g font-size="13" font-weight="600" text-anchor="middle">
+      <text x="53" y="378" fill="#FFFFFF">전시</text>
+      <text x="119" y="378" fill="#111114">영화</text>
+      <text x="185" y="378" fill="#111114">등산</text>
+      <text x="251" y="378" fill="#111114">요리</text>
+      <text x="317" y="378" fill="#111114">수영</text>
+    </g>
+    <!-- chips row 3 -->
+    <rect x="24" y="400" width="86" height="38" rx="19" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <rect x="118" y="400" width="58" height="38" rx="19" fill="#FFFFFF" stroke="#E3E3E8"/>
+    <g font-size="13" font-weight="600" text-anchor="middle">
+      <text x="67" y="424" fill="#111114">보드게임</text>
+      <text x="147" y="424" fill="#111114">캠핑</text>
+    </g>
+    <!-- button -->
+    <rect x="24" y="756" width="345" height="54" rx="14" fill="#17171A"/>
+    <text x="196" y="789" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">다음 · 3/5</text>
+    <rect x="129.5" y="840" width="134" height="5" rx="2.5" fill="#111114" opacity="0.28"/>
+  </g>
+</svg>
