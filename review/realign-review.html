@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>겹 — 정렬 스프린트 리뷰 팩 (R1–R4)</title>
+<style>
+  :root {
+    --bg: #f7f7f8; --surface: #ffffff; --ink: #1c1c1e; --sub: #6e6e73;
+    --accent: #5b5bd6; --ok: #1f7a45; --warn: #8a6d1a; --line: #e5e5ea;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: -apple-system, "Apple SD Gothic Neo", "Pretendard", sans-serif;
+         line-height: 1.6; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 21px; margin: 56px 0 8px; padding-top: 24px; border-top: 1px solid var(--line); }
+  h3 { font-size: 16px; margin: 0 0 6px; }
+  .meta { color: var(--sub); font-size: 14px; margin-bottom: 24px; }
+  .meta code { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+  .note { background: #fff8e1; border: 1px solid #eadfa8; border-radius: 10px; padding: 12px 16px; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; background: var(--surface);
+          border: 1px solid var(--line); border-radius: 10px; overflow: hidden; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: #fafafa; font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .ok { color: var(--ok); font-weight: 600; }
+  .fix { color: var(--accent); font-weight: 600; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-top: 20px; }
+  .shot { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .shot img { width: 100%; border-radius: 10px; border: 1px solid var(--line); display: block; }
+  .shot .cap { font-size: 13px; color: var(--sub); margin: 10px 0 6px; font-weight: 600; letter-spacing: .02em; }
+  .shot ul { margin: 6px 0 0; padding-left: 18px; font-size: 13.5px; }
+  .shot li { margin-bottom: 3px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 5px; padding: 1px 7px; margin-left: 6px; vertical-align: 2px; }
+  .tag.r4 { background: #e8e8fb; color: var(--accent); }
+  .tag.r3 { background: #e2f2e8; color: var(--ok); }
+  .tag.r2 { background: #fdeee2; color: #a05a1c; }
+  .diff li, .device li { margin-bottom: 10px; }
+  .diff b, .device b { display: block; }
+  ul.diff, ul.device { padding-left: 20px; font-size: 14.5px; }
+  .small { font-size: 13px; color: var(--sub); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>겹 — 정렬 스프린트 리뷰 팩 (R1–R4)</h1>
+<p class="meta">
+  2026-08-08 · 통합 세션 · 기준: <code>docs/navigation-map.md</code> 배선표 ·
+  시각 기준: <code>docs/gyeop-prototype.html</code><br>
+  촬영: iPhone 17 Pro 시뮬레이터 (iOS 26.5) · 라이트 모드 · 플로우 순서 · UI 테스트 자동 캡처<br>
+  <span class="note" style="display:inline-block; margin-top:8px;">⚠️ 요청 기준은 iPhone 16 Pro였으나 이 Mac에 해당 시뮬레이터 런타임이 없어
+  CLAUDE.md 대체 기준(iPhone 17 Pro)으로 촬영했다. 화면 구성·비율은 동일 계열.</span>
+</p>
+
+<h2>0. 최종 검증 결과</h2>
+<table>
+  <tr><th>항목</th><th>결과</th></tr>
+  <tr><td>Packages/GyeopPackages <code>swift test</code> (Core·CardKit·GyeopKit·DataKit·DesignSystem)</td><td class="ok">전부 통과</td></tr>
+  <tr><td>AppClip/AppClipKit <code>swift test</code> (ClipModel 레인·보존 정책·URL 파서)</td><td class="ok">전부 통과</td></tr>
+  <tr><td><code>xcodebuild</code> Gyeop 스킴 — 빌드 + 유닛 + UI 테스트 6종 (스크린샷·AX5/XS·실패 경로 포함)</td><td class="ok">전부 통과</td></tr>
+  <tr><td><code>xcodebuild</code> GyeopClip 스킴 — 빌드 + 클립 레인 관통·실패 UI 테스트</td><td class="ok">전부 통과</td></tr>
+  <tr><td>사용자 노출 "러너/아카데미" 문자열 (App/·AppClip/·UITests/ 전수 rg)</td><td class="ok">0건</td></tr>
+  <tr><td>내비게이션 배선표 1:1 전수 대조 (§1 클립 레인 9화면 + §2 변형 5종)</td><td class="fix">불일치 3건 발견 → 코드 수정 (아래 R4)</td></tr>
+</table>
+
+<h3 style="margin-top:28px;">R4 — 배선표 불일치 수정 3건</h3>
+<table>
+  <tr><th>배선표 항목</th><th>이전 코드</th><th>수정</th></tr>
+  <tr>
+    <td>§1-3 <code>vibe</code>: 카드 4택1 → 선택 표시, 미선택이면 「다음」 비활성, 「다음」 → <code>intro</code></td>
+    <td>원탭 즉시 다음 화면 (선택 표시·다음 버튼 없음)</td>
+    <td>선택은 화면에 남고(강조·isSelected), 하단 「다음」 버튼 — 미선택 시 비활성. 본앱·클립 공통(소스 공유), UI 테스트 4개 파일 갱신</td>
+  </tr>
+  <tr>
+    <td>§1-2 <code>interests</code> 뒤로 스와이프 → <code>clip</code> (시스템 제스처)</td>
+    <td>reception이 NavigationStack 밖 — 복귀 경로 없음</td>
+    <td>클립 레인 입구를 reception 루트의 NavigationStack으로 재조립, 온보딩 3단계를 push로. 시스템 제스처로 복귀하면 단계도 <code>clip</code>으로 (ClipModel.backToReception). 클립 UI 테스트로 검증</td>
+  </tr>
+  <tr>
+    <td>§1-8 <code>keep</code> 「전체 앱 받기」 → SKOverlay → <b>완료 시</b> <code>done</code></td>
+    <td>오버레이만 띄우고 전환 없음 (+ 오버레이 닫은 뒤 재탭 불가)</td>
+    <td>SKOverlayDelegate로 닫힘(완료) 시점을 받아 <code>done</code> 전환 (ClipModel.finishInstallSuggestion). 단위 테스트 2건 추가</td>
+  </tr>
+</table>
+
+<h2>1. 클립 레인 — 화면 전수 (배선표 §1 순서)</h2>
+<div class="grid">
+  <div class="shot">
+    <img src="assets/realign/clip-1-reception.png" alt="클립 1 — 카드 수신">
+    <div class="cap">1 · clip — 카드 수신 <span class="tag r2">R2</span></div>
+    <ul>
+      <li>구 단일 온보딩 화면을 배선표 9단계 레인으로 재구성 — 첫 화면이 수신으로 분리</li>
+      <li>인보케이션 URL(<code>?t=토큰&n=닉네임</code>)의 발신자 닉네임이 헤드라인·카드 자리에 반영</li>
+      <li>「내 카드 만들기」 → 온보딩, 「카드는 어떻게 만들어지나요?」 → 설명 시트</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/clip-1b-how-sheet.png" alt="클립 1b — 설명 시트">
+    <div class="cap">1b · 설명 시트 (§1-1 변형) <span class="tag r2">R2</span></div>
+    <ul>
+      <li>미디엄 디텐트 시트 — 닫으면 clip으로 (배선표: 시트는 Figma 오버레이 대응)</li>
+      <li>카드 생성 원리 한 문단: 입력=시드, 같은 입력=같은 카드, 사진·계정 불필요</li>
+      <li>프로토타입은 이 버튼이 interests로 직행 — 배선표 확정안(시트)을 따름</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/clip-2-interests.png" alt="클립 2 — 관심사">
+    <div class="cap">2 · interests — 관심사 (본앱 뷰 소스 공유) <span class="tag r3">R3</span></div>
+    <ul>
+      <li>138행 큐레이션 카탈로그(이모지+이름 칩), 최대 5개 — 초과 선택은 비활성</li>
+      <li>고르는 순간 상단 카드 프리뷰가 물든다 (실시간 시드 재계산)</li>
+      <li>0개면 「다음 · 0/5」 비활성 · 뒤로 스와이프 → clip (R4, §1-2)</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/clip-3-vibe.png" alt="클립 3 — 성향">
+    <div class="cap">3 · vibe — 여가 성향 <span class="tag r4">R4</span></div>
+    <ul>
+      <li>2×2(정적/동적 × 실내/실외) 4택1 — 선택이 화면에 강조로 남는다</li>
+      <li>미선택이면 하단 「다음」 비활성 (배선표 §1-3 정렬 — 이번 수정)</li>
+      <li>선택 셀에 예시 카피(보드게임·독서 …) — 프로토타입 확정 카피</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/clip-4-intro.png" alt="클립 4 — 입력">
+    <div class="cap">4 · intro — 닉네임·한 줄·이모지 <span class="tag r3">R3</span></div>
+    <ul>
+      <li>전부 선택사항 — 다 비워도 「카드 완성」 진행 (§1-4)</li>
+      <li>이모지는 1차 16개 노출 + 키워드 검색으로 138행 전체 접근</li>
+      <li>「카드 완성」 → 클립은 리빌 없이 곧장 card 단계로 (본앱과의 유일한 차이)</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/clip-5-card.png" alt="클립 5 — 내 카드">
+    <div class="cap">5 · card — 이게 나예요 <span class="tag r2">R2</span></div>
+    <ul>
+      <li>입력 시드로 결정론 렌더된 내 카드 (CardKit 셰이더)</li>
+      <li>「지수님과 맞대기」 — 발신자 닉네임이 버튼에 실린다</li>
+      <li>여기까지 설치 유도 UI 없음 — UI 테스트가 매 화면 단언</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/clip-6-bump.png" alt="클립 6 — 맞대기">
+    <div class="cap">6 · bump — 아이폰을 서로 가까이 <span class="tag r2">R2</span></div>
+    <ul>
+      <li>실기기: MPC 자동 트리거 / 시뮬레이터: Mock 스크립트 약 3초 (배선표 실앱 열)</li>
+      <li>시스템 ProgressView — 커스텀 비주얼은 카드만 허용(가드레일)이라 오브 애니메이션 없음</li>
+      <li>실패 시 failed 화면(중립 톤) → 「다시 시도」로 bump 재진입</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/clip-7-overlap.png" alt="클립 7 — 겹 결과">
+    <div class="cap">7 · overlap — 겹 결과 (캡처는 겹침 0개 변형, §2)</div>
+    <ul>
+      <li>겹치면 강조 칩 + "○○가 겹쳐요", 0개면 "겹치는 관심사는 없지만" — 이 캡처는 0개 변형(테스트 선택 달리기·자전거 ↔ 상대 클라이밍·보드게임·커피)</li>
+      <li>상대만의 관심사는 흐림 칩으로 — 서로 없는 것도 대화 소재라는 카피</li>
+      <li>상대 카드 렌더 + 같은 이모지면 이스터에그 한 줄 (R3)</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/clip-8-keep.png" alt="클립 8 — 보관·전환">
+    <div class="cap">8 · keep — 보관·전환 제안 <span class="tag r4">R4</span></div>
+    <ul>
+      <li><b>레인에서 유일하게 설치를 언급하는 화면</b> — 이전 화면 노출 금지를 UI 테스트가 단언</li>
+      <li>「전체 앱 받기」 → SKOverlay → 닫힘(완료) 시 done (이번 수정, §1-8) · 「나중에 할게요」 → 거절 비용 0</li>
+      <li>클립 30일 보존 고지 (ClipRetentionPolicy) + 겹친 관심사 개수 표기(캡처는 0개 변형) — App Group 저장·본앱 마이그레이션 우편함</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/clip-9-done.png" alt="클립 9 — 나의 겹">
+    <div class="cap">9 · done — 나의 겹 <span class="tag r2">R2</span></div>
+    <ul>
+      <li>내 카드 + 오늘의 겹 1장 — 설치 없이도 가치가 온전히 성립하는 종착점</li>
+      <li>실앱 전환 시 이 기록은 App Group 우편함으로 본앱 컬렉션에 병합</li>
+      <li>배선표 §1-9: 클립은 여기 머무름 (처음부터는 프로토타입 전용)</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/clip-10-failure.png" alt="클립 — 교환 실패">
+    <div class="cap">변형 · failed — 교환 실패 <span class="tag r2">R2</span></div>
+    <ul>
+      <li>중립 톤 실패 문구 (실패는 거절이 아니다 — 경고색 금지 원칙)</li>
+      <li>「다시 시도」 → bump 재진입, 성공 시 overlap까지 회복 (단위 테스트)</li>
+      <li>실패 화면에도 설치 유도 없음 — UI 테스트 단언</li>
+    </ul>
+  </div>
+</div>
+
+<h2>2. 본앱 레인 — 화면 전수 (플로우 순서)</h2>
+<div class="grid">
+  <div class="shot">
+    <img src="assets/realign/app-0-welcome.png" alt="본앱 0 — 로그인 게이트">
+    <div class="cap">0 · welcome — Sign in with Apple 게이트</div>
+    <ul>
+      <li>SIWA 단독 로그인 (심사 4.8 충족 구성) — 성공 시 온보딩 진입</li>
+      <li>R1: 시즌/D-day·아카데미 문구 전면 제거, 중립 태그라인만</li>
+      <li>배선표 §3 "본앱 홈" 이전의 유일한 게이트</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/app-1-interests.png" alt="본앱 1 — 관심사">
+    <div class="cap">1/3 · 관심사 <span class="tag r3">R3</span></div>
+    <ul>
+      <li>클립과 같은 뷰(소스 공유) — 실시간 카드 프리뷰 + 138행 카탈로그</li>
+      <li>최대 5개, 0개면 「다음 · 0/5」 비활성</li>
+      <li>R1: "러너" 카피 전량 교체 완료</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/app-2-style.png" alt="본앱 2 — 성향">
+    <div class="cap">2/3 · 성향 <span class="tag r4">R4</span></div>
+    <ul>
+      <li>4택1 선택 표시 + 미선택 비활성 「다음」 (이번 수정 — 클립과 동일 뷰)</li>
+      <li>AX5(최대 다이나믹 타입)에서도 버튼 도달 가능 — 전용 UI 테스트 유지</li>
+      <li>선택 결과가 카드 질감 시드에 반영</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/app-3-profile.png" alt="본앱 3 — 입력">
+    <div class="cap">3/3 · 닉네임·한 줄·이모지 <span class="tag r3">R3</span></div>
+    <ul>
+      <li>전부 선택사항 — 빈 값도 카드 생성 (전용 UI 테스트)</li>
+      <li>이모지 1차 16개 + 검색으로 전체 접근</li>
+      <li>「카드 완성」 → 카드 리빌 push</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/app-4-card-reveal.png" alt="본앱 4 — 카드 리빌">
+    <div class="cap">4 · 카드 리빌 <span class="tag r3">R3</span></div>
+    <ul>
+      <li>완성 카드 공개 — 프로토타입 확정 카피로 교체</li>
+      <li>같은 입력이면 언제나 같은 카드 (결정론 시드)</li>
+      <li>「컬렉션으로」 → 본앱 홈</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/app-5-collection-empty.png" alt="본앱 5 — 빈 컬렉션">
+    <div class="cap">5 · 컬렉션 (빈 상태 — §2 변형)</div>
+    <ul>
+      <li>겹 0건 빈 상태 — "다음 만남이 여기에" 자리 표시</li>
+      <li>R1: Season/D-day 헤더 삭제 — 시즌 무관 서비스로</li>
+      <li>상단 설정 진입 + 「맞대기」 진입점</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/app-6-exchange-searching.png" alt="본앱 6 — 맞대기 탐색">
+    <div class="cap">6 · 맞대기 — 탐색 중</div>
+    <ul>
+      <li>실기기 MPC / 시뮬레이터 Mock (조립부에서만 분기)</li>
+      <li>진행 중에는 시트 스와이프 닫기 금지 — 「닫기」로만 취소</li>
+      <li>타임아웃 실패 문구에 로컬 네트워크 권한 안내 포함</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/app-7-exchange-completed.png" alt="본앱 7 — 겹 성립">
+    <div class="cap">7 · 맞대기 — 겹 성립 <span class="tag r3">R3</span></div>
+    <ul>
+      <li>상대 카드 + 겹치는 관심사 나열</li>
+      <li>같은 이모지면 "이모지도 겹쳤어요" 이스터에그</li>
+      <li>「컬렉션으로」 → 받은 카드가 컬렉션에</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/app-8-collection-filled.png" alt="본앱 8 — 컬렉션(찬 상태)">
+    <div class="cap">8 · 컬렉션 (겹 1건)</div>
+    <ul>
+      <li>상대당 최신 카드 1장, 최신순 (24h 중복 겹 방지 규칙)</li>
+      <li>내 카드 + 받은 카드 그리드</li>
+      <li>카드 탭 → 상세 시트</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/app-9-card-detail.png" alt="본앱 9 — 카드 상세">
+    <div class="cap">9 · 카드 상세</div>
+    <ul>
+      <li>받은 카드 전체 보기 — 관심사·한 줄·이모지</li>
+      <li>시트 표시, 「닫기」로 복귀</li>
+      <li>커스텀 비주얼 허용 범위는 카드 내부뿐 (CardKit)</li>
+    </ul>
+  </div>
+  <div class="shot">
+    <img src="assets/realign/app-10-settings.png" alt="본앱 10 — 설정">
+    <div class="cap">10 · 설정</div>
+    <ul>
+      <li>프로필 수정 + 계정 삭제 (심사 5.1.1(v) 필수 대응)</li>
+      <li>R1: 데드 텔레메트리·SIWA 코디네이터 정리 반영</li>
+      <li>배선표 §3 "설정 — 홈에서" 배선 일치</li>
+    </ul>
+  </div>
+</div>
+
+<h2>3. 프로토타입과 달라진 점</h2>
+<ul class="diff">
+  <li><b>reception의 발신자 카드 = GroupBox 자리 표시 (토큰→카드 조회 미구현)</b>
+      프로토타입은 지수의 실제 카드(미니)를 렌더하지만, 인보케이션 URL에는 토큰(t)·닉네임(n)만 있고
+      카드 데이터는 교환에서야 도착한다. 토큰→카드 조회(서버/캐시)가 생기면 CardView로 교체 —
+      코드 주석으로 명시해 둠.</li>
+  <li><b>「카드는 어떻게 만들어지나요?」 = 설명 시트</b>
+      프로토타입은 interests로 직행하지만, 배선표 §1-1 확정안(설명 시트 → 닫으면 clip)을 따랐다.</li>
+  <li><b>온보딩 단계 표시: stepdots → 내비게이션 타이틀 "1/3 · 2/3 · 3/3"</b>
+      시스템 컴포넌트 우선 원칙. 프로토타입의 점 3개 인디케이터는 도입하지 않음.</li>
+  <li><b>vibe·intro 상단 카드 프리뷰 없음</b>
+      프로토타입은 세 단계 모두 상단에 프리뷰 카드가 있지만, 코드는 interests에만 실시간 프리뷰가 있다
+      (R3 범위). 2·3단계 프리뷰 확장은 소유자 판단 대기.</li>
+  <li><b>bump 비주얼: 오브 애니메이션("겹!") → 시스템 ProgressView</b>
+      커스텀 비주얼 허용 범위가 카드뿐이라는 가드레일에 따름. 햅틱은 실기기 전용.</li>
+  <li><b>bump 트리거: 프로토타입 수동 버튼 → 자동 (MPC/Mock)</b>
+      배선표 §1-6 실앱 열("MPC 자동 트리거") 그대로 — card의 「맞대기」 탭 후 자동 진행.</li>
+  <li><b>keep의 SKOverlay는 시뮬레이터에서 실제 App Store 카드가 뜨지 않음</b>
+      미배포 앱이라 실기기+배포 후에만 실동작 확인 가능. 완료 시 done 전환은 델리게이트 경로로 구현·단위 테스트만 완료.</li>
+  <li><b>App Clip 필(상단 "설치 없이 실행 중")</b>은 OS가 그리는 요소 — 코드/스크린샷에는 없음.</li>
+</ul>
+
+<h2>4. 실기기 확인 필요 (시뮬레이터 검증 불가)</h2>
+<ul class="device">
+  <li><b>MPC 맞대기 왕복 (핵심)</b> — 시뮬레이터는 MockExchangeSession. 실기기 2대: 발견→연결→전송 3초 이내,
+      양쪽 컬렉션 동시 기록, 타임아웃·peerLost·재시도 엣지. 로컬 네트워크 권한 프롬프트 동작 포함.</li>
+  <li><b>교환 햅틱</b> — peerFound·connected·completed·failed 패턴 구분 체감 (시뮬레이터 no-op). 감각 튜닝 별도.</li>
+  <li><b>SKOverlay 실동작</b> — keep 「전체 앱 받기」 → App Store 카드 표시·닫힘 → done 전환 (배포 후에만).</li>
+  <li><b>App Group 마이그레이션</b> — 클립 겹 기록이 본앱 첫 부트스트랩에서 병합되는지 교차 프로세스 확인.</li>
+  <li><b>클립 실도메인 인보케이션</b> — AASA 검증·태그/QR 자동 실행은 도메인 확정 후 (제출 리스크 목록 유지).</li>
+  <li class="small">전체 목록·통합 실행 계획(2대·약 2시간)은 <code>docs/device-required.md</code> 참조.</li>
+</ul>
+
+<p class="small" style="margin-top:48px;">
+  이 문서는 통합 세션이 생성했다. 스크린샷은 UI 테스트 첨부(xcresult) 자동 추출 —
+  재촬영: Gyeop 스킴 <code>ScreenshotAndAccessibilityUITests</code>, GyeopClip 스킴 <code>ClipLaneUITests</code>.
+  소유자 승인 전 추가 구현 없음.
+</p>
+
+</div>
+</body>
+</html>
