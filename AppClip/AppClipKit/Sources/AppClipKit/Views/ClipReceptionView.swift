@@ -29,13 +29,25 @@ public struct ClipReceptionView: View {
 
             if let inviterNickname {
                 GroupBox {
-                    HStack(spacing: DS.Spacing.s) {
-                        Text(inviterNickname)
-                            .font(DS.Typo.headline)
-                        Spacer()
-                        Text("카드는 맞댄 뒤에 열려요")
-                            .font(DS.Typo.caption)
-                            .foregroundStyle(DS.Palette.secondaryText)
+                    // Dynamic Type 극단에서 두 텍스트가 한 줄을 두고 경쟁하지 않도록,
+                    // 안 맞으면 세로로 쌓는다.
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: DS.Spacing.s) {
+                            Text(inviterNickname)
+                                .font(DS.Typo.headline)
+                            Spacer()
+                            Text("카드는 맞댄 뒤에 열려요")
+                                .font(DS.Typo.caption)
+                                .foregroundStyle(DS.Palette.secondaryText)
+                        }
+                        VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+                            Text(inviterNickname)
+                                .font(DS.Typo.headline)
+                            Text("카드는 맞댄 뒤에 열려요")
+                                .font(DS.Typo.caption)
+                                .foregroundStyle(DS.Palette.secondaryText)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .frame(minHeight: DS.minTapTarget)
                 }

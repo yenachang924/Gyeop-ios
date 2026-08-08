@@ -13,6 +13,50 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         try runFullFlow(app, prefix: "default")
     }
 
+    /// 로그인 게이트(SIWA) — 디자인 QA 전 화면 인벤토리용. `-uitest-reset` 없이 launch해
+    /// (프레시 설치 = 토큰 없음) Welcome이 실제로 뜨는 경로를 그대로 캡처한다.
+    @MainActor
+    func testWelcomeScreenDefault() throws {
+        let app = XCUIApplication()
+        app.launch()
+        let signIn = app.buttons["welcome.signInWithApple"]
+        XCTAssertTrue(signIn.waitForExistence(timeout: 5))
+        snap(app, "default-0-welcome")
+    }
+
+    @MainActor
+    func testWelcomeScreenAtMaxDynamicType() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+        ]
+        app.launch()
+        let signIn = app.buttons["welcome.signInWithApple"]
+        XCTAssertTrue(signIn.waitForExistence(timeout: 5))
+        snap(app, "ax5-0-welcome")
+    }
+
+    /// 선택 상태 보조 컷 — 풀 플로우 인벤토리는 화면 진입 직후(선택 전)만 담기므로,
+    /// 칩·성향 셀의 "선택됨" 시각 상태를 기록하는 전용 캡처. (U1: 선택은 무채 잉크 채움)
+    @MainActor
+    func testSelectionStatesCapture() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-uitest-reset"]
+        app.launch()
+        // 그리드 상단 두 칩 — 스크롤 없이 선택 상태가 프레임에 남는다
+        let first = app.buttons["onboarding.interest.달리기"]
+        XCTAssertTrue(first.waitForExistence(timeout: 5))
+        first.tap()
+        app.buttons["onboarding.interest.클라이밍"].tap()
+        snap(app, "default-1b-interests-selected")
+
+        tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
+        let style = app.buttons["onboarding.style.active-indoor"]
+        XCTAssertTrue(style.waitForExistence(timeout: 5))
+        tapEvenIfOffscreen(app, style)
+        snap(app, "default-2b-style-selected")
+    }
+
     /// Dynamic Type 최대(AX5) — 레이아웃이 깨져 버튼이 사라지면 여기서 실패한다.
     @MainActor
     func testFullFlowAtMaxDynamicType() throws {
@@ -35,6 +79,20 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         ]
         app.launch()
         try runFullFlow(app, prefix: "xs")
+    }
+
+    /// 다크 모드 전 화면 (U3 디테일 패스) — POSTECH Red 액센트·overlap 3값·글라스가
+    /// 다크에서도 대비를 유지하는지 실화면으로 확인.
+    ///
+    /// 주의: `-UIUserInterfaceStyle Dark` 런치 인자는 최신 iOS 시뮬레이터에서 더 이상
+    /// 앱 외관을 바꾸지 않는다(no-op로 확인됨) — 실행 전 시뮬레이터 자체를 다크로 바꿔야 한다:
+    /// `xcrun simctl ui <device-udid> appearance dark` (테스트 후 `appearance light`로 복구).
+    @MainActor
+    func testFullFlowDarkMode() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-uitest-reset"]
+        app.launch()
+        try runFullFlow(app, prefix: "dark")
     }
 
     @MainActor

@@ -9,6 +9,8 @@ import SwiftUI
 public struct CardView: View {
     private let card: CardSnapshot
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     public init(card: CardSnapshot) {
         self.card = card
     }
@@ -46,7 +48,9 @@ public struct CardView: View {
         }
         .padding(DS.Spacing.l)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .aspectRatio(0.7, contentMode: .fit)
+        // 고정 0.7 비율은 콘텐츠(닉네임·태그라인·칩)가 자라는 접근성 폰트 크기에서
+        // clipShape에 잘린다 — 접근성 크기에서는 비율을 풀고 세로로 자라게 둔다.
+        .aspectRatio(dynamicTypeSize.isAccessibilitySize ? nil : 0.7, contentMode: .fit)
         .background {
             MeshGradient(
                 width: CardVisual.meshDimension,

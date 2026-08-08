@@ -33,6 +33,8 @@ struct CollectionView: View {
                     } label: {
                         Label("설정", systemImage: "gearshape")
                     }
+                    // 무채 크롬 — 이 화면의 빨강은 주인공 액션(맞대기) 하나뿐 (U1 원칙 1)
+                    .tint(.primary)
                     .accessibilityIdentifier("collection.settings")
                 }
                 ToolbarItem(placement: .primaryAction) {

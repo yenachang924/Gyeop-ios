@@ -8,22 +8,26 @@ public struct ClipBumpView: View {
     public init() {}
 
     public var body: some View {
-        VStack(spacing: DS.Spacing.l) {
-            Spacer()
-            ProgressView()
-                .controlSize(.large)
-            VStack(spacing: DS.Spacing.s) {
-                Text("아이폰을\n서로 가까이")
-                    .font(DS.Typo.largeTitle)
-                    .multilineTextAlignment(.center)
-                Text("가까워지는 것 자체가 동의예요. 서버 없이, 와이파이 없이.")
-                    .font(DS.Typo.body)
-                    .foregroundStyle(DS.Palette.secondaryText)
-                    .multilineTextAlignment(.center)
+        // Dynamic Type 극단에서 제목+캡션이 화면을 넘칠 수 있어 스크롤 가능하게 한다
+        // (ExchangeView.progress와 같은 패턴).
+        ScrollView {
+            VStack(spacing: DS.Spacing.l) {
+                ProgressView()
+                    .controlSize(.large)
+                VStack(spacing: DS.Spacing.s) {
+                    Text("아이폰을\n서로 가까이")
+                        .font(DS.Typo.largeTitle)
+                        .multilineTextAlignment(.center)
+                    Text("가까워지는 것 자체가 동의예요. 서버 없이, 와이파이 없이.")
+                        .font(DS.Typo.body)
+                        .foregroundStyle(DS.Palette.secondaryText)
+                        .multilineTextAlignment(.center)
+                }
             }
-            Spacer()
+            .frame(maxWidth: .infinity)
+            .padding(.top, DS.Spacing.xl)
+            .padding(.horizontal, DS.Spacing.m)
         }
-        .padding(DS.Spacing.m)
         .background(DS.Palette.background)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("아이폰을 서로 가까이 — 카드를 교환하는 중")

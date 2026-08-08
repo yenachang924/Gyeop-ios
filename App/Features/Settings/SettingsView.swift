@@ -35,7 +35,9 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
+                    // 무채 크롬 — 파괴적 액션(systemRed)과 브랜드 레드가 한 화면에서 섞이지 않게 (U1)
                     Button("닫기") { dismiss() }
+                        .tint(.primary)
                 }
             }
             .confirmationDialog(

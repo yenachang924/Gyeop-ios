@@ -21,8 +21,41 @@ public enum DS {
     }
 
     public enum Palette {
-        /// 앱 액센트 (겹의 보라 — 두 색이 겹치는 색)
-        public static let accent = Color.indigo
+        // U1 아트 디렉션 (2026-08-09): 브랜드 색은 POSTECH Red 하나. 빨강은 희소해야 귀하다 —
+        // 쓰는 곳은 "겹 성립" 순간(success·GyeopMomentView 링)과 프라이머리 CTA(전역 tint를
+        // 타는 .borderedProminent)뿐. 선택 상태·크롬은 무채, 겹침 하이라이트는 overlap 3값.
+        // 한 화면에 액센트 빨강이 3곳 이상 보이면 실패로 간주하고 덜어낸다.
+
+        /// 브랜드 액센트 — POSTECH Red. 원색이 아닌 저채도 딥 레드라 글라스 위에서도 가라앉는다.
+        /// 라이트 #A61955: 흰 배경 대비 7.3:1 (텍스트로 써도 AA 통과).
+        /// 다크 #E0517F: 시스템 레드가 다크에서 명도를 올리듯(#FF3B30→#FF453A) 들어올린 값 —
+        /// 다크 표면 #1C1C1E 대비 4.6:1.
+        public static let accent = dynamic(light: 0xA61955, dark: 0xE0517F)
+
+        /// 선택 상태(관심사 칩·성향 셀·이모지) 채움 — 무채 잉크. 프로토타입 칩의 눌린 상태
+        /// (`--ios-btn` 솔리드)와 같은 관습. 선택을 액센트로 칠하면 칩 5개 선택 시 화면이
+        /// 빨강으로 넘치므로 선택은 항상 무채다.
+        public static let selection = Color.primary
+        /// selection 채움 위 콘텐츠 색 — primary의 반전 (라이트: 밝은 글자, 다크: 어두운 글자).
+        #if canImport(UIKit)
+        public static let onSelection = Color(uiColor: .systemBackground)
+        #else
+        public static let onSelection = Color.white
+        #endif
+
+        // 겹침 하이라이트 3값 — Figma `overlap/*` 올리브(#E1E7CC/#C6D19E/#45521F)를 액센트와
+        // 같은 hue(≈335°)의 웜 레드 패밀리로 재조율 (U1 원칙 2). 액센트와는 명도·채도로 위계를
+        // 분리한다 — 하이라이트는 와인 톤, 축하·CTA만 선명한 빨강.
+        // 대비(WCAG): ink/bg 라이트 8.9:1 · 다크 9.2:1, ink/화면배경 라이트 9.9:1 · 다크 9.5:1.
+        // line은 장식 테두리(비텍스트)라 대비 기준 비대상.
+
+        /// 겹침 하이라이트 — 칩 배경
+        public static let overlapBg = dynamic(light: 0xF7E1E8, dark: 0x38121F)
+        /// 겹침 하이라이트 — 칩 테두리
+        public static let overlapLine = dynamic(light: 0xE3B9C7, dark: 0x5C2438)
+        /// 겹침 하이라이트 — 텍스트·아이콘
+        public static let overlapInk = dynamic(light: 0x731441, dark: 0xF2AFC6)
+
         /// 보조 텍스트
         public static let secondaryText = Color.secondary
 
@@ -39,11 +72,40 @@ public enum DS {
 
         /// 성사·완료 상태. 겹은 "거절이 성립하지 않는 구조"라 실패를 경고색으로 담지 않는다 —
         /// 성사만 액센트로 축하하고, 대기·실패는 전부 중립(secondaryText)으로 처리한다.
+        /// "겹 성립" 순간이 곧 브랜드 빨강이 허락된 자리다 (U1 원칙 1).
         public static let success = accent
         /// 대기·진행중 상태
         public static let pending = secondaryText
         /// 실패 상태(타임아웃·연결 끊김) — 거절이 아니므로 경고색을 쓰지 않는다.
         public static let failure = secondaryText
+
+        /// 라이트·다크 값 쌍 → Color. 시스템 시맨틱에 없는 브랜드 색만 이 경로로 만든다 —
+        /// 구조 색(배경·표면·보조텍스트)은 계속 시스템 시맨틱을 쓴다.
+        private static func dynamic(light: UInt32, dark: UInt32) -> Color {
+            #if canImport(UIKit)
+            return Color(uiColor: UIColor { traits in
+                rgb(traits.userInterfaceStyle == .dark ? dark : light)
+            })
+            #else
+            // macOS는 swift test 컴파일 대상일 뿐 — 라이트 값으로 고정
+            return Color(
+                red: Double((light >> 16) & 0xFF) / 255,
+                green: Double((light >> 8) & 0xFF) / 255,
+                blue: Double(light & 0xFF) / 255
+            )
+            #endif
+        }
+
+        #if canImport(UIKit)
+        private static func rgb(_ hex: UInt32) -> UIColor {
+            UIColor(
+                red: CGFloat((hex >> 16) & 0xFF) / 255,
+                green: CGFloat((hex >> 8) & 0xFF) / 255,
+                blue: CGFloat(hex & 0xFF) / 255,
+                alpha: 1
+            )
+        }
+        #endif
     }
 
     /// 전부 시스템 텍스트 스타일 매핑 — Dynamic Type 자동 대응

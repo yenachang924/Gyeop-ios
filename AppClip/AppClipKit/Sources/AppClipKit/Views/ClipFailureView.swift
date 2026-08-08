@@ -21,11 +21,17 @@ public struct ClipFailureView: View {
     }
 
     public var body: some View {
-        VStack(spacing: DS.Spacing.l) {
-            Spacer()
+        // Dynamic Type 극단에서 메시지가 길어지면 재시도 버튼이 화면 밖으로 밀릴 수 있어
+        // 내용은 스크롤, 버튼은 safeAreaInset으로 항상 화면 안에 남긴다 (ExchangeView와 같은 패턴).
+        ScrollView {
             Text(message)
                 .font(DS.Typo.title)
                 .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.top, DS.Spacing.xl)
+                .padding(.horizontal, DS.Spacing.m)
+        }
+        .safeAreaInset(edge: .bottom) {
             Button {
                 Task { await onRetry() }
             } label: {
@@ -35,9 +41,8 @@ public struct ClipFailureView: View {
             }
             .buttonStyle(.borderedProminent)
             .accessibilityIdentifier("clip.failure.retry")
-            Spacer()
+            .padding(.horizontal, DS.Spacing.m)
         }
-        .padding(DS.Spacing.m)
         .background(DS.Palette.background)
     }
 }
