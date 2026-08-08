@@ -24,7 +24,7 @@ struct OnboardingFlowView: View {
             .navigationDestination(for: Step.self) { step in
                 switch step {
                 case .style:
-                    StyleStepView(selected: $draft.style) {
+                    StyleStepView(selected: $draft.style, interests: draft.interests) {
                         path.append(.profile)
                     }
                 case .profile:

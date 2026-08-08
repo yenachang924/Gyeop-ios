@@ -79,12 +79,13 @@ final class ClipLaneUITests: XCTestCase {
         snap("clip-2-interests")
         app.buttons["onboarding.interests.next"].tap()
 
-        // 3 vibe — 4택1 선택 후 「다음」 (navigation-map §1-3)
-        let style = app.buttons["onboarding.style.active-outdoor"]
-        XCTAssertTrue(style.waitForExistence(timeout: 5), "온보딩 2/3(성향) 진입 실패")
+        // 3 vibe — 2축 슬라이더 조작 후 「다음」 (F17, navigation-map §1-3)
+        let energySlider = app.sliders["onboarding.style.energy"]
+        XCTAssertTrue(energySlider.waitForExistence(timeout: 5), "온보딩 2/3(성향) 진입 실패")
         assertNoInstallSuggestion(stage: "vibe")
         snap("clip-3-vibe")
-        style.tap()
+        energySlider.adjust(toNormalizedSliderPosition: 0.8)
+        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.8)
         app.buttons["onboarding.style.next"].tap()
 
         // 4 intro — 닉네임·이모지 입력 (전부 선택사항)
@@ -138,9 +139,10 @@ final class ClipLaneUITests: XCTestCase {
         interest.tap()
         app.buttons["onboarding.interests.next"].tap()
 
-        let style = app.buttons["onboarding.style.calm-indoor"]
-        XCTAssertTrue(style.waitForExistence(timeout: 5))
-        style.tap()
+        let energySlider = app.sliders["onboarding.style.energy"]
+        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
+        energySlider.adjust(toNormalizedSliderPosition: 0.2)
+        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
         app.buttons["onboarding.style.next"].tap()
 
         let nickname = app.textFields["onboarding.nickname"]

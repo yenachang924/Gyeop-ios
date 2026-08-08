@@ -17,12 +17,14 @@ final class OnboardingFlowUITests: XCTestCase {
         app.buttons["onboarding.interest.보드게임"].tap()
         app.buttons["onboarding.interests.next"].tap()
 
-        // 2/3 성향 — 4택1 선택 후 「다음」 (미선택이면 다음 비활성 — navigation-map §1-3)
-        let style = app.buttons["onboarding.style.active-indoor"]
-        XCTAssertTrue(style.waitForExistence(timeout: 5))
+        // 2/3 성향 — 슬라이더 미조작이면 다음 비활성 (F17, navigation-map §1-3)
+        let energySlider = app.sliders["onboarding.style.energy"]
+        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
         let styleNext = app.buttons["onboarding.style.next"]
-        XCTAssertFalse(styleNext.isEnabled, "성향 미선택인데 다음이 활성화됨")
-        style.tap()
+        XCTAssertFalse(styleNext.isEnabled, "성향 미조작인데 다음이 활성화됨")
+        energySlider.adjust(toNormalizedSliderPosition: 0.8)
+        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
+        XCTAssertTrue(styleNext.isEnabled, "슬라이더 조작 후에도 다음이 비활성")
         styleNext.tap()
 
         // 3/3 닉네임·한 줄·이모지
@@ -86,9 +88,10 @@ final class OnboardingFlowUITests: XCTestCase {
         app.buttons["onboarding.interests.next"].tap()
 
         // 2/3 성향 — 선택 후 「다음」
-        let style = app.buttons["onboarding.style.active-indoor"]
-        XCTAssertTrue(style.waitForExistence(timeout: 5))
-        style.tap()
+        let energySlider = app.sliders["onboarding.style.energy"]
+        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
+        energySlider.adjust(toNormalizedSliderPosition: 0.8)
+        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
         app.buttons["onboarding.style.next"].tap()
 
         // 3/3 — 1차 16개 밖(카탈로그 17번째 행)인 "낚시"는 기본 그리드엔 없다가 검색하면 나타난다
@@ -141,9 +144,10 @@ final class U2DemoRecordingUITests: XCTestCase {
         }
         app.buttons["onboarding.interests.next"].tap()
 
-        let style = app.buttons["onboarding.style.active-indoor"]
-        XCTAssertTrue(style.waitForExistence(timeout: 5))
-        style.tap()
+        let energySlider = app.sliders["onboarding.style.energy"]
+        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
+        energySlider.adjust(toNormalizedSliderPosition: 0.8)
+        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
         app.buttons["onboarding.style.next"].tap()
 
         let nickname = app.textFields["onboarding.nickname"]
@@ -224,9 +228,10 @@ final class U2DemoRecordingUITests: XCTestCase {
         hold(1.2)
         app.buttons["onboarding.interests.next"].tap()
 
-        let style = app.buttons["onboarding.style.active-indoor"]
-        XCTAssertTrue(style.waitForExistence(timeout: 5))
-        style.tap()
+        let energySlider = app.sliders["onboarding.style.energy"]
+        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
+        energySlider.adjust(toNormalizedSliderPosition: 0.8)
+        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
         hold(1.0)
         app.buttons["onboarding.style.next"].tap()
 

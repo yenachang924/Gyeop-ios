@@ -1,5 +1,5 @@
 <!-- 겹 1차 시연 피드백 — 시각 제안 3종 (소유자 선택용)
-     생성: 2026-08-08 · 기준 커밋: d001f21 (F1~F12 반영 후)
+     생성: 2026-08-08 · 기준 커밋: d001f21, 결정 반영 갱신(F17·F18)
      주의: 코드가 바뀌면 이 목업은 기준 자격을 잃는다 — 비교 전 생성 시점 확인. -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -258,9 +258,8 @@
           "같은 카드"라는 인상이 약해지고 배터리·Reduce Motion 고려가 필요합니다.</p>
       </article>
     </div>
-    <div class="verdict"><b>제안:</b> 실기기에서 stir 반영분을 먼저 보고 → 부족하면 ⓐ(blur 강화)를
-      기본, ⓑ는 시드 재설계 비용이 있어 별도 사이클로. ⓒ는 온보딩 프리뷰에만 한정 적용하는
-      절충도 가능합니다(컬렉션 카드는 정지).</div>
+    <div class="verdict"><b>결정: 제안대로</b> — 실기기에서 stir 반영분을 먼저 체감하고,
+      부족하면 ⓐ(blur 강화)부터 적용합니다.</div>
   </section>
 
   <!-- ② 2/3 인터랙션 -->
@@ -318,9 +317,10 @@
           4분면으로 양자화되므로 "연속처럼 보이는데 4개"라는 어긋남이 생길 수 있습니다.</p>
       </article>
     </div>
-    <div class="verdict"><b>제안:</b> 기본값 <b>B(버블)</b> — 유동 무드·원형 모티브·"면적 선택"
-      요구를 모두 만족하면서 결과가 여전히 명확한 4택1입니다. C는 아름답지만 4택1과의
-      어긋남이 UX 부채가 됩니다. A는 이미 반영돼 있으니 실기기에서 B와 비교해 보세요.</div>
+    <div class="verdict"><b>결정(F17): C 확정</b> — 마음챙김식 2축을 채택하되, 레퍼런스의
+      뻑뻑한 바 느낌을 버리고 슬라이더가 카드 프리뷰 색에 연속적으로 기여하도록 구현
+      (4분면 시드 색의 이중선형 보간). "사실상 4개" 양자화는 소유자 판단으로 수용.
+      코드 반영 완료 — 실기기에서 흐르는 색을 확인하세요.</div>
   </section>
 
   <!-- ③ 앱 아이콘 컬러웨이 -->
@@ -331,12 +331,14 @@
     <div class="row">
       <article class="option">
         <div class="iconbox"><div class="appicon">
-          <i class="me" style="background: linear-gradient(135deg, #74D6E4, #2F6F74);"></i>
-          <i class="you" style="background: linear-gradient(225deg, #F6A700, #DABA65);"></i>
+          <i class="me" style="background: linear-gradient(135deg, rgba(116,214,228,0.94), rgba(47,111,116,0.94));"></i>
+          <i class="you" style="background: linear-gradient(225deg, rgba(246,167,0,0.82), rgba(218,186,101,0.82)); backdrop-filter: blur(1.5px); -webkit-backdrop-filter: blur(1.5px);"></i>
+          <b style="position:absolute; left:38px; top:30px; width:32px; height:48px; border-radius:50%; background: linear-gradient(160deg, rgba(255,255,255,0.5), rgba(255,255,255,0)); pointer-events:none;"></b>
         </div></div>
-        <h3><em>A</em>공간 × 온기</h3>
-        <p>나 = Mint Cyan→Deep Teal(라운지의 공간감), 상대 = Orange→Gold(포인트·온기).
-          차가움과 따뜻함이 만나는 대비가 "겹"의 서사와 맞습니다.</p>
+        <h3><em>A</em>공간 × 온기 + 유리 겹침 ✓ 확정(F18)</h3>
+        <p>나 = Mint Cyan→Deep Teal, 상대 = Orange→Gold. 상대 원을 반투명 유리로 —
+          겹치는 부분에 아래 원이 비쳐 "겹"이 형태 자체로 드러납니다. R10의 완전
+          불투명 결정은 이 안으로 개정. 1024px 최종본은 이 방향으로 제작합니다.</p>
       </article>
       <article class="option">
         <div class="iconbox"><div class="appicon">
@@ -369,9 +371,8 @@
         <tr><td><span class="sw" style="background:#2F6F74"></span>Deep Teal</td><td class="hex">#2F6F74</td><td>민트시안 보조, 깊이감 있는 포인트</td></tr>
       </tbody>
     </table>
-    <div class="verdict"><b>제안:</b> 기본값 <b>A</b> — 파운데이션(라운지)의 정체성이 가장 잘
-      드러나고, 두 원의 색 대비가 커서 작은 크기에서도 "두 사람"이 읽힙니다.
-      선택되면 1024px 최종본을 Figma 프레임으로 재작업합니다.</div>
+    <div class="verdict"><b>결정(F18): A + 유리 겹침 확정</b> — 위 A 목업이 확정 방향입니다.
+      B·C는 기각. 1024px 최종본 제작이 제출 큐에 올라갑니다.</div>
   </section>
 </main>
 

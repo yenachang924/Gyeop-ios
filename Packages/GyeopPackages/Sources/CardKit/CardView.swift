@@ -14,6 +14,7 @@ public struct CardView: View {
     private let card: CardSnapshot
     private let overlap: [String]
     private let stirToken: Int
+    private let colorsOverride: [Color]?
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -22,10 +23,18 @@ public struct CardView: View {
     ///   - overlap: 겹 성립 순간에만 전달 — 카드 하단 알약 줄로 표시된다 (F3).
     ///   - stirToken: 값이 바뀔 때마다 메시가 잠깐 일렁였다 가라앉는다 (F11 "섞는 맛").
     ///     최종 상태는 항상 고정 격자 — "같은 입력=같은 카드"의 결정성은 흔들리지 않는다.
-    public init(card: CardSnapshot, overlap: [String] = [], stirToken: Int = 0) {
+    ///   - colorsOverride: 온보딩 2/3 유동 프리뷰 전용 (F17, `CardPreview.blendedColors`).
+    ///     저장·표시되는 실제 카드에는 절대 쓰지 않는다 — 시드가 진실이다.
+    public init(
+        card: CardSnapshot,
+        overlap: [String] = [],
+        stirToken: Int = 0,
+        colorsOverride: [Color]? = nil
+    ) {
         self.card = card
         self.overlap = overlap
         self.stirToken = stirToken
+        self.colorsOverride = colorsOverride
     }
 
     /// 등간격 제어점 격자 (결정 R2: 5×5). 위치는 고정, 색만 시드가 정한다 —
@@ -78,7 +87,7 @@ public struct CardView: View {
                     width: CardVisual.meshDimension,
                     height: CardVisual.meshDimension,
                     points: Self.stirredPoints(phase: phase),
-                    colors: CardVisual(seed: card.seed).colors
+                    colors: colorsOverride ?? CardVisual(seed: card.seed).colors
                 )
                 .cardTexture()
             } keyframes: { _ in

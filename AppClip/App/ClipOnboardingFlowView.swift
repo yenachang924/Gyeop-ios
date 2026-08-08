@@ -33,7 +33,7 @@ struct ClipOnboardingFlowView: View {
                         path.append(.style)
                     }
                 case .style:
-                    StyleStepView(selected: $draft.style) {
+                    StyleStepView(selected: $draft.style, interests: draft.interests) {
                         path.append(.profile)
                     }
                 case .profile:

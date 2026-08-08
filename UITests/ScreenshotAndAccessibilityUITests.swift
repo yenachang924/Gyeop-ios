@@ -51,9 +51,10 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         snap(app, "default-1b-interests-selected")
 
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
-        let style = app.buttons["onboarding.style.active-indoor"]
-        XCTAssertTrue(style.waitForExistence(timeout: 5))
-        tapEvenIfOffscreen(app, style)
+        let energySlider = app.sliders["onboarding.style.energy"]
+        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
+        energySlider.adjust(toNormalizedSliderPosition: 0.8)
+        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
         snap(app, "default-2b-style-selected")
     }
 
@@ -106,11 +107,12 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         tapEvenIfOffscreen(app, app.buttons["onboarding.interest.보드게임"])
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
 
-        // 2/3 성향 — 4택1 선택 후 「다음」
-        let style = app.buttons["onboarding.style.active-indoor"]
-        XCTAssertTrue(style.waitForExistence(timeout: 5))
+        // 2/3 성향 — 2축 슬라이더 조작 후 「다음」 (F17)
+        let energySlider = app.sliders["onboarding.style.energy"]
+        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-2-onboarding-style")
-        tapEvenIfOffscreen(app, style)
+        energySlider.adjust(toNormalizedSliderPosition: 0.8)
+        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
         tapEvenIfOffscreen(app, app.buttons["onboarding.style.next"])
 
         // 3/3 프로필

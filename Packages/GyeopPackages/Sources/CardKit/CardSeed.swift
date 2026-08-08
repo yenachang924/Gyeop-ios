@@ -1,5 +1,6 @@
 import Core
 import Foundation
+import SwiftUI
 
 /// 카드 시드 규칙의 유일한 정의 지점: **정렬된 관심사 + 성향 + 닉네임 + 이모지 → sha256**.
 /// `ownerID`·`version`은 의도적으로 제외한다 — 시드가 프로필 식별자와 무관해야
@@ -47,6 +48,36 @@ public enum CardPreview {
                 nickname: nickname, emoji: emoji, interests: interests, leisureStyle: leisureStyle
             )
         )
+    }
+
+    /// 2/3 유동 프리뷰 (F17): 성향 2축 연속값(0~1)이 카드 색에 연속적으로 기여한다.
+    /// 4분면 시드 각각의 제어점 색을 이중선형 보간 — 축이 사분면 경계를 지나도 색이
+    /// 끊기지 않고 흐른다. 저장되는 최종 카드는 양자화된 `LeisureStyle` 시드를 그대로
+    /// 쓰므로 "같은 입력=같은 카드"의 결정성은 유지된다.
+    public static func blendedColors(
+        nickname: String,
+        emoji: String,
+        interests: [String],
+        energy: Double,
+        venue: Double
+    ) -> [Color] {
+        func quadrant(_ e: LeisureStyle.Energy, _ v: LeisureStyle.Venue) -> [Color] {
+            visual(
+                nickname: nickname, emoji: emoji, interests: interests,
+                leisureStyle: LeisureStyle(energy: e, venue: v)
+            ).colors
+        }
+        let calmIndoor = quadrant(.calm, .indoor)
+        let calmOutdoor = quadrant(.calm, .outdoor)
+        let activeIndoor = quadrant(.active, .indoor)
+        let activeOutdoor = quadrant(.active, .outdoor)
+        let e = min(max(energy, 0), 1)
+        let v = min(max(venue, 0), 1)
+        return calmIndoor.indices.map { index in
+            let calm = calmIndoor[index].mix(with: calmOutdoor[index], by: v)
+            let active = activeIndoor[index].mix(with: activeOutdoor[index], by: v)
+            return calm.mix(with: active, by: e)
+        }
     }
 }
 
