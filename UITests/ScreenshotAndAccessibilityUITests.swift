@@ -36,6 +36,27 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         snap(app, "ax5-0-welcome")
     }
 
+    /// 선택 상태 보조 컷 — 풀 플로우 인벤토리는 화면 진입 직후(선택 전)만 담기므로,
+    /// 칩·성향 셀의 "선택됨" 시각 상태를 기록하는 전용 캡처. (U1: 선택은 무채 잉크 채움)
+    @MainActor
+    func testSelectionStatesCapture() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-uitest-reset"]
+        app.launch()
+        // 그리드 상단 두 칩 — 스크롤 없이 선택 상태가 프레임에 남는다
+        let first = app.buttons["onboarding.interest.달리기"]
+        XCTAssertTrue(first.waitForExistence(timeout: 5))
+        first.tap()
+        app.buttons["onboarding.interest.클라이밍"].tap()
+        snap(app, "default-1b-interests-selected")
+
+        tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
+        let style = app.buttons["onboarding.style.active-indoor"]
+        XCTAssertTrue(style.waitForExistence(timeout: 5))
+        tapEvenIfOffscreen(app, style)
+        snap(app, "default-2b-style-selected")
+    }
+
     /// Dynamic Type 최대(AX5) — 레이아웃이 깨져 버튼이 사라지면 여기서 실패한다.
     @MainActor
     func testFullFlowAtMaxDynamicType() throws {
