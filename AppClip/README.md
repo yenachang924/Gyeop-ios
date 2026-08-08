@@ -1,8 +1,14 @@
-# AppClip — 타깃 자리
+# AppClip
 
-App Clip 타깃의 자리다. 아직 Xcode 타깃으로 활성화하지 않는다 — 부모 앱 번들 ID·entitlements(App Clip
+> **2026-08-08 통합 세션: 타깃 활성화 완료.** `GyeopClip` 타깃이 project.yml에 연결됐고 본앱에
+> 임베드된다 (아래 "활성화 절차"는 이미 실행됨). 남은 것은 실도메인 확정 후 entitlements의
+> `PLACEHOLDER.gyeop.example` 교체와 App Store Connect 경험 등록 — `docs/review-kit.md` §4,
+> `docs/submission-checklist.md` 참조. 클립 조립부(`ClipModel.live()`)의 Mock 교환은
+> 실기기 MPC 검증 후 본앱과 같은 방식으로 교체 예정(아래 4번 항목).
+
+App Clip 타깃의 자리였다. 원래 계획: 부모 앱 번들 ID·entitlements(App Clip
 association)·서명이 필요해서, Developer Program 세팅이 끝난 뒤 S6 세션이 활성화한다. `project.yml`과
-`App/` 디렉토리는 S1/S6만 수정하므로 (CLAUDE.md 소유권 규칙), 이 세션은 그 경계 밖의 것만 만든다.
+`App/` 디렉토리는 S1/S6만 수정하므로 (CLAUDE.md 소유권 규칙), 그 세션은 그 경계 밖의 것만 만들었다.
 
 ## 지금 여기 있는 것
 
