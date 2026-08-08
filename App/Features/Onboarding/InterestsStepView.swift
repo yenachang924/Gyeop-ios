@@ -140,7 +140,8 @@ struct InterestsStepView: View {
                 Text(icon.emoji)
                 Text(icon.name)
                     .font(DS.Typo.body)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
             }
             .foregroundStyle(isSelected ? DS.Palette.onSelection : Color.secondary)
             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)

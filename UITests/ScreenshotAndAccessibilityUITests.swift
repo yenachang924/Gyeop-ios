@@ -81,6 +81,20 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         try runFullFlow(app, prefix: "xs")
     }
 
+    /// 다크 모드 전 화면 (U3 디테일 패스) — POSTECH Red 액센트·overlap 3값·글라스가
+    /// 다크에서도 대비를 유지하는지 실화면으로 확인.
+    ///
+    /// 주의: `-UIUserInterfaceStyle Dark` 런치 인자는 최신 iOS 시뮬레이터에서 더 이상
+    /// 앱 외관을 바꾸지 않는다(no-op로 확인됨) — 실행 전 시뮬레이터 자체를 다크로 바꿔야 한다:
+    /// `xcrun simctl ui <device-udid> appearance dark` (테스트 후 `appearance light`로 복구).
+    @MainActor
+    func testFullFlowDarkMode() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-uitest-reset"]
+        app.launch()
+        try runFullFlow(app, prefix: "dark")
+    }
+
     @MainActor
     private func runFullFlow(_ app: XCUIApplication, prefix: String) throws {
         // 1/3 관심사

@@ -18,28 +18,30 @@ struct StyleStepView: View {
     ]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.l) {
-            VStack(alignment: .leading, spacing: DS.Spacing.s) {
-                Text("쉬는 날의 나는")
-                    .font(DS.Typo.largeTitle)
-                Text("하나만 — 성향의 결이 카드의 질감을 정해요")
-                    .font(DS.Typo.body)
-                    .foregroundStyle(DS.Palette.secondaryText)
-            }
+        // Dynamic Type 극단에서 셀 4개(각 minHeight 88pt 이상)가 화면을 넘칠 수 있어
+        // InterestsStepView와 같은 패턴으로 스크롤 가능하게 한다.
+        ScrollView {
+            VStack(alignment: .leading, spacing: DS.Spacing.l) {
+                VStack(alignment: .leading, spacing: DS.Spacing.s) {
+                    Text("쉬는 날의 나는")
+                        .font(DS.Typo.largeTitle)
+                    Text("하나만 — 성향의 결이 카드의 질감을 정해요")
+                        .font(DS.Typo.body)
+                        .foregroundStyle(DS.Palette.secondaryText)
+                }
 
-            Grid(horizontalSpacing: DS.Spacing.s, verticalSpacing: DS.Spacing.s) {
-                ForEach(LeisureStyle.Energy.allCases, id: \.self) { energy in
-                    GridRow {
-                        ForEach(LeisureStyle.Venue.allCases, id: \.self) { venue in
-                            styleCell(LeisureStyle(energy: energy, venue: venue))
+                Grid(horizontalSpacing: DS.Spacing.s, verticalSpacing: DS.Spacing.s) {
+                    ForEach(LeisureStyle.Energy.allCases, id: \.self) { energy in
+                        GridRow {
+                            ForEach(LeisureStyle.Venue.allCases, id: \.self) { venue in
+                                styleCell(LeisureStyle(energy: energy, venue: venue))
+                            }
                         }
                     }
                 }
             }
-
-            Spacer()
+            .padding(DS.Spacing.m)
         }
-        .padding(DS.Spacing.m)
         .background(DS.Palette.background)
         .navigationTitle("2 / 3")
         .navigationBarTitleDisplayMode(.inline)

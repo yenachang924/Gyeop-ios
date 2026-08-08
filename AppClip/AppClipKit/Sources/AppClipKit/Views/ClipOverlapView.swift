@@ -84,19 +84,28 @@ public struct ClipOverlapView: View {
     }
 
     /// 겹친 관심사는 강조, 상대만 가진 관심사는 흐리게 — 프로토타입 overlap-chips 구성.
+    @ViewBuilder
     private var interestChips: some View {
         let shared = sharedInterests
         let counterpartOnly = record.counterpartCard.interests.filter { !shared.contains($0) }
-        return FlowChips(
-            highlighted: shared,
-            dimmed: counterpartOnly
-        )
+        if shared.isEmpty, counterpartOnly.isEmpty {
+            Text("이번엔 등록된 관심사가 없었어요")
+                .font(DS.Typo.caption)
+                .foregroundStyle(DS.Palette.secondaryText)
+        } else {
+            FlowChips(highlighted: shared, dimmed: counterpartOnly)
+        }
     }
 
     private var overlapAccessibilityLabel: String {
-        sharedInterests.isEmpty
+        let counterpartOnly = record.counterpartCard.interests.filter { !sharedInterests.contains($0) }
+        let sharedPart = sharedInterests.isEmpty
             ? "겹치는 관심사 없음"
             : "겹치는 관심사: \(sharedInterests.joined(separator: ", "))"
+        let counterpartPart = counterpartOnly.isEmpty
+            ? ""
+            : ". 상대만 가진 관심사: \(counterpartOnly.joined(separator: ", "))"
+        return "\(sharedPart)\(counterpartPart). \(talkLine)"
     }
 }
 

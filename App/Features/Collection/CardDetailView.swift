@@ -35,7 +35,7 @@ struct CardDetailView: View {
                                 .foregroundStyle(DS.Palette.secondaryText)
                         }
                         .accessibilityElement(children: .combine)
-                        .accessibilityLabel("겹치는 관심사 \(sharedInterests.joined(separator: ", "))")
+                        .accessibilityLabel("겹치는 관심사 \(sharedInterests.joined(separator: ", ")). 다음에 만나면 여기서 시작하세요")
                     }
                 }
                 .padding(DS.Spacing.m)

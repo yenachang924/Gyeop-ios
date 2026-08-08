@@ -51,12 +51,14 @@
 <body>
 <div class="wrap">
 
-<h1>겹 — U1 아트 디렉션 리뷰 팩 <span style="color:var(--accent)">POSTECH Red</span></h1>
+<h1>겹 — U1 아트 디렉션 + U3 디테일 패스 리뷰 팩 <span style="color:var(--accent)">POSTECH Red</span></h1>
 <p class="meta">
-  2026-08-09 · U1 세션 · 브랜치 <code>design/u1-postech-red</code> (베이스: <code>b248967</code> U2 시그니처 폴리시)<br>
-  촬영: iPhone 17 Pro 전용 클론 시뮬레이터 (iOS 26.5) · 라이트 모드 · UI 테스트 자동 캡처 22장(default 11 + AX5 11) + 선택 상태 보조 2컷<br>
-  <span class="note" style="display:inline-block; margin-top:8px;">⚠️ 본 트리에 U2 미커밋 작업이 진행 중이어서 U1은 워크트리(<code>.claude/worktrees/u1-postech-red</code>)에서
-  격리 수행했다. before = <code>b248967</code>(인디고, U2 모션 포함) 그대로, after = +U1 팔레트만. <b>main 병합은 소유자 승인 후.</b></span>
+  2026-08-09 · U1(팔레트) + U3(디테일 패스) 세션 · 브랜치 <code>design/u1-postech-red</code> (베이스: <code>b248967</code> U2 시그니처 폴리시)<br>
+  촬영: iPhone 17 Pro 전용 클론 시뮬레이터 (iOS 26.5) · UI 테스트 자동 캡처 — default 13(선택 상태 2컷 포함)
+  + AX5 11 + <b>XS 10(U3 신규)</b> + <b>다크 모드 10(U3 신규)</b><br>
+  <span class="note" style="display:inline-block; margin-top:8px;">본 트리에서 U1이 워크트리(<code>.claude/worktrees/u1-postech-red</code>)로 격리 수행,
+  U3가 같은 워크트리에서 디테일 패스 진행. before = <code>b248967</code>(인디고, U2 모션 포함) 그대로, after = +U1 팔레트 +U3 접근성/레이아웃 수정.
+  <b>main 병합은 소유자 승인 후.</b></span>
 </p>
 
 <h2>0. 검증 결과</h2>
@@ -67,6 +69,8 @@
   <tr><td><code>xcodebuild</code> Gyeop 스킴 — 빌드 + UI 테스트 (풀 플로우 default/AX5 · Welcome 2종 · 선택 상태 캡처)</td><td class="ok">전부 통과</td></tr>
   <tr><td><code>xcodebuild</code> GyeopClip 스킴 — 빌드 (ClipOverlapView 칩 재배선 반영)</td><td class="ok">통과</td></tr>
   <tr><td>before/after 스크린샷 — 동일 시뮬레이터·동일 테스트 경로로 각 22장 재생성</td><td class="ok">완료</td></tr>
+  <tr><td>U3: <code>swift test</code> 재확인(65+16개, U3 접근성 수정 반영) + <code>xcodebuild</code> 빌드 + OnboardingFlowUITests·ExchangeFailureUITests 회귀</td><td class="ok">전부 통과</td></tr>
+  <tr><td>U3: 다크 모드 10화면 + XS(최소 Dynamic Type) 10화면 신규 캡처 · 심사용 6.9" 세트 10장 재생성</td><td class="ok">완료</td></tr>
 </table>
 
 <h2>1. 토큰 결정 — 값은 전부 <code>Tokens.swift</code>에만</h2>
@@ -233,7 +237,7 @@
       U1 지시가 시간상 나중이자 명시적이라 방향은 U1을 따랐으나, <b>docs 단일 진실 원칙상 병합 승인 시 R1·R8 갱신이 선행돼야 한다.</b> 아래 갱신안 참고.</li>
   <li><b>선택 시맨틱:</b> <code>selection/onSelection</code>은 U1이 신설한 토큰 — "선택"과 "겹침"을 분리하는 시맨틱. Figma 스타일 등록 여부는 소유자 판단.</li>
   <li><b>실험 브랜치의 Dynamic Type 상한·ScaledMetric·카드 칩 말줄임 수정</b> — §2에서 보류로 분류. 채택하려면 별도 지시 필요.</li>
-  <li><b>병합 절차:</b> 본 브랜치는 <code>b248967</code>(U2) 위에 리베이스 완료 — 승인 시 main에 fast-forward 병합 가능. U3는 U1·U2 착지 후 시작 대기 중.</li>
+  <li><b>병합 절차:</b> 본 브랜치는 <code>b248967</code>(U2) 위에 리베이스 완료, U3 접근성/레이아웃 수정 포함 — 승인 시 main에 fast-forward 병합 가능.</li>
 </ul>
 
 <h3>design-decisions.md R1·R8 갱신안 (승인 시 적용)</h3>
@@ -242,10 +246,103 @@
 
 <h2>8. 실기기 확인 항목</h2>
 <ul class="plain">
-  <li>다크 모드 실화면 — 수치 검증은 완료, OLED 실기기에서 <code>#E0517F</code> 액센트·<code>#38121F</code> 칩 배경의 체감 확인.</li>
+  <li>다크 모드 실화면 — 수치 검증 + <b>U3 실화면 캡처 10장(§9-1) 완료, 시뮬레이터 기준 이슈 없음</b>. 남은 것은 OLED 실기기에서 <code>#E0517F</code> 액센트·<code>#38121F</code> 칩 배경의 체감 확인뿐.</li>
   <li>iOS 26 Liquid Glass 위 CTA — 시뮬레이터 확인 완료, 실기기 글라스 블러 위 채도 체감(원칙 4)은 실기기에서.</li>
   <li>U2 겹 융합 연출과의 색 조합 — 링(accent)이 이제 레드 — 실기기 모션에서 과하지 않은지.</li>
+  <li><b>햅틱 감각 튜닝(D1)</b> — §9-5 참고. U3 범위 밖, 실기기 세션 필수.</li>
 </ul>
+
+<h2>9. U3 디테일 패스 — 다크모드·Dynamic Type·빈 상태·VoiceOver</h2>
+<p class="small">U1·U2 착지 후 진행. 코드 감사(Explore 에이전트, App+AppClip 21개 뷰 전체 정독) → 수정 →
+시뮬레이터 실화면 재검 → 빌드·테스트 재확인 → 스크린샷 재생성 순서로 진행했다.</p>
+
+<h3>9-1. 다크 모드 — 코드 감사: 리터럴 색상 0건, 실화면 재검 10화면: 이슈 0건</h3>
+<p class="small">
+  <code>DS.Palette.*</code> 밖에서 직접 색을 쓰는 곳은 <code>CardKit</code>뿐이었고 전부 의도된 예외다 —
+  <code>CardView</code>/<code>GyeopMomentView</code>의 <code>.white</code>는 카드 콘텐츠용 고정 흰 글자(카드 배경이 자체적으로
+  4.5:1 대비를 보장하는 생성 그라디언트라 시스템 배경과 무관, CLAUDE.md가 CardKit에 허용한 커스텀 비주얼 예외),
+  <code>GooBlobs</code>의 <code>.black</code>은 alphaThreshold 마스크용 불투명도 트릭이라 색으로 렌더링되지 않는다.
+  나머지 전부 <code>DS.Palette.*</code> 아니면 시스템 시맨틱(<code>.primary</code>·<code>.secondary</code>·<code>systemGroupedBackground</code>)이라
+  다크 대응이 자동이다.
+</p>
+<p class="small">
+  <b>실화면 검증에서 실제로 걸린 것은 코드가 아니라 테스트 하네스였다:</b> UI 테스트 런치 인자
+  <code>-UIUserInterfaceStyle Dark</code>는 최신 iOS 시뮬레이터에서 더 이상 앱 외관을 바꾸지 않는 no-op임을 확인 —
+  처음 캡처한 "다크" 스크린샷 10장이 실제로는 라이트였다. <code>xcrun simctl ui &lt;device&gt; appearance dark</code>로
+  시뮬레이터 자체를 다크로 전환한 뒤 재캡처해서 진짜 다크 화면 10장을 확보했고 (아래 링크), 재발 방지로
+  <code>UITests/ScreenshotAndAccessibilityUITests.swift</code>의 <code>testFullFlowDarkMode</code>에 이 절차를 주석으로 남겼다.
+  진짜 다크 화면 10장 전부 — 액센트·overlap 3값·글라스·칩 대비 — 육안 이슈 없음.
+</p>
+<div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:12px;">
+  <figure style="margin:0; width:150px;"><img src="assets/postech/dark/dark-1-onboarding-interests.png" style="width:100%; border-radius:8px; border:1px solid var(--line);"><figcaption class="small" style="text-align:center;">1 관심사</figcaption></figure>
+  <figure style="margin:0; width:150px;"><img src="assets/postech/dark/dark-2-onboarding-style.png" style="width:100%; border-radius:8px; border:1px solid var(--line);"><figcaption class="small" style="text-align:center;">2 성향</figcaption></figure>
+  <figure style="margin:0; width:150px;"><img src="assets/postech/dark/dark-3-onboarding-profile.png" style="width:100%; border-radius:8px; border:1px solid var(--line);"><figcaption class="small" style="text-align:center;">3 프로필</figcaption></figure>
+  <figure style="margin:0; width:150px;"><img src="assets/postech/dark/dark-4-card-reveal.png" style="width:100%; border-radius:8px; border:1px solid var(--line);"><figcaption class="small" style="text-align:center;">4 카드 리빌</figcaption></figure>
+  <figure style="margin:0; width:150px;"><img src="assets/postech/dark/dark-5-collection-empty.png" style="width:100%; border-radius:8px; border:1px solid var(--line);"><figcaption class="small" style="text-align:center;">5 컬렉션(빈)</figcaption></figure>
+  <figure style="margin:0; width:150px;"><img src="assets/postech/dark/dark-6-exchange-searching.png" style="width:100%; border-radius:8px; border:1px solid var(--line);"><figcaption class="small" style="text-align:center;">6 맞대기</figcaption></figure>
+  <figure style="margin:0; width:150px;"><img src="assets/postech/dark/dark-7-exchange-completed.png" style="width:100%; border-radius:8px; border:1px solid var(--line);"><figcaption class="small" style="text-align:center;">7 겹 성립 ✦</figcaption></figure>
+  <figure style="margin:0; width:150px;"><img src="assets/postech/dark/dark-8-collection-filled.png" style="width:100%; border-radius:8px; border:1px solid var(--line);"><figcaption class="small" style="text-align:center;">8 컬렉션(찬)</figcaption></figure>
+  <figure style="margin:0; width:150px;"><img src="assets/postech/dark/dark-9-card-detail.png" style="width:100%; border-radius:8px; border:1px solid var(--line);"><figcaption class="small" style="text-align:center;">9 카드 상세</figcaption></figure>
+  <figure style="margin:0; width:150px;"><img src="assets/postech/dark/dark-10-settings.png" style="width:100%; border-radius:8px; border:1px solid var(--line);"><figcaption class="small" style="text-align:center;">10 설정</figcaption></figure>
+</div>
+
+<h3>9-2. Dynamic Type 최대(AX5)·최소(XS) — 6건 수정</h3>
+<table>
+  <tr><th>파일</th><th>문제</th><th>수정</th></tr>
+  <tr><td><code>CardKit/CardView.swift</code></td>
+      <td>고정 <code>.aspectRatio(0.7, contentMode: .fit)</code>가 AX5에서 자라는 콘텐츠(닉네임·태그라인·칩)를 <code>clipShape</code>로 잘라냄 —
+      카드를 쓰는 모든 화면(리빌·상세·컬렉션·교환·클립 3곳)에 영향</td>
+      <td><code>dynamicTypeSize.isAccessibilitySize</code>일 때 비율 제약을 풀어 세로로 자라게 함</td></tr>
+  <tr><td><code>ExchangeView.progress()</code></td>
+      <td><code>Spacer</code> 2개로 감싼 고정 레이아웃 — AX5에서 제목+캡션이 화면을 넘치면 잘림. 같은 화면의 completed/failed는 이미 스크롤 패턴이었는데 이 단계만 빠짐</td>
+      <td><code>ScrollView</code>로 통일</td></tr>
+  <tr><td><code>Onboarding/StyleStepView.swift</code></td>
+      <td>4셀 Grid가 스크롤 없는 <code>VStack</code>에 있어 AX5에서 하단 셀이 화면 밖으로 밀림</td>
+      <td>InterestsStepView와 같은 ScrollView+safeAreaInset 패턴 적용</td></tr>
+  <tr><td><code>Onboarding/InterestsStepView.swift</code> 칩 라벨</td>
+      <td><code>.lineLimit(1)</code>로 긴 관심사명이 AX5에서 말줄임</td>
+      <td><code>.lineLimit(2)</code> + <code>.minimumScaleFactor(0.8)</code></td></tr>
+  <tr><td><code>Welcome/WelcomeView.swift</code> SIWA 버튼</td>
+      <td><code>.frame(height: 50)</code> 고정 — AX5에서 내부 라벨이 잘릴 위험</td>
+      <td><code>.frame(minHeight: DS.minTapTarget)</code>로 완화</td></tr>
+  <tr><td><code>ClipBumpView.swift</code> / <code>ClipFailureView.swift</code></td>
+      <td>ExchangeView와 같은 결함 — 특히 ClipFailureView는 재시도 버튼이 <code>Spacer</code> 사이에 있어 AX5에서 화면 밖으로 밀릴 수 있었음</td>
+      <td>ScrollView + <code>safeAreaInset(edge: .bottom)</code>로 버튼 항상 도달 가능하게</td></tr>
+  <tr><td><code>ClipKeepView.swift</code> / <code>ClipReceptionView.swift</code> <code>GroupBox</code> 행</td>
+      <td>닉네임+캡션 <code>HStack</code>이 AX5에서 한 줄을 두고 경쟁</td>
+      <td><code>ViewThatFits</code>로 안 맞으면 세로 스택으로 전환</td></tr>
+</table>
+<p class="small">XS(최소)는 코드 변경 없음 — 기존 시스템 텍스트 스타일 매핑만으로 레이아웃이 여유롭게 맞는 것을 스크린샷으로 확인.
+XS 스크린샷: <code>review/assets/postech/xs/xs-1-onboarding-interests.png</code> ~ <code>xs-10-settings.png</code>.</p>
+
+<h3>9-3. 빈 상태 — 2건 수정</h3>
+<ul class="plain">
+  <li><b><code>Onboarding/ProfileStepView.swift</code></b> — 이모지 검색 결과가 0건일 때 그리드 자리가 조용히 비어있던 것을
+      "일치하는 이모지가 없어요" 안내로 대체.</li>
+  <li><b><code>AppClipKit/ClipOverlapView.swift</code></b> — 겹친 관심사·상대만의 관심사가 둘 다 0개인 극단 케이스(양쪽 다 관심사
+      미입력)에서 칩 영역이 빈 채로 남던 것을 "이번엔 등록된 관심사가 없었어요" 한 줄로 대체.
+      컬렉션 빈 상태(점선 슬롯 + "다음 만남이 여기에")는 기존 구현 그대로 — navigation-map.md §2와 정합 확인.</li>
+</ul>
+
+<h3>9-4. VoiceOver — 4건 수정</h3>
+<ul class="plain">
+  <li><b><code>Collection/CardDetailView.swift</code></b> — <code>.accessibilityElement(children: .combine)</code> +
+      커스텀 <code>.accessibilityLabel</code>이 하위 <code>Text</code>들의 결합 라벨을 덮어써서, 화면 맨 아래 "다음에 만나면
+      여기서 시작하세요" 팁을 VoiceOver 사용자만 못 듣던 문제 — 라벨 문자열에 팁을 합쳐 넣음.</li>
+  <li><b><code>AppClipKit/ClipOverlapView.swift</code></b> — 같은 패턴의 결함 2건: 대화 시작 문구(<code>talkLine</code>)와
+      "상대만 가진 관심사"(흐린 칩, 시각적으로는 보이지만 라벨에서 빠짐)가 커스텀 라벨에 없었음 — 둘 다 라벨에 포함.</li>
+  <li>나머지 19개 뷰는 이모지·아이콘·카드 등 비텍스트 요소에 <code>accessibilityLabel</code> 누락 없음, 44pt 미만 탭 타깃 없음,
+      합성 뷰의 <code>.combine</code> 사용이 일관됨을 확인 (Explore 에이전트 전수 정독 + 수동 재확인).</li>
+</ul>
+
+<h3>9-5. 햅틱 상수 — 실기기 피드백 반영: 블로킹, 코드 변경 없음</h3>
+<p class="small">
+  <code>docs/device-required.md</code>의 "CoreHaptics 교환 햅틱" 항목은 <b>"감각 튜닝은 D1 결정 대기, 실기기 체감 확인 필요"</b>
+  상태 그대로다 — 즉 반영할 실기기 피드백 자체가 아직 존재하지 않는다. U3는 실기기가 없어 이 항목을 <b>블로킹으로 보고하고
+  코드를 건드리지 않았다</b> (임의로 값을 지어내면 다음 실기기 세션에서 다시 튜닝해야 하는 이중 작업이 된다).
+  튜닝 표면은 이미 U2가 <code>GyeopKit/HapticFeedback.swift</code>의 <code>HapticTuning</code> enum(강도·날카로움·더블탭 간격
+  8개 상수)으로 분리해뒀다 — 실기기 세션에서는 이 상수들만 조정하면 된다.
+</p>
 
 </div>
 </body>

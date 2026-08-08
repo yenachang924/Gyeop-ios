@@ -40,7 +40,14 @@ struct ProfileStepView: View {
             Section {
                 TextField("이모지 검색", text: $emojiQuery)
                     .accessibilityIdentifier("onboarding.emoji.search")
-                emojiGrid
+                if visibleEmojis.isEmpty {
+                    Text("일치하는 이모지가 없어요")
+                        .font(DS.Typo.subheadline)
+                        .foregroundStyle(DS.Palette.secondaryText)
+                        .accessibilityIdentifier("onboarding.emoji.empty")
+                } else {
+                    emojiGrid
+                }
             } header: {
                 Text("나를 나타내는 이모지 · 선택")
             } footer: {

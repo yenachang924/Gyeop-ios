@@ -79,20 +79,24 @@ struct ExchangeView: View {
         }
     }
 
+    // Dynamic Type 극단에서 제목+캡션이 화면을 넘칠 수 있어 completedView/failedView와
+    // 같은 패턴으로 스크롤 가능하게 한다.
     private func progress(title: String, caption: String) -> some View {
-        VStack(spacing: DS.Spacing.l) {
-            Spacer()
-            ProgressView()
-                .controlSize(.large)
-            VStack(spacing: DS.Spacing.s) {
-                Text(title)
-                    .font(DS.Typo.title)
-                Text(caption)
-                    .font(DS.Typo.body)
-                    .foregroundStyle(DS.Palette.secondaryText)
-                    .multilineTextAlignment(.center)
+        ScrollView {
+            VStack(spacing: DS.Spacing.l) {
+                ProgressView()
+                    .controlSize(.large)
+                VStack(spacing: DS.Spacing.s) {
+                    Text(title)
+                        .font(DS.Typo.title)
+                    Text(caption)
+                        .font(DS.Typo.body)
+                        .foregroundStyle(DS.Palette.secondaryText)
+                        .multilineTextAlignment(.center)
+                }
             }
-            Spacer()
+            .frame(maxWidth: .infinity)
+            .padding(.top, DS.Spacing.xl)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title). \(caption)")

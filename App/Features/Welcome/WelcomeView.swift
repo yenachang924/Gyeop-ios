@@ -37,7 +37,7 @@ struct WelcomeView: View {
             } onCompletion: { result in
                 handle(result)
             }
-            .frame(height: 50)
+            .frame(minHeight: DS.minTapTarget)
             .accessibilityIdentifier("welcome.signInWithApple")
         }
         .padding(DS.Spacing.m)
