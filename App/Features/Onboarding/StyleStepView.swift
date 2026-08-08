@@ -55,26 +55,42 @@ struct StyleStepView: View {
     }
 
     private func styleCell(_ style: LeisureStyle) -> some View {
+        let isSelected = selected == style
+
+        // 선택 상태는 무채 잉크 채움 — 관심사 칩과 같은 관습 (U1 원칙 1).
+        return Group {
+            if isSelected {
+                cellButton(style, isSelected: true)
+                    .buttonStyle(.borderedProminent)
+                    .tint(DS.Palette.selection)
+            } else {
+                cellButton(style, isSelected: false)
+                    .buttonStyle(.bordered)
+                    .tint(.secondary)
+            }
+        }
+        // 4택1 선택 스프링 — 관심사 칩과 같은 결 (quick)
+        .scaleEffect(isSelected ? 1.03 : 1)
+        .animation(reduceMotion ? nil : DS.Motion.quick, value: selected)
+        .accessibilityLabel("여가 성향 \(style.label)")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier("onboarding.style.\(style.energy.rawValue)-\(style.venue.rawValue)")
+    }
+
+    private func cellButton(_ style: LeisureStyle, isSelected: Bool) -> some View {
         Button {
             selected = style
         } label: {
             VStack(spacing: DS.Spacing.s) {
                 Text(style.label)
                     .font(DS.Typo.headline)
+                    .foregroundStyle(isSelected ? DS.Palette.onSelection : Color.secondary)
                 Text(Self.examples[style] ?? "")
                     .font(DS.Typo.caption)
-                    .foregroundStyle(DS.Palette.secondaryText)
+                    .foregroundStyle(isSelected ? DS.Palette.onSelection.opacity(0.8) : DS.Palette.secondaryText)
             }
             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget * 2)
         }
-        .buttonStyle(.bordered)
-        .tint(selected == style ? DS.Palette.accent : .secondary)
-        // 4택1 선택 스프링 — 관심사 칩과 같은 결 (quick)
-        .scaleEffect(selected == style ? 1.03 : 1)
-        .animation(reduceMotion ? nil : DS.Motion.quick, value: selected)
-        .accessibilityLabel("여가 성향 \(style.label)")
-        .accessibilityAddTraits(selected == style ? .isSelected : [])
-        .accessibilityIdentifier("onboarding.style.\(style.energy.rawValue)-\(style.venue.rawValue)")
     }
 }
 

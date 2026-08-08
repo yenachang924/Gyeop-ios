@@ -38,6 +38,8 @@ struct ExchangeView: View {
                             Task { await session?.cancel() }
                             dismiss()
                         }
+                        // 크롬은 무채 — 이 화면의 빨강은 겹 성립 순간과 CTA 몫이다 (U1 원칙 1)
+                        .tint(.primary)
                         .accessibilityIdentifier("exchange.close")
                     }
                 }
@@ -137,9 +139,10 @@ struct ExchangeView: View {
                             .padding(.horizontal, DS.Spacing.xl)
                     }
                     if !myCard.emoji.isEmpty, myCard.emoji == record.counterpartCard.emoji {
+                        // 이모지 겹침도 "겹침" — 와인 톤(overlapInk)으로, 빨강은 제목·CTA 둘만 (U1)
                         Text("이모지도 겹쳤어요 \(myCard.emoji) — 오늘의 이스터에그")
                             .font(DS.Typo.headline)
-                            .foregroundStyle(DS.Palette.success)
+                            .foregroundStyle(DS.Palette.overlapInk)
                             .multilineTextAlignment(.center)
                     }
                 }
@@ -256,11 +259,12 @@ private struct StaggeredOverlapChips: View {
             ForEach(Array(items.enumerated()), id: \.element) { index, item in
                 Text(item)
                     .font(DS.Typo.headline)
-                    .foregroundStyle(DS.Palette.accent)
+                    .foregroundStyle(DS.Palette.overlapInk)
                     .padding(.horizontal, DS.Spacing.s)
                     .padding(.vertical, DS.Spacing.xs)
                     .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
-                    .background(DS.Palette.accent.opacity(0.15), in: Capsule())
+                    .background(DS.Palette.overlapBg, in: Capsule())
+                    .overlay(Capsule().strokeBorder(DS.Palette.overlapLine))
                     .opacity(shown ? 1 : 0)
                     .animation(
                         reduceMotion

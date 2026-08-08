@@ -105,10 +105,34 @@ struct InterestsStepView: View {
         let isSelected = selected.contains(icon.name)
         let isFull = selected.count >= UserProfile.maxInterests
 
-        return Button {
+        // 선택 상태는 액센트가 아니라 무채 잉크 채움 — 칩 5개 선택 시 화면이 빨강으로
+        // 넘치지 않게 한다 (U1 원칙 1, 프로토타입 chip[aria-pressed] 관습).
+        return Group {
+            if isSelected {
+                chipButton(icon, isSelected: true)
+                    .buttonStyle(.borderedProminent)
+                    .tint(DS.Palette.selection)
+            } else {
+                chipButton(icon, isSelected: false)
+                    .buttonStyle(.bordered)
+                    .tint(.secondary)
+            }
+        }
+        // 선택 스프링 스케일 — 잦은 인터랙션이라 quick (살짝만 커진다)
+        .scaleEffect(isSelected ? 1.04 : 1)
+        .animation(reduceMotion ? nil : DS.Motion.quick, value: isSelected)
+        .disabled(!isSelected && isFull)
+        .accessibilityLabel("관심사 \(icon.name)")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier("onboarding.interest.\(icon.name)")
+    }
+
+    /// borderedProminent가 다크에서 흰 채움(primary 반전)이 되므로 라벨은 onSelection으로 명시.
+    private func chipButton(_ icon: EmojiIcon, isSelected: Bool) -> some View {
+        Button {
             if isSelected {
                 selected.removeAll { $0 == icon.name }
-            } else if !isFull {
+            } else if selected.count < UserProfile.maxInterests {
                 selected.append(icon.name)
             }
         } label: {
@@ -118,17 +142,9 @@ struct InterestsStepView: View {
                     .font(DS.Typo.body)
                     .lineLimit(1)
             }
+            .foregroundStyle(isSelected ? DS.Palette.onSelection : Color.secondary)
             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
         }
-        .buttonStyle(.bordered)
-        .tint(isSelected ? DS.Palette.accent : .secondary)
-        // 선택 스프링 스케일 — 잦은 인터랙션이라 quick (살짝만 커진다)
-        .scaleEffect(isSelected ? 1.04 : 1)
-        .animation(reduceMotion ? nil : DS.Motion.quick, value: isSelected)
-        .disabled(!isSelected && isFull)
-        .accessibilityLabel("관심사 \(icon.name)")
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
-        .accessibilityIdentifier("onboarding.interest.\(icon.name)")
     }
 }
 

@@ -119,21 +119,30 @@ private struct FlowChips: View {
         }
     }
 
+    /// 겹친 칩은 본앱과 같은 overlap 3값(bg/line/ink) — 두 레인의 겹침 색이 갈라지지 않게 한다.
+    /// 비겹침은 중립 표면색 + 보조 텍스트 (프로토타입 `.oc.dim` 관습).
     @ViewBuilder
     private func chip(_ text: String, emphasized: Bool) -> some View {
-        let label = Text(text)
-            .font(DS.Typo.caption)
-            .padding(.horizontal, DS.Spacing.s)
-            .padding(.vertical, DS.Spacing.xs)
-            .frame(maxWidth: .infinity)
-            .background(
-                DS.Palette.accent.opacity(emphasized ? 0.15 : 0.05),
-                in: RoundedRectangle(cornerRadius: DS.Radius.chip)
-            )
         if emphasized {
-            label
+            Text(text)
+                .font(DS.Typo.caption)
+                .foregroundStyle(DS.Palette.overlapInk)
+                .padding(.horizontal, DS.Spacing.s)
+                .padding(.vertical, DS.Spacing.xs)
+                .frame(maxWidth: .infinity)
+                .background(DS.Palette.overlapBg, in: RoundedRectangle(cornerRadius: DS.Radius.chip))
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.Radius.chip)
+                        .strokeBorder(DS.Palette.overlapLine)
+                )
         } else {
-            label.foregroundStyle(DS.Palette.secondaryText)
+            Text(text)
+                .font(DS.Typo.caption)
+                .foregroundStyle(DS.Palette.secondaryText)
+                .padding(.horizontal, DS.Spacing.s)
+                .padding(.vertical, DS.Spacing.xs)
+                .frame(maxWidth: .infinity)
+                .background(DS.Palette.surface, in: RoundedRectangle(cornerRadius: DS.Radius.chip))
         }
     }
 }

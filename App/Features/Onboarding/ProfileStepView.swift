@@ -85,7 +85,8 @@ struct ProfileStepView: View {
                         .font(DS.Typo.title)
                         .frame(minWidth: DS.minTapTarget, minHeight: DS.minTapTarget)
                         .background(
-                            draft.emoji == icon.emoji ? DS.Palette.accent.opacity(0.25) : .clear,
+                            // 선택 표시는 무채 — 이모지 자체가 색을 갖고 있다 (U1 원칙 1)
+                            draft.emoji == icon.emoji ? DS.Palette.selection.opacity(0.25) : .clear,
                             in: RoundedRectangle(cornerRadius: DS.Radius.chip)
                         )
                         // 이모지 원탭 선택 스프링 — 다른 선택 컨트롤과 같은 결 (quick)
