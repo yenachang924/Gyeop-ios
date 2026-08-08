@@ -10,9 +10,8 @@ struct WelcomeView: View {
     @State private var failed = false
 
     var body: some View {
-        VStack(spacing: DS.Spacing.l) {
-            Spacer()
-
+        // 타이틀·소제는 화면 정중앙(1차 시연 지시), 로그인은 하단 — 흑백 상태 유지.
+        ZStack {
             VStack(spacing: DS.Spacing.s) {
                 Text("겹")
                     .font(DS.Typo.largeTitle)
@@ -24,21 +23,25 @@ struct WelcomeView: View {
             .accessibilityElement(children: .combine)
             .accessibilityLabel("겹. 아이폰을 맞대면, 만남이 쌓입니다")
 
-            Spacer()
+            VStack(spacing: DS.Spacing.s) {
+                Spacer()
 
-            if failed {
-                Text("로그인하지 못했어요. 다시 시도해 주세요.")
-                    .font(DS.Typo.footnote)
-                    .foregroundStyle(DS.Palette.secondaryText)
-            }
+                if failed {
+                    Text("로그인하지 못했어요. 다시 시도해 주세요.")
+                        .font(DS.Typo.footnote)
+                        .foregroundStyle(DS.Palette.secondaryText)
+                }
 
-            SignInWithAppleButton(.signIn) { request in
-                request.requestedScopes = [.fullName, .email]
-            } onCompletion: { result in
-                handle(result)
+                SignInWithAppleButton(.signIn) { request in
+                    request.requestedScopes = [.fullName, .email]
+                } onCompletion: { result in
+                    handle(result)
+                }
+                // 풀블리드로 퍼지지 않게 폭을 묶는다 (1차 시연: "칸이 넓다")
+                .frame(maxWidth: DS.Layout.signInMaxWidth, minHeight: DS.minTapTarget)
+                .frame(maxWidth: .infinity)
+                .accessibilityIdentifier("welcome.signInWithApple")
             }
-            .frame(minHeight: DS.minTapTarget)
-            .accessibilityIdentifier("welcome.signInWithApple")
         }
         .padding(DS.Spacing.m)
         .background(DS.Palette.background)

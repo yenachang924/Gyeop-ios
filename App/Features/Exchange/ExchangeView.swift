@@ -175,6 +175,8 @@ struct ExchangeView: View {
                 }
             }
         }
+        // 내용이 화면보다 작으면 세로 중앙에 앉는다 (1차 시연: 하단이 비어 상단 쏠림)
+        .defaultScrollAnchor(.center)
         // 융합에서 넘어온 흐름을 잇는 등장 — 카드가 먼저, 제목이 반 박자 뒤에
         .onAppear { celebrated = true }
         .safeAreaInset(edge: .bottom) {

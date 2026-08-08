@@ -22,6 +22,15 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    NavigationLink("카드 색 읽는 법") {
+                        CardColorGuideView()
+                    }
+                    .accessibilityIdentifier("settings.cardColorGuide")
+                } footer: {
+                    Text("색이 성향을 어떻게 담는지, 겹의 공식 규칙을 알려드려요.")
+                }
+
+                Section {
                     Button("계정 삭제", role: .destructive) {
                         confirmingDeletion = true
                     }
@@ -68,6 +77,49 @@ struct SettingsView: View {
         } else {
             deletionFailed = true
         }
+    }
+}
+
+/// "카드 색 읽는 법" — 색 → 성향 유추 규칙의 인앱 공식 문서 (F21).
+/// 애플 건강 앱의 교육 화면처럼, 앱이 정한 룰을 그대로 알려준다.
+/// 원문·단일 진실 원천: docs/card-color-guide.md (같은 파일에 두어 pbxproj 재생성 불필요).
+struct CardColorGuideView: View {
+    private struct Rule: Identifiable {
+        let signal: String
+        let reading: String
+        var id: String { signal }
+    }
+
+    private static let rules: [Rule] = [
+        Rule(signal: "활발", reading: "웜 톤. 레드에서 골드 사이의 온기"),
+        Rule(signal: "잔잔", reading: "쿨 톤. 틸에서 인디고 사이의 고요"),
+        Rule(signal: "실외", reading: "밝은 명도. 볕이 든 듯 맑아요"),
+        Rule(signal: "실내", reading: "깊은 명도. 조명이 낮은 듯 아늑해요"),
+    ]
+
+    var body: some View {
+        List {
+            Section {
+                Text("한 장의 카드는 7가지 색으로만 물듭니다. 색의 큰 방향은 성향이 정하고, 미묘한 차이는 이름·한 줄·이모지·관심사가 정해요. 같은 입력이면 언제나 같은 카드입니다.")
+                    .font(DS.Typo.body)
+            }
+
+            Section("색이 말하는 것") {
+                ForEach(Self.rules) { rule in
+                    LabeledContent(rule.signal, value: rule.reading)
+                }
+            }
+
+            Section {
+                Text("따뜻하고 밝은 카드라면 활발하고 바깥을 좋아하는 사람일 거예요. 차갑고 깊은 카드라면 잔잔한 실내의 결을 가진 사람이고요. 다음 겹에서 색부터 읽어보세요.")
+                    .font(DS.Typo.body)
+                    .foregroundStyle(DS.Palette.secondaryText)
+            } header: {
+                Text("읽는 예")
+            }
+        }
+        .navigationTitle("카드 색 읽는 법")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

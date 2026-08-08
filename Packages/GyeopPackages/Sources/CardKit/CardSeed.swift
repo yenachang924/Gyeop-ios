@@ -46,7 +46,8 @@ public enum CardPreview {
         CardVisual(
             seed: CardSeed.hash(
                 nickname: nickname, emoji: emoji, interests: interests, leisureStyle: leisureStyle
-            )
+            ),
+            style: leisureStyle
         )
     }
 

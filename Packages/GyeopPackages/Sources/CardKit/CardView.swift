@@ -87,7 +87,7 @@ public struct CardView: View {
                     width: CardVisual.meshDimension,
                     height: CardVisual.meshDimension,
                     points: Self.stirredPoints(phase: phase),
-                    colors: colorsOverride ?? CardVisual(seed: card.seed).colors
+                    colors: colorsOverride ?? CardVisual(seed: card.seed, style: card.leisureStyle).colors
                 )
                 .cardTexture()
             } keyframes: { _ in

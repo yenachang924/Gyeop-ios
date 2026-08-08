@@ -20,6 +20,11 @@ public enum DS {
         public static let card: CGFloat = 20
     }
 
+    public enum Layout {
+        /// 로그인(SIWA) 버튼 최대 폭 — 화면 폭 전체로 퍼지는 문제(1차 시연 지적) 방지.
+        public static let signInMaxWidth: CGFloat = 280
+    }
+
     public enum Palette {
         // U1 아트 디렉션 (2026-08-09): 브랜드 색은 POSTECH Red 하나. 빨강은 희소해야 귀하다 —
         // 쓰는 곳은 "겹 성립" 순간(success·GyeopMomentView 링)과 프라이머리 CTA(전역 tint를
