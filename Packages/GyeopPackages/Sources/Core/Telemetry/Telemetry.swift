@@ -18,14 +18,10 @@ public enum Log {
 
     /// 카드 맞대기 — MPC 발견/연결/전송, UWB 거리 이벤트
     public static let nearby = Logger(subsystem: subsystem, category: "nearby")
-    /// 여가 신호 — 생성/조인/소멸, 푸시 수신
-    public static let signal = Logger(subsystem: subsystem, category: "signal")
     /// 서버 동기화 — 오프라인 큐, 업로드, 중복 검출
     public static let sync = Logger(subsystem: subsystem, category: "sync")
     /// 렌더링 — 셰이더, 그래프 프레임
     public static let render = Logger(subsystem: subsystem, category: "render")
-    /// 인증·계정
-    public static let auth = Logger(subsystem: subsystem, category: "auth")
 }
 
 // MARK: - Signpost
@@ -37,9 +33,6 @@ public enum Signpost {
 
     public static let nearby = OSSignposter(
         logger: Logger(subsystem: subsystem, category: "signpost.nearby")
-    )
-    public static let signal = OSSignposter(
-        logger: Logger(subsystem: subsystem, category: "signpost.signal")
     )
     public static let sync = OSSignposter(
         logger: Logger(subsystem: subsystem, category: "signpost.sync")
@@ -134,12 +127,6 @@ public enum Metric {
     public static let exchangeFailure = "exchange.failure"
     public static let exchangeRetry = "exchange.retry"
     public static let exchangeDuplicate = "exchange.duplicate"   // 멱등성 검증용 — 아티클 #2
-
-    public static let signalCreated = "signal.created"
-    public static let signalJoined = "signal.joined"
-    public static let signalFulfilled = "signal.fulfilled"        // 정원 충족
-    public static let signalExpired = "signal.expired"
-    public static let pushReceived = "push.received"
 
     public static let syncQueued = "sync.queued"
     public static let syncUploaded = "sync.uploaded"

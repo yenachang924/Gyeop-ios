@@ -1,6 +1,6 @@
 import Foundation
 
-/// 저장 계약. 도메인·UI는 이 프로토콜만 안다 — SwiftData/Firebase는 DataKit 안에 갇힌다.
+/// 저장 계약. 도메인·UI는 이 프로토콜만 안다 — SwiftData는 DataKit 안에 갇힌다.
 ///
 /// 소유: DataKit 세션이 실구현(SwiftData + 이후 동기화 큐)을 제공한다.
 /// 다른 세션은 `MockGyeopRepository`로 개발한다.

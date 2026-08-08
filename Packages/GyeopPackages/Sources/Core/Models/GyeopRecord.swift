@@ -1,6 +1,6 @@
 import Foundation
 
-/// "겹" = 인증된 만남 1회. 물리적 교환(또는 신호 성사)에서만 생성된다.
+/// "겹" = 인증된 만남 1회. 물리적 교환에서만 생성된다.
 /// `id`는 `GyeopID.make`의 결정적 해시 — 양쪽 기기가 독립적으로 같은 값을 계산해
 /// 서버에서 자연스럽게 중복이 제거된다 (Telemetry.swift 참조).
 public struct GyeopRecord: Codable, Hashable, Sendable, Identifiable {
@@ -11,8 +11,6 @@ public struct GyeopRecord: Codable, Hashable, Sendable, Identifiable {
         case multipeer
         /// NearbyInteraction UWB 자동 트리거
         case uwb
-        /// 여가 신호 성사
-        case signal
     }
 
     public let id: String
