@@ -35,6 +35,14 @@ public enum DS {
         public static let background = Color.gray.opacity(0.1)
         public static let surface = Color.gray.opacity(0.05)
         #endif
+
+        /// 성사·완료 상태. 겹은 "거절이 성립하지 않는 구조"라 실패를 경고색으로 담지 않는다 —
+        /// 성사만 액센트로 축하하고, 대기·실패는 전부 중립(secondaryText)으로 처리한다.
+        public static let success = accent
+        /// 대기·진행중 상태
+        public static let pending = secondaryText
+        /// 실패 상태(타임아웃·연결 끊김) — 거절이 아니므로 경고색을 쓰지 않는다.
+        public static let failure = secondaryText
     }
 
     /// 전부 시스템 텍스트 스타일 매핑 — Dynamic Type 자동 대응
@@ -43,6 +51,29 @@ public enum DS {
         public static let title = Font.title2.weight(.semibold)
         public static let headline = Font.headline
         public static let body = Font.body
+        /// 제목 아래 보조 설명 한 줄 (예: 시간·정원 요약)
+        public static let subheadline = Font.subheadline
+        /// 타임스탬프 등 가장 낮은 위계의 부가 정보
+        public static let footnote = Font.footnote
         public static let caption = Font.caption
+        /// D-day 등 상시 노출되는 카운터 숫자 — Weather/Fitness/Screen Time처럼 Rounded 디자인,
+        /// monospacedDigit으로 자릿수 변화에도 레이아웃이 흔들리지 않는다.
+        public static let counter = Font.system(.title, design: .rounded).weight(.heavy).monospacedDigit()
+    }
+
+    /// 상태 전환 애니메이션 프리셋. 시스템 시트·탭 전환과 같은 계열의 스프링을 재사용해
+    /// 커스텀 이징이 이곳저곳에서 제각각 나타나지 않게 한다. Reduce Motion은 호출부에서
+    /// `accessibilityReduceMotion` 확인 후 `.linear`/`nil`로 대체한다.
+    public enum Motion {
+        /// 카드 도착·매칭 성사처럼 "축하할 만한" 전환 — 살짝 튕긴다.
+        public static let standard = Animation.spring(response: 0.35, dampingFraction: 0.8)
+        /// 버튼·토글처럼 잦고 가벼운 반응 — 거의 안 튕긴다.
+        public static let quick = Animation.spring(response: 0.2, dampingFraction: 0.9)
+    }
+
+    /// 시스템 컨트롤(Button 등)은 `.disabled(true)`에서 자동으로 흐려지므로 이 토큰이 필요 없다.
+    /// 커스텀 합성 뷰는 `.disabled()`가 상호작용만 막고 겉모습은 그대로라, 직접 흐려줄 때 이 값을 쓴다.
+    public enum Opacity {
+        public static let disabled: Double = 0.4
     }
 }
