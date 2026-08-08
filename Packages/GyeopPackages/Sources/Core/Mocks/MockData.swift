@@ -6,13 +6,6 @@ public enum MockData {
     /// 기준 시각: 2026-08-01 00:00 KST 부근 (고정)
     public static let referenceDate = Date(timeIntervalSince1970: 1_785_000_000)
 
-    /// 4기 시즌 (수료일까지 D-day 계산의 기준)
-    public static let season = Season(
-        name: "Apple Developer Academy 4기",
-        startDate: Date(timeIntervalSince1970: 1_772_000_000),
-        endDate: Date(timeIntervalSince1970: 1_797_600_000)
-    )
-
     public static let sampleProfiles: [UserProfile] = [
         UserProfile(
             id: "user-haram",

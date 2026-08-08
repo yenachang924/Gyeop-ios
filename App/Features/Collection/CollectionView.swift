@@ -3,7 +3,7 @@ import Core
 import DesignSystem
 import SwiftUI
 
-/// 컬렉션 — 내 카드 + 겹에서 받은 카드들. 수료 D-day가 상단에 흐른다 (시즌 시계).
+/// 컬렉션 — 내 카드 + 겹에서 받은 카드들.
 struct CollectionView: View {
     @Environment(AppModel.self) private var model
     @State private var selectedCard: CardSnapshot?
@@ -14,8 +14,6 @@ struct CollectionView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: DS.Spacing.l) {
-                    seasonHeader
-
                     if let myCard = model.myCard {
                         myCardSection(myCard)
                     }
@@ -56,22 +54,6 @@ struct CollectionView: View {
                 SettingsView()
             }
         }
-    }
-
-    private var seasonHeader: some View {
-        let dDay = model.season.daysRemaining(from: .now)
-        return HStack(spacing: DS.Spacing.s) {
-            Text("수료까지 D-\(dDay)")
-                .font(DS.Typo.headline)
-            Spacer()
-            Text("겹 \(model.gyeops.count)회")
-                .font(DS.Typo.headline)
-                .foregroundStyle(DS.Palette.accent)
-        }
-        .padding(DS.Spacing.m)
-        .background(DS.Palette.surface, in: RoundedRectangle(cornerRadius: DS.Radius.chip))
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("수료까지 \(dDay)일, 겹 \(model.gyeops.count)회")
     }
 
     private func myCardSection(_ card: CardSnapshot) -> some View {

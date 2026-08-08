@@ -28,23 +28,3 @@ public struct GyeopRecord: Codable, Hashable, Sendable, Identifiable {
         self.occurredAt = occurredAt
     }
 }
-
-/// 기수(시즌). 수료 D-day가 앱의 시계다 — 유한함의 상시 노출.
-public struct Season: Codable, Hashable, Sendable {
-    public let name: String
-    public let startDate: Date
-    public let endDate: Date
-
-    public init(name: String, startDate: Date, endDate: Date) {
-        self.name = name
-        self.startDate = startDate
-        self.endDate = endDate
-    }
-
-    /// 수료까지 남은 일수 (수료일 당일 = 0)
-    public func daysRemaining(from date: Date, calendar: Calendar = .current) -> Int {
-        let from = calendar.startOfDay(for: date)
-        let to = calendar.startOfDay(for: endDate)
-        return calendar.dateComponents([.day], from: from, to: to).day ?? 0
-    }
-}

@@ -21,8 +21,6 @@ final class AppModel {
     private(set) var myCard: CardSnapshot?
     private(set) var gyeops: [GyeopRecord] = []
 
-    let season = MockData.season
-
     private let cardGenerator: any CardGenerating
     private let repository: any GyeopRepository
     /// 교환 세션 팩토리 — 판마다 새 세션. 실기기는 MPC, 시뮬레이터·프리뷰는 Mock.
