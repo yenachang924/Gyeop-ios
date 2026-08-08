@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- App Clip → 본앱 마이그레이션 공유 컨테이너 (AppClip.entitlements와 동일 그룹) -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.gyeop.app</string>
+	</array>
+	<!-- 자리 표시 도메인 — 실도메인은 소유자 결정 후 교체 (docs/device-required.md) -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:PLACEHOLDER.gyeop.example</string>
+		<string>appclips:PLACEHOLDER.gyeop.example</string>
+	</array>
+</dict>
+</plist>

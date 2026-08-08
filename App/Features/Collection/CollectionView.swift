@@ -7,6 +7,8 @@ import SwiftUI
 struct CollectionView: View {
     @Environment(AppModel.self) private var model
     @State private var selectedCard: CardSnapshot?
+    @State private var showingExchange = false
+    @State private var showingSettings = false
 
     var body: some View {
         NavigationStack {
@@ -24,8 +26,34 @@ struct CollectionView: View {
             }
             .background(DS.Palette.background)
             .navigationTitle("컬렉션")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showingSettings = true
+                    } label: {
+                        Label("설정", systemImage: "gearshape")
+                    }
+                    .accessibilityIdentifier("collection.settings")
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        showingExchange = true
+                    } label: {
+                        Label("맞대기", systemImage: "person.line.dotted.person.fill")
+                    }
+                    .accessibilityIdentifier("collection.exchange")
+                }
+            }
             .sheet(item: $selectedCard) { card in
                 CardDetailView(card: card, myCard: model.myCard)
+            }
+            .sheet(isPresented: $showingExchange, onDismiss: {
+                Task { await model.enterCollection() }
+            }) {
+                ExchangeView()
+            }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
             }
         }
     }

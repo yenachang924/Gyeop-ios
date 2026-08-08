@@ -17,6 +17,8 @@ settings:
 packages:
   GyeopPackages:
     path: Packages/GyeopPackages
+  AppClipKit:
+    path: AppClip/AppClipKit
 
 targets:
   Gyeop:
@@ -27,15 +29,24 @@ targets:
     dependencies:
       - package: GyeopPackages
         products: [Core, DesignSystem, CardKit, GyeopKit, DataKit]
+      - target: GyeopClip
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.gyeop.app
-        GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: 겹
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
-        SUPPORTED_INTERFACE_ORIENTATIONS_IPHONE: UIInterfaceOrientationPortrait
         TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_ENTITLEMENTS: App/Support/Gyeop.entitlements
+    info:
+      path: App/Support/Info.plist
+      properties:
+        CFBundleDisplayName: 겹
+        UILaunchScreen: {}
+        # MPC 로컬 네트워크 권한 (실기기 맞대기) — 서비스명은 GyeopKit ExchangeConstants.serviceType
+        NSLocalNetworkUsageDescription: 근처 러너와 아이폰을 맞대 카드를 교환하려면 로컬 네트워크 접근이 필요합니다.
+        NSBonjourServices: [_gyeop-exchange._tcp, _gyeop-exchange._udp]
+        ITSAppUsesNonExemptEncryption: false
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
 
   GyeopUITests:
     type: bundle.ui-testing
@@ -50,18 +61,31 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: Gyeop
 
-  # --- AppClip (자리) ---
-  # Developer Program 세팅 후 S6이 활성화한다. AppClip/README.md 참조.
-  # GyeopClip:
-  #   type: application.on-demand-install-capable
-  #   platform: iOS
-  #   sources: [AppClip]
-  #   dependencies:
-  #     - package: GyeopPackages
-  #       products: [Core, DesignSystem, CardKit]
-  #   settings:
-  #     base:
-  #       PRODUCT_BUNDLE_IDENTIFIER: com.gyeop.app.Clip
+  # AppClip — 도메인은 자리 표시(PLACEHOLDER.gyeop.example), 실도메인 확정 시 entitlements 교체
+  GyeopClip:
+    type: application.on-demand-install-capable
+    platform: iOS
+    sources: [AppClip/App]
+    dependencies:
+      - package: GyeopPackages
+        products: [Core, DesignSystem, CardKit]
+      - package: AppClipKit
+        products: [AppClipKit]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.gyeop.app.Clip
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_ENTITLEMENTS: AppClip/App/AppClip.entitlements
+    info:
+      path: AppClip/App/Info.plist
+      properties:
+        CFBundleDisplayName: 겹 클립
+        UILaunchScreen: {}
+        ITSAppUsesNonExemptEncryption: false
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        NSAppClip:
+          NSAppClipRequestEphemeralUserNotification: false
+          NSAppClipRequestLocationConfirmation: false
 
 schemes:
   Gyeop:

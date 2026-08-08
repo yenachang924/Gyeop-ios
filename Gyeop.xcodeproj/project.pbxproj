@@ -8,12 +8,19 @@
 
 /* Begin PBXBuildFile section */
 		0C5F8F682F8F459D586F288E /* InterestsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77762B5D57F8BEB9881E4F14 /* InterestsStepView.swift */; };
+		17DD98D19E804442087A10EE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BB9415FD921160F6E33BDE5 /* SettingsView.swift */; };
 		1BE36991EDB07D9F8D8F695D /* StyleStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FA8444B0DB1FC4BBA71E12 /* StyleStepView.swift */; };
 		3141FDC6408BA41C1F32BBF8 /* emoji-icons.csv in Resources */ = {isa = PBXBuildFile; fileRef = EE5F0DB1E684956C240C7993 /* emoji-icons.csv */; };
+		3191FDA00910CD022ACCC193 /* CardKit in Frameworks */ = {isa = PBXBuildFile; productRef = CCA957920C427472008FB9E4 /* CardKit */; };
+		348E0B6EB13908037F956664 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF396ED85073133240235C7A /* WelcomeView.swift */; };
+		56F8704BC3A29AC15159ADC5 /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = C624FB5B92E45527785D84F5 /* Core */; };
+		58D46EA90DB166CF49C524DB /* GyeopClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = 8B25C63ADE80AD156FF1590D /* GyeopClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5D509A29E200FB2EE6BD26DD /* CardDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A315153ABBD0D3E154457254 /* CardDetailView.swift */; };
+		61AF2EDDE559D5AF86611CC2 /* ExchangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E760C13518A80D90639DEC4B /* ExchangeView.swift */; };
 		6CDE9AAA490BD44344B255C5 /* DataKit in Frameworks */ = {isa = PBXBuildFile; productRef = E5924117A6E01668E7DD321B /* DataKit */; };
 		6FC98FEFE4E15491EFC922D5 /* CardKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6B5D611A45CD9734335D6DC0 /* CardKit */; };
 		7C3FCB18EC57B9D6A053F2FD /* OnboardingFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF3A254426E2CC7FEE77275 /* OnboardingFlowUITests.swift */; };
+		8459442DB39B3ED3381C2782 /* AppClipKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2F43C72A773AFE690AE72A56 /* AppClipKit */; };
 		85FE6DACB5D7B9031AC44C06 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD63AB1680EBD8241FB337D /* AppModel.swift */; };
 		911B838843CD755B11384B7E /* ProfileStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B532C58FBE7B2E92053F29 /* ProfileStepView.swift */; };
 		A2029DF635635C6E6BD0E03B /* EmojiCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4B1EA1770D8AE18ED44731 /* EmojiCatalog.swift */; };
@@ -23,8 +30,10 @@
 		CA2EC43AA355E8511F0FCFF7 /* GyeopKit in Frameworks */ = {isa = PBXBuildFile; productRef = 83E8E335BB8635ECB9DA9439 /* GyeopKit */; };
 		D182DE960D0EA71A5C5E2BE3 /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = D602563F4F418C874E302642 /* Core */; };
 		D2A9F6636C1E41DC29A1863E /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE100902A9F49506C6D2A50 /* OnboardingFlowView.swift */; };
+		D8BBD02EB328DCF238743E87 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 91C41E5E7F91A062F0610DAD /* DesignSystem */; };
 		E8FD3EB8967292E2A1C68E51 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C7C9C994FD97CF40E62B6319 /* Assets.xcassets */; };
 		F66944B889FA9929FEC23B41 /* CollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 863A4BB1552A39DBD063E27E /* CollectionView.swift */; };
+		F9A9158551F6C392A5B0448D /* AppClipApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C754AAF26F03ED129DC0A3D1 /* AppClipApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,24 +44,55 @@
 			remoteGlobalIDString = B1083FE0C382C899D4BEC2C1;
 			remoteInfo = Gyeop;
 		};
+		22F6E79C5117A77E6B8B3D65 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A33CB8CED062E3DE3233310F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E89A9007526AD57464586023;
+			remoteInfo = GyeopClip;
+		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		A18A9F26529B53EF57EE9065 /* Embed App Clips */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/AppClips";
+			dstSubfolderSpec = 16;
+			files = (
+				58D46EA90DB166CF49C524DB /* GyeopClip.app in Embed App Clips */,
+			);
+			name = "Embed App Clips";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		040CA6E8AD22284574773BEE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		0FF3A254426E2CC7FEE77275 /* OnboardingFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowUITests.swift; sourceTree = "<group>"; };
 		18B40EEA992A9D7F9C8781BE /* CardRevealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardRevealView.swift; sourceTree = "<group>"; };
 		2B4B1EA1770D8AE18ED44731 /* EmojiCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiCatalog.swift; sourceTree = "<group>"; };
 		3F61AB8788D0608FCA8CD1F6 /* GyeopPackages */ = {isa = PBXFileReference; lastKnownFileType = folder; name = GyeopPackages; path = Packages/GyeopPackages; sourceTree = SOURCE_ROOT; };
 		42DA513B14E1385CA8F5209F /* Gyeop.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Gyeop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		77762B5D57F8BEB9881E4F14 /* InterestsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterestsStepView.swift; sourceTree = "<group>"; };
+		7BB9415FD921160F6E33BDE5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		863A4BB1552A39DBD063E27E /* CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionView.swift; sourceTree = "<group>"; };
 		8AE100902A9F49506C6D2A50 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
+		8B25C63ADE80AD156FF1590D /* GyeopClip.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = GyeopClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		96FA8444B0DB1FC4BBA71E12 /* StyleStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyleStepView.swift; sourceTree = "<group>"; };
 		A315153ABBD0D3E154457254 /* CardDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDetailView.swift; sourceTree = "<group>"; };
 		ABD63AB1680EBD8241FB337D /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		B550F47054049C5FFB88305E /* AppClipKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AppClipKit; path = AppClip/AppClipKit; sourceTree = SOURCE_ROOT; };
+		C754AAF26F03ED129DC0A3D1 /* AppClipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppClipApp.swift; sourceTree = "<group>"; };
 		C7C9C994FD97CF40E62B6319 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CF54E2B1267F18D983CEDFF5 /* GyeopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GyeopApp.swift; sourceTree = "<group>"; };
+		D097092EBED5A441532FA073 /* Gyeop.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Gyeop.entitlements; sourceTree = "<group>"; };
+		DC80FB69DB55CB461315692F /* AppClip.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AppClip.entitlements; sourceTree = "<group>"; };
+		DF396ED85073133240235C7A /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		E16E99F9D82C3109EA3DA8DF /* GyeopUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = GyeopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E760C13518A80D90639DEC4B /* ExchangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeView.swift; sourceTree = "<group>"; };
 		EE5F0DB1E684956C240C7993 /* emoji-icons.csv */ = {isa = PBXFileReference; path = "emoji-icons.csv"; sourceTree = "<group>"; };
+		F1208475C4EFF7B6D64C97F8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		F2B532C58FBE7B2E92053F29 /* ProfileStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileStepView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -69,6 +109,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		365D9F844663016C4DB6B7F5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56F8704BC3A29AC15159ADC5 /* Core in Frameworks */,
+				D8BBD02EB328DCF238743E87 /* DesignSystem in Frameworks */,
+				3191FDA00910CD022ACCC193 /* CardKit in Frameworks */,
+				8459442DB39B3ED3381C2782 /* AppClipKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -82,6 +133,32 @@
 				DBA7FCB8D5110766E2534FB1 /* Support */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		1F40A2945B0AEA87DB69D822 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				DC80FB69DB55CB461315692F /* AppClip.entitlements */,
+				C754AAF26F03ED129DC0A3D1 /* AppClipApp.swift */,
+				040CA6E8AD22284574773BEE /* Info.plist */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		38279B40C44F9A69F7A23017 /* AppClip */ = {
+			isa = PBXGroup;
+			children = (
+				1F40A2945B0AEA87DB69D822 /* App */,
+			);
+			path = AppClip;
+			sourceTree = "<group>";
+		};
+		3B85A437294996B7732A2EE0 /* Exchange */ = {
+			isa = PBXGroup;
+			children = (
+				E760C13518A80D90639DEC4B /* ExchangeView.swift */,
+			);
+			path = Exchange;
 			sourceTree = "<group>";
 		};
 		5A78AF997BD3593307349492 /* Onboarding */ = {
@@ -107,6 +184,7 @@
 			isa = PBXGroup;
 			children = (
 				1B1726DE063F9BF5B10728D6 /* App */,
+				38279B40C44F9A69F7A23017 /* AppClip */,
 				FE78D579BCC3BDB7B56F4196 /* Packages */,
 				5F0F4ECA5D998277C9F41044 /* UITests */,
 				E0767528812078E963BEACE8 /* Products */,
@@ -120,6 +198,14 @@
 				EE5F0DB1E684956C240C7993 /* emoji-icons.csv */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		95A260D73E7EBB945DC298C1 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				7BB9415FD921160F6E33BDE5 /* SettingsView.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		A2353F63659F93E459100718 /* Collection */ = {
@@ -139,10 +225,20 @@
 			path = Card;
 			sourceTree = "<group>";
 		};
+		B54281AF94BAFFB64C43CCD3 /* Welcome */ = {
+			isa = PBXGroup;
+			children = (
+				DF396ED85073133240235C7A /* WelcomeView.swift */,
+			);
+			path = Welcome;
+			sourceTree = "<group>";
+		};
 		DBA7FCB8D5110766E2534FB1 /* Support */ = {
 			isa = PBXGroup;
 			children = (
 				2B4B1EA1770D8AE18ED44731 /* EmojiCatalog.swift */,
+				D097092EBED5A441532FA073 /* Gyeop.entitlements */,
+				F1208475C4EFF7B6D64C97F8 /* Info.plist */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -151,6 +247,7 @@
 			isa = PBXGroup;
 			children = (
 				42DA513B14E1385CA8F5209F /* Gyeop.app */,
+				8B25C63ADE80AD156FF1590D /* GyeopClip.app */,
 				E16E99F9D82C3109EA3DA8DF /* GyeopUITests.xctest */,
 			);
 			name = Products;
@@ -161,7 +258,10 @@
 			children = (
 				B29E17FE253BB1B6015200CD /* Card */,
 				A2353F63659F93E459100718 /* Collection */,
+				3B85A437294996B7732A2EE0 /* Exchange */,
 				5A78AF997BD3593307349492 /* Onboarding */,
+				95A260D73E7EBB945DC298C1 /* Settings */,
+				B54281AF94BAFFB64C43CCD3 /* Welcome */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -169,6 +269,7 @@
 		FE78D579BCC3BDB7B56F4196 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
+				B550F47054049C5FFB88305E /* AppClipKit */,
 				3F61AB8788D0608FCA8CD1F6 /* GyeopPackages */,
 			);
 			path = Packages;
@@ -202,10 +303,12 @@
 				51E6E47E7A236930211B18B5 /* Sources */,
 				6672362FBD1457E8CDBB6E65 /* Resources */,
 				2D51D19841A255895CF13003 /* Frameworks */,
+				A18A9F26529B53EF57EE9065 /* Embed App Clips */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				64ADA76138D9EED527BF5B46 /* PBXTargetDependency */,
 			);
 			name = Gyeop;
 			packageProductDependencies = (
@@ -218,6 +321,28 @@
 			productName = Gyeop;
 			productReference = 42DA513B14E1385CA8F5209F /* Gyeop.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E89A9007526AD57464586023 /* GyeopClip */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 47847C08AE8B431FF3C62624 /* Build configuration list for PBXNativeTarget "GyeopClip" */;
+			buildPhases = (
+				C1D1374410D660D743D7D83B /* Sources */,
+				365D9F844663016C4DB6B7F5 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GyeopClip;
+			packageProductDependencies = (
+				C624FB5B92E45527785D84F5 /* Core */,
+				91C41E5E7F91A062F0610DAD /* DesignSystem */,
+				CCA957920C427472008FB9E4 /* CardKit */,
+				2F43C72A773AFE690AE72A56 /* AppClipKit */,
+			);
+			productName = GyeopClip;
+			productReference = 8B25C63ADE80AD156FF1590D /* GyeopClip.app */;
+			productType = "com.apple.product-type.application.on-demand-install-capable";
 		};
 /* End PBXNativeTarget section */
 
@@ -235,6 +360,9 @@
 					B1083FE0C382C899D4BEC2C1 = {
 						ProvisioningStyle = Automatic;
 					};
+					E89A9007526AD57464586023 = {
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 5155717B36DDC33D6C74F796 /* Build configuration list for PBXProject "Gyeop" */;
@@ -247,6 +375,7 @@
 			mainGroup = 7A7D6F9F7856367F2F1C3D60;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				341B13FF769085C92655B812 /* XCLocalSwiftPackageReference "AppClip/AppClipKit" */,
 				335C233A92918A93F301AB5B /* XCLocalSwiftPackageReference "Packages/GyeopPackages" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -256,6 +385,7 @@
 			targets = (
 				B1083FE0C382C899D4BEC2C1 /* Gyeop */,
 				7D8AB88A1F8880EF555C7B69 /* GyeopUITests */,
+				E89A9007526AD57464586023 /* GyeopClip */,
 			);
 		};
 /* End PBXProject section */
@@ -282,11 +412,22 @@
 				C83929052B6621691135B5BE /* CardRevealView.swift in Sources */,
 				F66944B889FA9929FEC23B41 /* CollectionView.swift in Sources */,
 				A2029DF635635C6E6BD0E03B /* EmojiCatalog.swift in Sources */,
+				61AF2EDDE559D5AF86611CC2 /* ExchangeView.swift in Sources */,
 				AD283490731BEF482F78C764 /* GyeopApp.swift in Sources */,
 				0C5F8F682F8F459D586F288E /* InterestsStepView.swift in Sources */,
 				D2A9F6636C1E41DC29A1863E /* OnboardingFlowView.swift in Sources */,
 				911B838843CD755B11384B7E /* ProfileStepView.swift in Sources */,
+				17DD98D19E804442087A10EE /* SettingsView.swift in Sources */,
 				1BE36991EDB07D9F8D8F695D /* StyleStepView.swift in Sources */,
+				348E0B6EB13908037F956664 /* WelcomeView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1D1374410D660D743D7D83B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9A9158551F6C392A5B0448D /* AppClipApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -306,9 +447,29 @@
 			target = B1083FE0C382C899D4BEC2C1 /* Gyeop */;
 			targetProxy = 188B55BC40B8E6260417DB22 /* PBXContainerItemProxy */;
 		};
+		64ADA76138D9EED527BF5B46 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E89A9007526AD57464586023 /* GyeopClip */;
+			targetProxy = 22F6E79C5117A77E6B8B3D65 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		0D03E57FA918B0C25208C10B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = AppClip/App/AppClip.entitlements;
+				INFOPLIST_FILE = AppClip/App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gyeop.app.Clip;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
 		36A18D70856F1BC10230FFF8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -373,16 +534,30 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = App/Support/Gyeop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "겹";
+				INFOPLIST_FILE = App/Support/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.gyeop.app;
 				SDKROOT = iphoneos;
-				SUPPORTED_INTERFACE_ORIENTATIONS_IPHONE = UIInterfaceOrientationPortrait;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		737B18CF55963740E05B92D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = AppClip/App/AppClip.entitlements;
+				INFOPLIST_FILE = AppClip/App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gyeop.app.Clip;
+				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
@@ -492,16 +667,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = App/Support/Gyeop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "겹";
+				INFOPLIST_FILE = App/Support/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.gyeop.app;
 				SDKROOT = iphoneos;
-				SUPPORTED_INTERFACE_ORIENTATIONS_IPHONE = UIInterfaceOrientationPortrait;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
@@ -514,6 +688,15 @@
 			buildConfigurations = (
 				ABE51A4C9EB6C8B98076CE98 /* Debug */,
 				9B9954347CFA4FA6F89DE563 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		47847C08AE8B431FF3C62624 /* Build configuration list for PBXNativeTarget "GyeopClip" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0D03E57FA918B0C25208C10B /* Debug */,
+				737B18CF55963740E05B92D0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -543,12 +726,20 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/GyeopPackages;
 		};
+		341B13FF769085C92655B812 /* XCLocalSwiftPackageReference "AppClip/AppClipKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = AppClip/AppClipKit;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		26CBD19128079A45A2709B14 /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DesignSystem;
+		};
+		2F43C72A773AFE690AE72A56 /* AppClipKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppClipKit;
 		};
 		6B5D611A45CD9734335D6DC0 /* CardKit */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -557,6 +748,18 @@
 		83E8E335BB8635ECB9DA9439 /* GyeopKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = GyeopKit;
+		};
+		91C41E5E7F91A062F0610DAD /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DesignSystem;
+		};
+		C624FB5B92E45527785D84F5 /* Core */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Core;
+		};
+		CCA957920C427472008FB9E4 /* CardKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CardKit;
 		};
 		D602563F4F418C874E302642 /* Core */ = {
 			isa = XCSwiftPackageProductDependency;

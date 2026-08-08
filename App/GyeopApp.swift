@@ -23,6 +23,8 @@ struct RootView: View {
             switch model.stage {
             case .loading:
                 ProgressView()
+            case .signIn:
+                WelcomeView()
             case .onboarding:
                 OnboardingFlowView()
             case .home:

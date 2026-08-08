@@ -42,9 +42,15 @@ final class OnboardingFlowUITests: XCTestCase {
         XCTAssertTrue(toCollection.waitForExistence(timeout: 5))
         toCollection.tap()
 
-        // 컬렉션 도착 + 목업 겹 카드 존재
+        // 컬렉션 도착 (첫 진입은 빈 상태 — 데모 시딩 제거됨)
         XCTAssertTrue(app.navigationBars["컬렉션"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["collection.myCard"].waitForExistence(timeout: 5))
+
+        // 맞대기 — 시뮬레이터는 MockExchangeSession 스크립트가 겹을 성립시킨다
+        app.buttons["collection.exchange"].tap()
+        let exchangeDone = app.buttons["exchange.done"]
+        XCTAssertTrue(exchangeDone.waitForExistence(timeout: 15))
+        exchangeDone.tap()
 
         // 받은 카드 탭 → 상세 시트 → 닫기 (LazyVGrid는 화면 밖 요소를 만들지 않으므로 스크롤)
         let received = app.buttons["collection.card.하람"]
