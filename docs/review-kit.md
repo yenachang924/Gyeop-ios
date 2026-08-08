@@ -45,11 +45,16 @@ ASC에는 7장 이내 큐레이션(1·2·4·5·7·8·9번 권장).
 
 ## 4. App Clip 경험 등록 (App Store Connect)
 
-⏳ 선행 대기: **어소시에이티드 도메인 실도메인 확정** + **헤더 이미지(D2 산출물)**.
+✅ **헤더 이미지 준비됨** — `docs/assets/appclip-header.png` (1800×1200px). POSTECH 팔레트
+스테인글라스 로즈윈도우 + 중앙에 겹치는 두 카드를 레드 글라스로 형상화. 재생성/조정은
+`docs/assets/appclip-header-generate.swift`를 `swift appclip-header-generate.swift <출력경로>`로
+실행(CoreGraphics 절차적 렌더 — 팔레트·판 개수·비네트 세기 등 스크립트 상단에서 조정 가능).
 
-등록 절차 (도메인·이미지 준비 후):
+⏳ 선행 대기: **어소시에이티드 도메인 실도메인 확정**.
+
+등록 절차 (도메인 확정 후):
 1. App Store Connect > 앱 > App Clip > 기본 경험 설정
-   - 헤더 이미지: 1800×1200px, D2 산출물 (⏳)
+   - 헤더 이미지: `docs/assets/appclip-header.png` ✅
    - 부제·액션 문구: "카드 맞대고 겹 쌓기" / 액션 "열기"
 2. 고급 경험(초대 URL): `https://<실도메인>/clip?inviter=<runnerID>` — `InvocationURLParser`가
    `inviter` 파라미터를 해석한다 (AppClipKit 테스트로 검증됨).

@@ -29,7 +29,7 @@
 - [ ] 🔧 스크린샷 업로드 — 6.9" 10장 `docs/screenshots/` 준비됨, ASC 업로드만 남음 (review-kit.md §1)
 - [ ] 🔧 개인정보 처리방침 게시 (docs/privacy-policy.md → 공개 URL) + 라벨 "수집 안 함"
 - [ ] 🔧 리뷰 노트 + 시연 영상 URL (review-kit.md §3 초안)
-- [ ] ⏳ App Clip 경험 등록 — **헤더 이미지(D2 산출물)** + **실도메인·AASA** 대기 (review-kit.md §4)
+- [ ] ⏳ App Clip 경험 등록 — 헤더 이미지 ✅ 준비됨(`docs/assets/appclip-header.png`), **실도메인·AASA** 대기 (review-kit.md §4)
 - [ ] ⏳ entitlements PLACEHOLDER.gyeop.example → 실도메인 교체 후 재빌드
 - [ ] 🔲 Archive → TestFlight 업로드 → 제출
 
@@ -39,9 +39,9 @@
 |---|---|---|---|
 | 1 | **MPC 실기기 미검증** — 상태 머신은 단위 테스트만 통과 | 심사 중 핵심 기능 불능 시 리젝 | 제출 전 실기기 세션 필수 (B 전부) |
 | 2 | **어소시에이티드 도메인 미확정** — entitlements가 자리 표시 | App Clip 경험 등록 불가, 자리 표시 도메인은 서명·검증 실패 | 도메인 확정까지 App Clip을 1차 제출에서 빼는 선택지 검토 (project.yml에서 GyeopClip 의존 제거는 1줄) |
-| 3 | App Clip 헤더 이미지 D2 산출물 대기 | App Clip 경험 등록 지연 | 본앱 먼저 제출, 클립은 후속 업데이트 가능 |
-| 4 | 아카데미 이메일 검증 미구현 (스펙 ⑤ Lv2의 일부) | 폐쇄형 커뮤니티 보장 없음 — 제품 결정 필요 | 서버 없이는 불가. v1은 개방형으로 제출하고 리뷰 노트에 명시 |
-| 5 | SIWA 토큰을 로컬 검증 없이 저장 (서버 부재로 검증 불가) | 보안상 실해는 없음(로컬 전용), 심사 이슈 아님 | 서버 도입 시 검증 추가 |
-| 6 | 시즌(수료 D-day)이 MockData.season 고정 | 실제 기수 날짜와 불일치 | 제출 전 Core MockData.season 값을 실기수로 갱신 (1줄) |
-| 7 | 온보딩 카피·emoji CSV가 스펙 기반 임시본 | 원본 프로토타입과 차이 가능 | 원본 수급 시 교체 (memory: missing-prototype-assets) |
-| 8 | 앱 아이콘 리소스 확인 필요 (Assets에 AppIcon 슬롯만 있을 수 있음) | 아이콘 없으면 업로드 리젝 | 제출 전 1024px 아이콘 필수 확인 |
+| 3 | 아카데미 이메일 검증 미구현 (스펙 ⑤ Lv2의 일부) | 폐쇄형 커뮤니티 보장 없음 — 제품 결정 필요 | 서버 없이는 불가. v1은 개방형으로 제출하고 리뷰 노트에 명시 |
+| 4 | SIWA 토큰을 로컬 검증 없이 저장 (서버 부재로 검증 불가) | 보안상 실해는 없음(로컬 전용), 심사 이슈 아님 | 서버 도입 시 검증 추가 |
+| 5 | 시즌(수료 D-day)이 MockData.season 고정 | 실제 기수 날짜와 불일치 | 제출 전 Core MockData.season 값을 실기수로 갱신 (1줄) |
+| 6 | 온보딩 카피·emoji CSV가 스펙 기반 임시본 | 원본 프로토타입과 차이 가능 | 원본 수급 시 교체 (memory: missing-prototype-assets) |
+| 7 | 앱 아이콘 리소스 확인 필요 (Assets에 AppIcon 슬롯만 있을 수 있음) | 아이콘 없으면 업로드 리젝 | 제출 전 1024px 아이콘 필수 확인 |
+| 8 | Dynamic Type 접근성 확대(AX1~5)를 앱 전체에서 제거 (이번 세션 제품 결정, `.dynamicTypeSize(...xxxLarge)`) | 저시력 등 접근성 확대 사용자는 큰 텍스트를 못 씀 — HIG 권고 위반이나 심사 거절 사유는 아님 | 의도된 제품 결정으로 기록. 재도입 원하면 `App/GyeopApp.swift`의 해당 modifier만 제거 |

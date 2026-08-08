@@ -1,0 +1,1013 @@
+<title>겹 — 인터랙티브 프로토타입 v0.1</title>
+<style>
+  :root {
+    --bg: #F2F4EF;
+    --bg-raised: #FFFFFF;
+    --bg-inset: #E9ECE3;
+    --ink: #14181B;
+    --ink-soft: #4A5450;
+    --ink-faint: #7C867E;
+    --line: #C6CDBF;
+    --line-soft: #DEE3D6;
+    --accent-a: #33518F;
+    --accent-a-soft: #DCE3F1;
+    --accent-b: #B96F1F;
+    --accent-b-soft: #F1E2CD;
+    --accent-g: #66783A;
+    --accent-g-soft: #E1E7CC;
+    --shadow: 0 1px 0 rgba(20,24,27,0.04), 0 8px 24px -16px rgba(20,24,27,0.25);
+
+    --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+                 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
+    --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+    /* 폰 내부(in-world iOS) 토큰 — 페이지 테마와 무관하게 고정 */
+    --ios-bg: #F2F2F7;
+    --ios-card: #FFFFFF;
+    --ios-ink: #111114;
+    --ios-ink2: #6C6C72;
+    --ios-line: #E3E3E8;
+    --ios-btn: #17171A;
+
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171A; --bg-raised: #1B1F20; --bg-inset: #1F2422;
+      --ink: #ECEFEA; --ink-soft: #A9B2AA; --ink-faint: #6E7873;
+      --line: #333B35; --line-soft: #262C27;
+      --accent-a: #7C9BE5; --accent-a-soft: #212B42;
+      --accent-b: #E3A455; --accent-b-soft: #382A17;
+      --accent-g: #A3BD5E; --accent-g-soft: #2A311C;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14171A; --bg-raised: #1B1F20; --bg-inset: #1F2422;
+    --ink: #ECEFEA; --ink-soft: #A9B2AA; --ink-faint: #6E7873;
+    --line: #333B35; --line-soft: #262C27;
+    --accent-a: #7C9BE5; --accent-a-soft: #212B42;
+    --accent-b: #E3A455; --accent-b-soft: #382A17;
+    --accent-g: #A3BD5E; --accent-g-soft: #2A311C;
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --bg: #F2F4EF; --bg-raised: #FFFFFF; --bg-inset: #E9ECE3;
+    --ink: #14181B; --ink-soft: #4A5450; --ink-faint: #7C867E;
+    --line: #C6CDBF; --line-soft: #DEE3D6;
+    --accent-a: #33518F; --accent-a-soft: #DCE3F1;
+    --accent-b: #B96F1F; --accent-b-soft: #F1E2CD;
+    --accent-g: #66783A; --accent-g-soft: #E1E7CC;
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-sans); font-size: 0.9375rem; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-g-soft); color: var(--ink); }
+  a { color: var(--accent-a); }
+  button:focus-visible, input:focus-visible, a:focus-visible {
+    outline: 2px solid var(--accent-g); outline-offset: 2px;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 72px; }
+
+  /* ---------- 헤더 ---------- */
+  .logomark circle:first-child { fill: var(--accent-a); }
+  .logomark circle:last-child { fill: var(--accent-b); mix-blend-mode: multiply; }
+  @media (prefers-color-scheme: dark) { .logomark circle:last-child { mix-blend-mode: screen; } }
+  :root[data-theme="dark"] .logomark circle:last-child { mix-blend-mode: screen; }
+  :root[data-theme="light"] .logomark circle:last-child { mix-blend-mode: multiply; }
+
+  header.masthead { padding: 24px 0 28px; border-bottom: 1px solid var(--line); margin-bottom: 36px; }
+  .eyebrow {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-faint);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px;
+  }
+  h1 { font-size: clamp(1.7rem, 1.3rem + 1.6vw, 2.4rem); font-weight: 700; letter-spacing: -0.01em; margin: 0 0 10px; text-wrap: balance; }
+  .lede { max-width: 64ch; color: var(--ink-soft); font-size: 1.0625rem; margin: 0 0 16px; }
+  .pivot-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 0.75rem;
+    background: var(--accent-g-soft); color: var(--accent-g);
+    border: 1px solid color-mix(in srgb, var(--accent-g) 35%, transparent);
+    padding: 5px 12px; border-radius: 999px;
+  }
+
+  /* ---------- 메인 그리드 ---------- */
+  .stage { display: grid; grid-template-columns: auto 1fr; gap: 48px; align-items: start; }
+  @media (max-width: 900px) { .stage { grid-template-columns: 1fr; gap: 32px; } }
+
+  /* ---------- iPhone 프레임 ---------- */
+  .phone-col { position: sticky; top: 24px; }
+  @media (max-width: 900px) { .phone-col { position: static; display: flex; justify-content: center; } }
+  .phone {
+    width: 375px; height: 790px; background: #0B0B0D;
+    border-radius: 54px; padding: 12px;
+    box-shadow: 0 24px 60px -24px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08) inset;
+    position: relative;
+  }
+  @media (max-width: 420px) { .phone { transform: scale(0.9); transform-origin: top center; margin-bottom: -70px; } }
+  .screen {
+    width: 100%; height: 100%; background: var(--ios-bg);
+    border-radius: 43px; overflow: hidden; position: relative;
+    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', var(--font-sans);
+    color: var(--ios-ink);
+  }
+  .island {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    width: 118px; height: 34px; background: #0B0B0D; border-radius: 20px; z-index: 40;
+  }
+  .homebar {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    width: 134px; height: 5px; background: rgba(0,0,0,0.28); border-radius: 3px; z-index: 40;
+  }
+
+  /* ---------- 앱 화면 공통 ---------- */
+  .view {
+    position: absolute; inset: 0; padding: 66px 22px 34px;
+    display: none; flex-direction: column;
+    background: var(--ios-bg);
+  }
+  .view.active { display: flex; animation: viewin 0.32s ease-out; }
+  @keyframes viewin { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .view.active { animation: none; }
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+
+  .v-title { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 6px; color: var(--ios-ink); }
+  .v-sub { font-size: 0.82rem; color: var(--ios-ink2); margin: 0 0 18px; line-height: 1.5; }
+  .spacer { flex: 1; }
+
+  .clip-pill {
+    align-self: center; display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.7rem; font-weight: 600; color: #3A6DD8;
+    background: #E8EEFB; border-radius: 999px; padding: 5px 12px; margin-bottom: 22px;
+  }
+  .clip-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: #3A6DD8; }
+
+  .btn {
+    display: block; width: 100%; border: 0; cursor: pointer;
+    background: var(--ios-btn); color: #fff;
+    font-family: inherit; font-size: 0.95rem; font-weight: 700;
+    padding: 15px; border-radius: 14px;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn[disabled] { opacity: 0.35; cursor: default; }
+  .btn.ghost { background: transparent; color: var(--ios-ink2); font-weight: 600; padding: 12px; }
+  .btn + .btn { margin-top: 6px; }
+
+  .stepdots { display: flex; gap: 5px; margin-bottom: 18px; }
+  .stepdots i { width: 22px; height: 4px; border-radius: 2px; background: #D9D9DF; }
+  .stepdots i.on { background: var(--ios-ink); }
+
+  /* ---------- 카드 비주얼 ---------- */
+  .gcard {
+    border-radius: 18px; color: #fff; position: relative; overflow: hidden;
+    background: #2A2A30;
+    box-shadow: 0 12px 28px -14px rgba(0,0,0,0.45);
+  }
+  .gcard::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(140% 90% at 50% 0%, rgba(255,255,255,0.16), transparent 55%);
+    pointer-events: none;
+  }
+  .gcard .gc-inner { position: relative; z-index: 1; padding: 16px; display: flex; flex-direction: column; height: 100%; }
+  .gc-name { font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; text-shadow: 0 1px 6px rgba(0,0,0,0.3); }
+  .gc-line { font-size: 0.72rem; opacity: 0.92; margin-top: 2px; text-shadow: 0 1px 5px rgba(0,0,0,0.3); }
+  .gc-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; }
+  .gc-chip {
+    font-size: 0.66rem; font-weight: 600; padding: 4px 9px; border-radius: 999px;
+    background: rgba(0,0,0,0.3); backdrop-filter: blur(4px);
+  }
+  .gc-chip.hot { background: rgba(255,255,255,0.92); color: #14181B; }
+  .gc-mark { position: absolute; top: 14px; right: 14px; opacity: 0.85; }
+
+  .preview-card { height: 92px; margin-bottom: 18px; transition: background 0.5s ease; }
+  .hero-card { height: 240px; margin-bottom: 16px; }
+  .mini-card { height: 130px; }
+
+  /* ---------- 칩 그리드 ---------- */
+  .chipgrid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    border: 1px solid var(--ios-line); background: var(--ios-card); color: var(--ios-ink);
+    font-family: inherit; font-size: 0.82rem; font-weight: 600;
+    padding: 9px 14px; border-radius: 999px; cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .chip[aria-pressed="true"] { background: var(--ios-btn); border-color: var(--ios-btn); color: #fff; }
+  .chip:active { transform: scale(0.95); }
+
+  /* ---------- 성향 2×2 ---------- */
+  .vibegrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .vibe {
+    border: 1.5px solid var(--ios-line); background: var(--ios-card);
+    border-radius: 16px; padding: 16px 14px; cursor: pointer; text-align: left;
+    font-family: inherit; transition: all 0.15s ease;
+  }
+  .vibe .vg-emo { font-size: 1.5rem; display: block; margin-bottom: 8px; }
+  .vibe .vg-name { font-weight: 700; font-size: 0.88rem; color: var(--ios-ink); display: block; }
+  .vibe .vg-axis { font-size: 0.68rem; color: var(--ios-ink2); }
+  .vibe[aria-pressed="true"] { border-color: var(--ios-btn); background: #EFEFF2; box-shadow: 0 0 0 1px var(--ios-btn); }
+
+  /* ---------- 입력 ---------- */
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 0.72rem; font-weight: 700; color: var(--ios-ink2); margin-bottom: 6px; letter-spacing: 0.02em; }
+  .field input {
+    width: 100%; border: 1px solid var(--ios-line); background: var(--ios-card);
+    font-family: inherit; font-size: 0.95rem; color: var(--ios-ink);
+    padding: 13px 14px; border-radius: 12px;
+  }
+  .field input::placeholder { color: #B4B4BC; }
+
+  /* ---------- 맞대기 ---------- */
+  .bump-stage { position: relative; height: 260px; margin: 10px 0 6px; }
+  .bump-orb {
+    position: absolute; top: 50%; width: 130px; height: 130px; border-radius: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 14px 30px -12px rgba(0,0,0,0.4);
+    transition: left 0.55s cubic-bezier(0.5, 0, 0.2, 1.2), right 0.55s cubic-bezier(0.5, 0, 0.2, 1.2);
+  }
+  .bump-orb.me { left: 8px; }
+  .bump-orb.you { right: 8px; mix-blend-mode: multiply; }
+  .bump-stage.hit .bump-orb.me { left: calc(50% - 88px); }
+  .bump-stage.hit .bump-orb.you { right: calc(50% - 88px); }
+  .bump-ring {
+    position: absolute; top: 50%; left: 50%; width: 150px; height: 150px;
+    border: 2.5px solid var(--accent-g); border-radius: 50%;
+    transform: translate(-50%,-50%) scale(0.4); opacity: 0;
+  }
+  .bump-stage.hit .bump-ring { animation: ring 0.7s ease-out 0.45s forwards; }
+  @keyframes ring {
+    0% { opacity: 0.9; transform: translate(-50%,-50%) scale(0.5); }
+    100% { opacity: 0; transform: translate(-50%,-50%) scale(1.5); }
+  }
+  .bump-word {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    font-weight: 900; font-size: 1.6rem; color: #fff; letter-spacing: -0.02em;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.35); opacity: 0; z-index: 2;
+  }
+  .bump-stage.hit .bump-word { animation: wordin 0.4s ease-out 0.55s forwards; }
+  @keyframes wordin { from { opacity: 0; transform: translate(-50%,-50%) scale(0.6); } to { opacity: 1; transform: translate(-50%,-50%) scale(1); } }
+  .bump-stage.hit { animation: shake 0.3s ease-in-out 0.5s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); }
+  }
+
+  /* ---------- 겹 결과 ---------- */
+  .overlap-banner {
+    background: var(--ios-card); border: 1px solid var(--ios-line); border-radius: 16px;
+    padding: 16px; margin-bottom: 14px;
+  }
+  .overlap-banner .ob-label { font-size: 0.68rem; font-weight: 800; color: #66783A; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .overlap-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .overlap-chips .oc {
+    font-size: 0.78rem; font-weight: 700; padding: 6px 12px; border-radius: 999px;
+    background: #E1E7CC; color: #45521F; border: 1px solid #C6D19E;
+  }
+  .overlap-chips .oc.dim { background: transparent; color: #B4B4BC; border-color: var(--ios-line); font-weight: 500; }
+  .ob-talk { font-size: 0.8rem; color: var(--ios-ink2); margin: 10px 0 0; line-height: 1.5; }
+
+  /* ---------- 보관/설치 ---------- */
+  .keep-note {
+    background: var(--ios-card); border: 1px solid var(--ios-line); border-radius: 16px;
+    padding: 16px; margin: 14px 0;
+  }
+  .keep-note b { display: block; font-size: 0.9rem; margin-bottom: 4px; }
+  .keep-note p { margin: 0; font-size: 0.78rem; color: var(--ios-ink2); line-height: 1.5; }
+  .toast {
+    position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%) translateY(8px);
+    background: rgba(20,20,24,0.92); color: #fff; font-size: 0.78rem; font-weight: 600;
+    padding: 10px 18px; border-radius: 999px; opacity: 0; pointer-events: none;
+    transition: all 0.25s ease; white-space: nowrap; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .collection { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* ---------- 우측: 플로우 레일 + 의도 패널 ---------- */
+  .rail { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+  .rail-step {
+    font-family: var(--font-mono); font-size: 0.72rem;
+    border: 1px solid var(--line); color: var(--ink-faint);
+    padding: 5px 11px; border-radius: 999px; background: transparent;
+    transition: all 0.2s ease;
+  }
+  .rail-step.on {
+    background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 600;
+  }
+
+  .intent {
+    background: var(--bg-raised); border: 1px solid var(--line); border-radius: 10px;
+    box-shadow: var(--shadow); padding: 24px 26px; margin-bottom: 20px;
+  }
+  .intent .i-eyebrow {
+    font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent-g);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;
+  }
+  .intent h3 { font-size: 1.15rem; margin: 0 0 12px; letter-spacing: -0.01em; }
+  .intent ul { margin: 0; padding-left: 1.1em; }
+  .intent li { margin-bottom: 9px; color: var(--ink-soft); max-width: 58ch; }
+  .intent li b { color: var(--ink); }
+  .intent .i-ios {
+    margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line);
+    font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-faint); line-height: 1.7;
+  }
+  .intent .i-ios b { color: var(--accent-a); font-weight: 600; }
+
+  .sidebox {
+    background: var(--bg-inset); border-radius: 10px; padding: 20px 24px; margin-bottom: 16px;
+  }
+  .sidebox h4 {
+    font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint);
+    text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px;
+  }
+  .sidebox ol { margin: 0; padding-left: 1.2em; }
+  .sidebox li { margin-bottom: 7px; color: var(--ink-soft); font-size: 0.875rem; }
+  .sidebox p { margin: 0; color: var(--ink-soft); font-size: 0.875rem; max-width: 58ch; }
+
+  footer.colophon {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 0.6875rem; color: var(--ink-faint);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+
+  /* ==================== Liquid Glass (iOS 26 결) ==================== */
+  /* 유리 뒤에 비칠 앰비언트 블롭 — 블러가 보이려면 배경에 색이 있어야 한다 */
+  .screen::before {
+    content: ""; position: absolute; width: 280px; height: 280px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(63,159,192,0.32), transparent 68%);
+    top: -70px; left: -80px; filter: blur(6px); z-index: 0; pointer-events: none;
+  }
+  .screen::after {
+    content: ""; position: absolute; width: 320px; height: 320px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(224,106,90,0.24), transparent 68%);
+    bottom: 30px; right: -100px; filter: blur(8px); z-index: 0; pointer-events: none;
+  }
+  .view { background: transparent; z-index: 1; }
+
+  .btn {
+    border-radius: 999px;
+    background: rgba(23,23,26,0.82);
+    backdrop-filter: blur(16px) saturate(1.5);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 10px 26px -12px rgba(0,0,0,0.4);
+  }
+  .btn.ghost {
+    background: rgba(255,255,255,0.45);
+    color: var(--ios-ink);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 14px -8px rgba(0,0,0,0.15);
+    border: 1px solid rgba(255,255,255,0.6);
+  }
+  .chip, .field input, .vibe {
+    background: rgba(255,255,255,0.55);
+    border-color: rgba(255,255,255,0.7);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 3px 10px -6px rgba(0,0,0,0.1);
+  }
+  .chip[aria-pressed="true"] {
+    background: rgba(23,23,26,0.85); border-color: transparent;
+  }
+  .vibe[aria-pressed="true"] {
+    background: rgba(255,255,255,0.8); border-color: var(--ios-btn);
+  }
+  .clip-pill {
+    background: rgba(232,238,251,0.6);
+    backdrop-filter: blur(12px) saturate(1.5);
+    -webkit-backdrop-filter: blur(12px) saturate(1.5);
+    border: 1px solid rgba(255,255,255,0.65);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+  }
+  .overlap-banner, .keep-note {
+    background: rgba(255,255,255,0.58);
+    border-color: rgba(255,255,255,0.7);
+    backdrop-filter: blur(18px) saturate(1.5);
+    -webkit-backdrop-filter: blur(18px) saturate(1.5);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 6px 18px -10px rgba(0,0,0,0.12);
+  }
+  .stepdots i { background: rgba(0,0,0,0.12); }
+  .stepdots i.on { background: var(--ios-ink); }
+
+  /* 카드 중앙 배치 — 히어로 카드가 상단에 붙지 않게 */
+  .push { flex: 0.55; }
+
+  /* 이모지 원탭 피커 */
+  .emojirow { display: flex; flex-wrap: wrap; gap: 7px; }
+  .emo {
+    width: 44px; height: 44px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.55); font-size: 22px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: inherit; padding: 0;
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .emo:active { transform: scale(0.92); }
+  .emo[aria-pressed="true"] {
+    box-shadow: 0 0 0 2px var(--ios-btn), inset 0 1px 0 rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.85);
+  }
+  .emo-hint { font-size: 0.68rem; color: #9A9AA2; margin-top: 8px; }
+  .gc-emo { font-size: 1rem; margin-left: 4px; }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="eyebrow">
+      <svg class="logomark" width="18" height="13" viewBox="0 0 22 16" aria-hidden="true">
+        <circle cx="8" cy="8" r="7.5"></circle><circle cx="14" cy="8" r="7.5"></circle>
+      </svg>
+      GYEOP — INTERACTIVE PROTOTYPE · v0.1
+    </div>
+    <h1>처음 만난 사람과, 아이폰을 맞대면</h1>
+    <p class="lede">
+      클릭해서 전체 흐름을 직접 통과해보세요: App Clip으로 카드를 받고 → 15초 만에 내 카드를 만들고 →
+      맞대서 겹치는 관심사를 발견하고 → 그제서야 설치를 제안받는 여정. 카드 색은 실제로
+      선택 입력에서 결정적으로 생성됩니다 — 같은 입력이면 언제나 같은 카드.
+      컴포넌트는 iOS 26 리퀴드 글라스 결을 흉내냈지만, <b>비주얼은 전면 재설계 예정</b>인
+      흐름 검증용 뼈대입니다.
+    </p>
+    <span class="pivot-tag">피벗 반영 · 아카데미 전용 → iOS의 모든 첫 만남 · 러너는 사용자가 아니라 피드백 그룹</span>
+  </header>
+
+  <div class="stage">
+    <!-- ============ iPhone ============ -->
+    <div class="phone-col">
+      <div class="phone">
+        <div class="screen" id="screen">
+          <div class="island"></div>
+
+          <!-- 1. App Clip 수신 -->
+          <div class="view active" data-view="clip">
+            <div class="clip-pill"><span class="dot"></span>App Clip · 설치 없이 실행 중</div>
+            <h2 class="v-title">지수님이<br>카드를 건넸어요</h2>
+            <p class="v-sub">내 카드를 만들어 맞대면, 서로 겹치는 관심사가 그 자리에서 보여요. 15초면 됩니다.</p>
+            <div class="push"></div>
+            <div class="gcard mini-card" id="jisu-card-clip">
+              <div class="gc-inner">
+                <div>
+                  <div class="gc-name">지수 <span class="gc-emo">☕</span></div>
+                  <div class="gc-line">주말마다 새로운 원두를 찾아다녀요</div>
+                </div>
+                <div class="gc-chips" id="jisu-chips-clip"></div>
+              </div>
+              <svg class="gc-mark" width="20" height="14" viewBox="0 0 22 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="rgba(255,255,255,0.85)"/><circle cx="14" cy="8" r="7.5" fill="rgba(255,255,255,0.45)"/></svg>
+            </div>
+            <div class="spacer"></div>
+            <button class="btn" data-go="interests">내 카드 만들기</button>
+            <button class="btn ghost" data-go="interests">카드는 어떻게 만들어지나요?</button>
+          </div>
+
+          <!-- 2a. 관심사 -->
+          <div class="view" data-view="interests">
+            <div class="stepdots"><i class="on"></i><i></i><i></i></div>
+            <div class="gcard preview-card" id="preview-1">
+              <div class="gc-inner"><div class="gc-line" id="preview-hint-1" style="margin:auto; text-align:center; opacity:0.8;">고르는 순간, 카드가 물들어요</div></div>
+            </div>
+            <h2 class="v-title">요즘 나를 이루는 것</h2>
+            <p class="v-sub">최대 5개 — 이 선택이 곧 카드의 색이 됩니다.</p>
+            <div class="chipgrid" id="chipgrid"></div>
+            <div class="spacer"></div>
+            <button class="btn" id="btn-interests" data-go="vibe" disabled>다음 · 0/5</button>
+          </div>
+
+          <!-- 2b. 성향 -->
+          <div class="view" data-view="vibe">
+            <div class="stepdots"><i class="on"></i><i class="on"></i><i></i></div>
+            <div class="gcard preview-card" id="preview-2">
+              <div class="gc-inner"></div>
+            </div>
+            <h2 class="v-title">쉬는 날의 나는</h2>
+            <p class="v-sub">하나만 — 성향의 결이 카드의 질감을 정해요.</p>
+            <div class="vibegrid" id="vibegrid"></div>
+            <div class="spacer"></div>
+            <button class="btn" id="btn-vibe" data-go="intro" disabled>다음</button>
+          </div>
+
+          <!-- 2c. 이름 + 한 줄 -->
+          <div class="view" data-view="intro">
+            <div class="stepdots"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+            <div class="gcard preview-card" id="preview-3"><div class="gc-inner"></div></div>
+            <h2 class="v-title">마지막 한 줄</h2>
+            <p class="v-sub">유일한 자유 입력이에요. 비워도 괜찮아요.</p>
+            <div class="field">
+              <label for="f-name">닉네임</label>
+              <input id="f-name" type="text" placeholder="예나" maxlength="10" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="f-line">요즘의 나, 한 줄</label>
+              <input id="f-line" type="text" placeholder="새벽 러닝에 빠졌어요" maxlength="30" autocomplete="off">
+            </div>
+            <div class="field">
+              <label>나를 나타내는 이모지 · 선택</label>
+              <div class="emojirow" id="emojirow"></div>
+              <div class="emo-hint">실제 앱: 전체 이모지 검색 (assets/emoji-icons.csv 큐레이션 세트) · 안 골라도 진행돼요</div>
+            </div>
+            <div class="spacer"></div>
+            <button class="btn" data-go="card">카드 완성</button>
+          </div>
+
+          <!-- 3. 내 카드 -->
+          <div class="view" data-view="card">
+            <h2 class="v-title">이게 나예요</h2>
+            <p class="v-sub">같은 입력이면, 언제나 같은 카드. 카드가 곧 나입니다.</p>
+            <div class="push"></div>
+            <div class="gcard hero-card" id="my-card">
+              <div class="gc-inner">
+                <div>
+                  <div class="gc-name"><span id="my-name">예나</span><span class="gc-emo" id="my-emoji"></span></div>
+                  <div class="gc-line" id="my-line">새벽 러닝에 빠졌어요</div>
+                </div>
+                <div class="gc-chips" id="my-chips"></div>
+              </div>
+              <svg class="gc-mark" width="22" height="16" viewBox="0 0 22 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="rgba(255,255,255,0.85)"/><circle cx="14" cy="8" r="7.5" fill="rgba(255,255,255,0.45)"/></svg>
+            </div>
+            <div class="spacer"></div>
+            <button class="btn" data-go="bump">지수님과 맞대기</button>
+          </div>
+
+          <!-- 4. 맞대기 -->
+          <div class="view" data-view="bump">
+            <h2 class="v-title">아이폰을<br>서로 가까이</h2>
+            <p class="v-sub">가까워지는 것 자체가 동의예요. 서버 없이, 와이파이 없이.</p>
+            <div class="bump-stage" id="bump-stage">
+              <div class="bump-orb me" id="orb-me"></div>
+              <div class="bump-orb you" id="orb-you"></div>
+              <div class="bump-ring"></div>
+              <div class="bump-word">겹!</div>
+            </div>
+            <div class="spacer"></div>
+            <button class="btn" id="btn-bump">맞대기 (시뮬레이션)</button>
+          </div>
+
+          <!-- 5. 겹 결과 -->
+          <div class="view" data-view="overlap">
+            <h2 class="v-title" id="overlap-title">러닝·커피가 겹쳐요</h2>
+            <p class="v-sub">여기서 대화를 시작하세요 — 앱이 아니라, 지금 눈앞의 사람과.</p>
+            <div class="overlap-banner">
+              <div class="ob-label">겹치는 관심사</div>
+              <div class="overlap-chips" id="overlap-chips"></div>
+              <p class="ob-talk" id="overlap-talk"></p>
+              <p class="ob-talk" id="overlap-emoji" hidden style="font-weight:700; color:#45521F;"></p>
+            </div>
+            <div class="gcard mini-card" id="jisu-card-recv">
+              <div class="gc-inner">
+                <div>
+                  <div class="gc-name">지수 <span class="gc-emo">☕</span></div>
+                  <div class="gc-line">주말마다 새로운 원두를 찾아다녀요</div>
+                </div>
+                <div class="gc-chips" id="jisu-chips-recv"></div>
+              </div>
+            </div>
+            <div class="spacer"></div>
+            <button class="btn" data-go="keep">카드 받기</button>
+          </div>
+
+          <!-- 6. 보관 / 설치 제안 -->
+          <div class="view" data-view="keep">
+            <h2 class="v-title">겹 1 — 첫 기록</h2>
+            <p class="v-sub">지수님과의 만남이 기록됐어요.</p>
+            <div class="gcard mini-card" id="jisu-card-keep">
+              <div class="gc-inner">
+                <div>
+                  <div class="gc-name">지수</div>
+                  <div class="gc-line">오늘 · 겹친 관심사 <span id="keep-count">2</span>개</div>
+                </div>
+              </div>
+            </div>
+            <div class="keep-note">
+              <b>이 카드, 계속 간직할까요?</b>
+              <p>App Clip에서 받은 카드는 30일 뒤 사라져요. 전체 앱에서는 겹이 계속 쌓입니다.</p>
+            </div>
+            <div class="spacer"></div>
+            <button class="btn" id="btn-install">전체 앱 받기</button>
+            <button class="btn ghost" data-go="done">나중에 할게요</button>
+          </div>
+
+          <!-- 7. 컬렉션 -->
+          <div class="view" data-view="done">
+            <h2 class="v-title">나의 겹</h2>
+            <p class="v-sub">스쳐 지나갈 뻔한 만남이, 여기 남아요.</p>
+            <div class="collection">
+              <div class="gcard mini-card" id="col-me">
+                <div class="gc-inner"><div><div class="gc-name"><span id="col-me-name">예나</span><span class="gc-emo" id="col-me-emoji"></span></div><div class="gc-line">나</div></div></div>
+              </div>
+              <div class="gcard mini-card" id="col-jisu">
+                <div class="gc-inner"><div><div class="gc-name">지수</div><div class="gc-line">겹 1 · 오늘</div></div></div>
+              </div>
+            </div>
+            <div class="spacer"></div>
+            <button class="btn ghost" id="btn-reset">처음부터 다시 보기</button>
+          </div>
+
+          <div class="toast" id="toast">App Store로 이동합니다 (시뮬레이션)</div>
+          <div class="homebar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 의도 패널 ============ -->
+    <div class="notes-col">
+      <div class="rail" id="rail" role="list" aria-label="플로우 단계">
+        <span class="rail-step" data-step="0" role="listitem">1 받기 · App Clip</span>
+        <span class="rail-step" data-step="1" role="listitem">2 만들기 · 15초</span>
+        <span class="rail-step" data-step="2" role="listitem">3 내 카드</span>
+        <span class="rail-step" data-step="3" role="listitem">4 맞대기</span>
+        <span class="rail-step" data-step="4" role="listitem">5 겹</span>
+        <span class="rail-step" data-step="5" role="listitem">6 보관 · 설치</span>
+      </div>
+
+      <div class="intent" id="intent" aria-live="polite">
+        <div class="i-eyebrow" id="i-eyebrow"></div>
+        <h3 id="i-title"></h3>
+        <ul id="i-list"></ul>
+        <div class="i-ios" id="i-ios"></div>
+      </div>
+
+      <div class="sidebox">
+        <h4>설치 제안 타이밍 — 이 프로토타입의 핵심 결정</h4>
+        <p>
+          설치 요청은 <b>교환이 끝나고 겹침을 확인한 뒤</b>에만 등장합니다. 받는 쪽의 비용이 0이어야
+          교환이라는 행위 자체가 성립하고, "간직하고 싶다"는 감정이 생긴 뒤의 설치 제안만이
+          거절당하지 않기 때문입니다. 앞 단계 어디에도 설치 유도가 없다는 것을 확인해보세요.
+        </p>
+      </div>
+
+      <div class="sidebox">
+        <h4>러너 피드백에서 검증할 질문</h4>
+        <ol>
+          <li>설치 제안 타이밍(교환 후)이 자연스러운가, 그래도 이른가?</li>
+          <li>카드 만들기 3단계가 정말 15초 안에 끝나는가?</li>
+          <li>겹침 하이라이트가 실제 대화 소재로 이어질 것 같은가?</li>
+          <li>카드를 "간직하고 싶다"는 감정이 생기는가? (30일 소멸이 동기가 되는가)</li>
+          <li>겹치는 관심사가 없을 때의 화면이 어색하지 않은가? (관심사를 다르게 골라 확인 가능)</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <footer class="colophon">
+    <span>겹(Gyeop) 인터랙티브 프로토타입 · 피그마 제작 전 검증용 · iOS 구현 매핑 포함</span>
+    <span>2026-08 · 피벗 v2 반영</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- 데이터 ---------- */
+  var INTERESTS = ["러닝","책","커피","사진","전시","음악","영화","등산","보드게임","요리","캠핑","수영"];
+  var VIBES = [
+    { id: "si", emo: "📖", name: "고요한 실내", axis: "정적 × 실내" },
+    { id: "so", emo: "🧺", name: "느긋한 바깥", axis: "정적 × 실외" },
+    { id: "di", emo: "🧗", name: "몸 쓰는 실내", axis: "동적 × 실내" },
+    { id: "do", emo: "🏃", name: "달리는 바깥", axis: "동적 × 실외" }
+  ];
+  var JISU = { name: "지수", interests: ["러닝","커피","전시","캠핑","요리"], vibe: "do", line: "주말마다 새로운 원두를 찾아다녀요", emoji: "☕" };
+  var EMOJIS = ["🏃","☕","📚","📷","🖼️","🎧","🎬","⛰️","🎲","🍳","🏕️","🌊","🦦","🌙","🔥","✨"];
+
+  var state = { interests: [], vibe: null, name: "", line: "", emoji: null };
+
+  /* ---------- 결정적 카드 그라디언트 ---------- */
+  function hashStr(s) {
+    var h = 5381;
+    for (var i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; }
+    return h;
+  }
+  function cardBg(seedStr) {
+    var h = hashStr(seedStr);
+    var h1 = h % 360;
+    var h2 = (h1 + 60 + ((h >> 3) % 120)) % 360;
+    var h3 = (h1 + 200 + ((h >> 7) % 80)) % 360;
+    return "radial-gradient(120% 95% at 18% 10%, hsl(" + h1 + " 78% 62%) 0%, transparent 62%)," +
+           "radial-gradient(115% 100% at 85% 28%, hsl(" + h2 + " 72% 56%) 0%, transparent 58%)," +
+           "radial-gradient(135% 110% at 50% 96%, hsl(" + h3 + " 70% 48%) 0%, transparent 64%)," +
+           "hsl(" + h1 + " 45% 20%)";
+  }
+  function mySeed() {
+    return state.interests.slice().sort().join("|") + "#" + (state.vibe || "") + "#" + (state.name || "예나") + "#" + (state.emoji || "");
+  }
+  var jisuBg = cardBg(JISU.interests.slice().sort().join("|") + "#" + JISU.vibe + "#" + JISU.name + "#" + JISU.emoji);
+
+  /* ---------- 의도 패널 콘텐츠 ---------- */
+  var NOTES = {
+    clip: {
+      step: 0, eyebrow: "Entry · 받는 쪽의 비용 0",
+      title: "설치 장벽을 제거해야 교환이 성립한다",
+      list: [
+        "<b>받는 사람에게 앱을 요구하는 순간 이 제품은 죽는다.</b> QR·링크로 App Clip이 즉시 열리고, 계정도 없다.",
+        "먼저 상대의 카드를 <b>보여준다</b> — 무엇을 받게 되는지 눈으로 확인한 뒤에야 만들 이유가 생긴다.",
+        "이 화면 어디에도 설치 버튼이 없다. 설치는 6단계에서, 가치를 다 얻은 뒤에."
+      ],
+      ios: "<b>App Clip</b> (35MB 타깃, 무계정) · QR / NFC / 링크 인보케이션 · <code>appclip:</code> 어소시에이티드 도메인"
+    },
+    interests: {
+      step: 1, eyebrow: "Input = Seed · 1/3",
+      title: "입력이 곧 카드다 — 타이핑 없이, 실시간으로",
+      list: [
+        "칩을 고를 때마다 <b>상단 카드가 실제로 물든다</b> — 입력과 결과가 같은 화면에서 연결된다.",
+        "최대 5개 제한은 정체성의 <b>편집</b>을 강제한다. 전부 고르면 아무것도 아니게 되니까.",
+        "이 프로토타입의 그라디언트는 실제로 선택값의 해시에서 생성된다 — 같은 선택이면 같은 색."
+      ],
+      ios: "<b>MeshGradient</b> (iOS 18) + Metal <code>layerEffect</code> 질감 · 시드 = 정렬된 선택값 해시"
+    },
+    vibe: {
+      step: 1, eyebrow: "Input = Seed · 2/3",
+      title: "성향은 묻지 않고 고르게 한다",
+      list: [
+        "정적/동적 × 실내/실외 — <b>2×2 하나</b>로 성향을 끝낸다. 설문처럼 느껴지는 순간 이탈한다.",
+        "성향은 카드의 색이 아니라 <b>질감·움직임의 결</b>을 정한다 (실구현: 셰이더 파라미터)."
+      ],
+      ios: "선택값 → Metal 셰이더 파라미터 (noise scale · flow speed) · <b>CoreHaptics</b> 선택 피드백"
+    },
+    intro: {
+      step: 1, eyebrow: "Input = Seed · 3/3",
+      title: "자유 입력은 단 하나, 그것도 선택",
+      list: [
+        "닉네임과 한 줄 — <b>유일한 타이핑</b>이고, 비워도 진행된다. 15초 약속을 지키는 장치.",
+        "한 줄은 자기소개가 아니라 <b>대화의 미끼</b>다. \"요즘의 나\"라는 프레임이 근황을 끌어낸다.",
+        "<b>이모지 원탭(선택)</b> — 키보드 없이 인앱 그리드에서 한 번 탭. 미모티콘 붙여넣기의 5단계 마찰을 대체하고, 모든 기기에서 동작한다. 이모지도 시드에 포함되어 카드 색을 바꾼다."
+      ],
+      ios: "무계정 로컬 저장 (App Clip 임시 컨테이너) · 전체 앱 전환 시 <b>SwiftData</b>로 마이그레이션 · 이모지 세트 = <code>assets/emoji-icons.csv</code>"
+    },
+    card: {
+      step: 2, eyebrow: "Identity · 결정적 생성",
+      title: "같은 입력이면, 언제나 같은 카드",
+      list: [
+        "카드는 꾸미는 게 아니라 <b>도출되는 것</b> — 그래서 카드가 곧 나라는 감각이 생긴다.",
+        "무작위가 아니라는 사실이 신뢰를 만든다. 다시 만들어도 같은 카드가 나온다는 것.",
+        "이 화면의 목표 감정: <b>\"이거 좀 예쁜데, 보여주고 싶다.\"</b> 교환의 동기는 여기서 만들어진다."
+      ],
+      ios: "결정적 시드 → <b>MeshGradient</b> 제어점 · 겹 로고 워터마크 · 스크린샷 감지 시 공유 시트 제안"
+    },
+    bump: {
+      step: 3, eyebrow: "Exchange · 물리적 제스처",
+      title: "가까워지는 것 자체가 동의다",
+      list: [
+        "버튼이 아니라 <b>거리</b>가 트리거다. 물리적 근접은 위조하기 어려운 상호 동의의 증거.",
+        "서버·와이파이 없이 P2P로 동작 — 지하 행사장, 해외, 어디서든 교환이 된다.",
+        "교환 순간의 햅틱 + '겹!' — 이 0.5초의 감각이 이 앱의 브랜드 그 자체다."
+      ],
+      ios: "<b>MultipeerConnectivity</b> 상태 머신 (발견→연결→전송) · <b>NearbyInteraction</b> UWB 30cm 승격(v0.2) · CoreHaptics"
+    },
+    overlap: {
+      step: 4, eyebrow: "Core Moment · 겹침 하이라이트",
+      title: "공통점 찾기를 앱이 끝내준다 — 대화는 사람이",
+      list: [
+        "교환 직후 <b>겹치는 관심사만 밝게</b> — 첫 마디를 앱이 건네준다. 여기가 이 제품의 존재 이유.",
+        "겹침은 실제로 계산된다 — 뒤로 가서 관심사를 바꾸면 결과도 바뀐다. (하나도 안 겹치는 경우의 문구도 확인해보세요)",
+        "여기서 채팅으로 이어지지 <b>않는다</b>. 다음 행동은 화면 밖, 눈앞의 사람에게."
+      ],
+      ios: "교집합 연산은 온디바이스 · 겹 기록 = <b>결정적 GyeopID</b> (정렬된 ID쌍+타임슬롯 해시, 중복 자동 제거)"
+    },
+    keep: {
+      step: 5, eyebrow: "Conversion · 설치는 마지막에",
+      title: "가치를 다 얻은 뒤에만 설치를 제안한다",
+      list: [
+        "교환도 겹침 확인도 끝났다 — <b>이제야</b> 설치 제안이 등장한다. 순서가 이 프로토타입의 핵심 주장.",
+        "\"30일 뒤 사라진다\"는 소멸이 보관의 동기다. 협박이 아니라 App Clip의 실제 수명 정책.",
+        "거절해도 아무 일도 일어나지 않는다 — <b>거절 비용 0</b> 원칙은 설치 제안에도 적용된다."
+      ],
+      ios: "<b>SKOverlay</b> / App Clip → 풀앱 전환 API · 임시 데이터 마이그레이션 · 전환율이 핵심 지표"
+    },
+    done: {
+      step: 5, eyebrow: "Retention · 기록이 쌓인다",
+      title: "스쳐 지나갈 뻔한 만남이 남는다",
+      list: [
+        "컬렉션은 피드가 아니다 — 내가 실제로 만난 사람만, 시간순으로. <b>체류시간을 늘릴 장치는 없다.</b>",
+        "지표는 하나: 오프라인에서 실제로 일어난 만남의 수. DAU를 보지 않는 이유가 여기 있다."
+      ],
+      ios: "<b>SwiftData</b> 로컬 우선 + 동기화 큐 · 위젯/잠금화면은 v0.2"
+    }
+  };
+
+  /* ---------- DOM 헬퍼 ---------- */
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  }
+
+  /* ---------- 화면 전환 ---------- */
+  var current = "clip";
+  function go(name) {
+    var views = document.querySelectorAll(".view");
+    for (var i = 0; i < views.length; i++) {
+      views[i].classList.toggle("active", views[i].getAttribute("data-view") === name);
+    }
+    current = name;
+    renderNote(name);
+    if (name === "card") renderMyCard();
+    if (name === "bump") prepBump();
+    if (name === "overlap") renderOverlap();
+    if (name === "keep") renderKeep();
+    if (name === "done") renderDone();
+  }
+
+  function renderNote(name) {
+    var n = NOTES[name]; if (!n) return;
+    $("i-eyebrow").textContent = n.eyebrow;
+    $("i-title").textContent = n.title;
+    var list = $("i-list"); list.innerHTML = "";
+    for (var i = 0; i < n.list.length; i++) {
+      var li = document.createElement("li"); li.innerHTML = n.list[i]; list.appendChild(li);
+    }
+    $("i-ios").innerHTML = "iOS 구현 — " + n.ios;
+    var steps = document.querySelectorAll(".rail-step");
+    for (var j = 0; j < steps.length; j++) {
+      steps[j].classList.toggle("on", parseInt(steps[j].getAttribute("data-step"), 10) === n.step);
+    }
+  }
+
+  /* ---------- 지수 카드 ---------- */
+  function fillJisu(cardId, chipsId, hotSet) {
+    var card = $(cardId); if (card) card.style.background = jisuBg;
+    var chips = chipsId ? $(chipsId) : null;
+    if (chips) {
+      chips.innerHTML = "";
+      for (var i = 0; i < JISU.interests.length; i++) {
+        var c = el("span", "gc-chip", JISU.interests[i]);
+        if (hotSet && hotSet.indexOf(JISU.interests[i]) !== -1) c.classList.add("hot");
+        chips.appendChild(c);
+      }
+    }
+  }
+
+  /* ---------- 관심사 칩 ---------- */
+  var chipgrid = $("chipgrid");
+  INTERESTS.forEach(function (name) {
+    var b = el("button", "chip", name);
+    b.type = "button";
+    b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", function () {
+      var idx = state.interests.indexOf(name);
+      if (idx !== -1) { state.interests.splice(idx, 1); b.setAttribute("aria-pressed", "false"); }
+      else if (state.interests.length < 5) { state.interests.push(name); b.setAttribute("aria-pressed", "true"); }
+      var n = state.interests.length;
+      var btn = $("btn-interests");
+      btn.disabled = n === 0;
+      btn.textContent = "다음 · " + n + "/5";
+      updatePreviews();
+    });
+    chipgrid.appendChild(b);
+  });
+
+  /* ---------- 성향 ---------- */
+  var vibegrid = $("vibegrid");
+  VIBES.forEach(function (v) {
+    var b = el("button", "vibe");
+    b.type = "button";
+    b.setAttribute("aria-pressed", "false");
+    b.innerHTML = '<span class="vg-emo">' + v.emo + '</span><span class="vg-name">' + v.name + '</span><span class="vg-axis">' + v.axis + '</span>';
+    b.addEventListener("click", function () {
+      state.vibe = v.id;
+      var all = vibegrid.querySelectorAll(".vibe");
+      for (var i = 0; i < all.length; i++) all[i].setAttribute("aria-pressed", "false");
+      b.setAttribute("aria-pressed", "true");
+      $("btn-vibe").disabled = false;
+      updatePreviews();
+    });
+    vibegrid.appendChild(b);
+  });
+
+  /* ---------- 이모지 원탭 피커 ---------- */
+  var emojirow = $("emojirow");
+  EMOJIS.forEach(function (e) {
+    var b = el("button", "emo", e);
+    b.type = "button";
+    b.setAttribute("aria-pressed", "false");
+    b.setAttribute("aria-label", "이모지 " + e);
+    b.addEventListener("click", function () {
+      var was = state.emoji === e;
+      state.emoji = was ? null : e;
+      var all = emojirow.querySelectorAll(".emo");
+      for (var i = 0; i < all.length; i++) all[i].setAttribute("aria-pressed", "false");
+      if (!was) b.setAttribute("aria-pressed", "true");
+      updatePreviews();
+    });
+    emojirow.appendChild(b);
+  });
+
+  /* ---------- 미리보기 갱신 ---------- */
+  function updatePreviews() {
+    var bg = state.interests.length ? cardBg(mySeed()) : "";
+    ["preview-1", "preview-2", "preview-3"].forEach(function (id) {
+      var p = $(id); if (!p) return;
+      p.style.background = bg || "#2A2A30";
+    });
+    var hint = $("preview-hint-1");
+    if (hint) hint.style.display = state.interests.length ? "none" : "";
+  }
+
+  /* ---------- 내 카드 ---------- */
+  function myName() { return ($("f-name").value || "").trim() || "예나"; }
+  function myLine() { return ($("f-line").value || "").trim() || "새벽 러닝에 빠졌어요"; }
+  function renderMyCard() {
+    state.name = myName(); state.line = myLine();
+    $("my-card").style.background = cardBg(mySeed());
+    $("my-name").textContent = state.name;
+    $("my-emoji").textContent = state.emoji || "";
+    $("my-line").textContent = state.line;
+    var chips = $("my-chips"); chips.innerHTML = "";
+    state.interests.forEach(function (n) { chips.appendChild(el("span", "gc-chip", n)); });
+  }
+
+  /* ---------- 맞대기 ---------- */
+  function prepBump() {
+    var st = $("bump-stage");
+    st.classList.remove("hit");
+    $("orb-me").style.background = cardBg(mySeed());
+    $("orb-you").style.background = jisuBg;
+    $("btn-bump").disabled = false;
+  }
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  $("btn-bump").addEventListener("click", function () {
+    if (reduceMotion) { go("overlap"); return; }
+    this.disabled = true;
+    $("bump-stage").classList.add("hit");
+    setTimeout(function () { go("overlap"); }, 1500);
+  });
+
+  /* ---------- 겹 결과 ---------- */
+  function overlapSet() {
+    return state.interests.filter(function (n) { return JISU.interests.indexOf(n) !== -1; });
+  }
+  function renderOverlap() {
+    var hot = overlapSet();
+    var title = $("overlap-title");
+    var talk = $("overlap-talk");
+    var chips = $("overlap-chips"); chips.innerHTML = "";
+    if (hot.length) {
+      title.textContent = hot.slice(0, 2).join("·") + (hot.length > 2 ? " 외 " + (hot.length - 2) + "개" : "") + "가 겹쳐요";
+      hot.forEach(function (n) { chips.appendChild(el("span", "oc", n)); });
+      JISU.interests.filter(function (n) { return hot.indexOf(n) === -1; })
+        .forEach(function (n) { var c = el("span", "oc dim", n); chips.appendChild(c); });
+      talk.textContent = "\"" + hot[0] + " 좋아하세요? 저도요\" — 첫 마디는 이미 준비됐어요.";
+    } else {
+      title.textContent = "겹치는 관심사는 없지만";
+      JISU.interests.forEach(function (n) { chips.appendChild(el("span", "oc dim", n)); });
+      talk.textContent = "성향이 닿아 있어요 — 서로 없는 걸 갖고 있다는 것도 대화가 됩니다.";
+    }
+    var emoLine = $("overlap-emoji");
+    if (state.emoji && state.emoji === JISU.emoji) {
+      emoLine.hidden = false;
+      emoLine.textContent = "이모지도 겹쳤어요 " + state.emoji + " — 오늘의 이스터에그";
+    } else {
+      emoLine.hidden = true;
+    }
+    fillJisu("jisu-card-recv", "jisu-chips-recv", hot);
+  }
+
+  /* ---------- 보관 ---------- */
+  function renderKeep() {
+    fillJisu("jisu-card-keep", null, null);
+    $("keep-count").textContent = String(overlapSet().length);
+  }
+  $("btn-install").addEventListener("click", function () {
+    var t = $("toast");
+    t.classList.add("show");
+    setTimeout(function () { t.classList.remove("show"); go("done"); }, 1400);
+  });
+
+  /* ---------- 컬렉션 ---------- */
+  function renderDone() {
+    $("col-me").style.background = cardBg(mySeed());
+    $("col-me-name").textContent = state.name || "예나";
+    $("col-me-emoji").textContent = state.emoji || "";
+    $("col-jisu").style.background = jisuBg;
+  }
+  $("btn-reset").addEventListener("click", function () {
+    state = { interests: [], vibe: null, name: "", line: "", emoji: null };
+    var pressed = document.querySelectorAll('[aria-pressed="true"]');
+    for (var i = 0; i < pressed.length; i++) pressed[i].setAttribute("aria-pressed", "false");
+    $("f-name").value = ""; $("f-line").value = "";
+    $("btn-interests").disabled = true; $("btn-interests").textContent = "다음 · 0/5";
+    $("btn-vibe").disabled = true;
+    updatePreviews();
+    go("clip");
+  });
+
+  /* ---------- 네비게이션 바인딩 ---------- */
+  document.querySelectorAll("[data-go]").forEach(function (b) {
+    b.addEventListener("click", function () { go(b.getAttribute("data-go")); });
+  });
+
+  /* ---------- 초기화 ---------- */
+  fillJisu("jisu-card-clip", "jisu-chips-clip", null);
+  updatePreviews();
+  renderNote("clip");
+})();
+</script>
