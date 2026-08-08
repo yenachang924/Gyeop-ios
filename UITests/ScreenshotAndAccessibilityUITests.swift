@@ -59,7 +59,7 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         nickname.tap()
         nickname.typeText("yena")
         app.textFields["onboarding.tagline"].tap()
-        app.textFields["onboarding.tagline"].typeText("보드게임 좋아하는 러너")
+        app.textFields["onboarding.tagline"].typeText("보드게임 좋아하는 사람")
         tapEvenIfOffscreen(app, app.buttons["onboarding.emoji.클라이밍"])
         snap(app, "\(prefix)-3-onboarding-profile")
         tapEvenIfOffscreen(app, app.buttons["onboarding.createCard"])
