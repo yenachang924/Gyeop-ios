@@ -10,7 +10,7 @@ struct CardRevealView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let card: CardSnapshot
 
-    /// 카드 등장 스프링 스케일 인 (DS.Motion.cardAppear) — 리빌의 "짠" 한 번.
+    /// 카드 딜 인 (F6 — 토스 카드 발급 모티브): 아래에서 떠오르며 틸트가 풀린다.
     @State private var appeared = false
 
     var body: some View {
@@ -21,21 +21,28 @@ struct CardRevealView: View {
                     Text("이게 나예요")
                         .font(DS.Typo.largeTitle)
                         .multilineTextAlignment(.center)
-                    Text("같은 입력이면, 언제나 같은 카드. 카드가 곧 나입니다.")
-                        .font(DS.Typo.body)
+                    // 서브 텍스트는 headline — body는 "상당히 작다"는 피드백 (1차 시연)
+                    Text("고른 것들이 그대로 물들어, 하나뿐인 카드가 됐어요.")
+                        .font(DS.Typo.headline)
                         .foregroundStyle(DS.Palette.secondaryText)
                         .multilineTextAlignment(.center)
                 }
 
                 CardView(card: card)
                     .padding(.horizontal, DS.Spacing.xl)
-                    .scaleEffect(appeared ? 1 : 0.86)
+                    .scaleEffect(appeared ? 1 : 0.92)
+                    .rotation3DEffect(
+                        .degrees(appeared ? 0 : 22),
+                        axis: (x: 1, y: 0, z: 0),
+                        perspective: 0.55
+                    )
+                    .offset(y: appeared ? 0 : 240)
                     .opacity(appeared ? 1 : 0)
             }
             .padding(DS.Spacing.m)
         }
         .onAppear {
-            withAnimation(reduceMotion ? nil : DS.Motion.cardAppear) { appeared = true }
+            withAnimation(reduceMotion ? nil : DS.Motion.cardDeal) { appeared = true }
         }
         .safeAreaInset(edge: .bottom) {
             Button {

@@ -36,7 +36,7 @@ public struct ClipKeepView: View {
         ScrollView {
             VStack(spacing: DS.Spacing.l) {
                 VStack(spacing: DS.Spacing.s) {
-                    Text("겹 1 — 첫 기록")
+                    Text("겹 1 · 첫 기록")
                         .font(DS.Typo.largeTitle)
                     Text("\(record.counterpartCard.nickname)님과의 만남이 기록됐어요.")
                         .font(DS.Typo.body)

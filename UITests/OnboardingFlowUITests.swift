@@ -69,10 +69,10 @@ final class OnboardingFlowUITests: XCTestCase {
         close.tap()
     }
 
-    /// 완료 기준 검증: 관심사·성향·닉네임·한 줄·이모지를 전부 비워도 카드 완성까지
-    /// 진행되고(전부 선택사항화), 이모지 그리드는 검색으로 1차 16개 밖의 항목도 찾을 수 있다.
+    /// 완료 기준 검증: 닉네임은 필수(F4 — 비어 있으면 카드 완성 비활성), 한 줄·이모지는
+    /// 선택사항. 이모지 그리드는 검색으로 1차 16개 밖의 항목도 찾을 수 있다.
     @MainActor
-    func testProfileFieldsAreOptionalAndEmojiSearchFindsBeyondFirst16() throws {
+    func testNicknameIsRequiredAndEmojiSearchFindsBeyondFirst16() throws {
         let app = XCUIApplication()
         app.launchArguments = ["-uitest-reset"]
         app.launch()
@@ -99,8 +99,14 @@ final class OnboardingFlowUITests: XCTestCase {
         searchField.typeText("낚시")
         XCTAssertTrue(app.buttons["onboarding.emoji.낚시"].waitForExistence(timeout: 5))
 
-        // 닉네임·한 줄·이모지 전부 비운 채로 바로 카드 완성 — 버튼이 활성 상태여야 한다
+        // 닉네임이 비어 있으면 카드 완성은 비활성 (F4 — 이름 필수)
         let create = app.buttons["onboarding.createCard"]
+        XCTAssertFalse(create.isEnabled)
+
+        // 닉네임을 채우면 활성 — 한 줄·이모지는 계속 비운 채 진행된다
+        let nickname = app.textFields["onboarding.nickname"]
+        nickname.tap()
+        nickname.typeText("yena")
         XCTAssertTrue(create.isEnabled)
         create.tap()
 
@@ -139,6 +145,11 @@ final class U2DemoRecordingUITests: XCTestCase {
         XCTAssertTrue(style.waitForExistence(timeout: 5))
         style.tap()
         app.buttons["onboarding.style.next"].tap()
+
+        let nickname = app.textFields["onboarding.nickname"]
+        XCTAssertTrue(nickname.waitForExistence(timeout: 5))
+        nickname.tap()
+        nickname.typeText("yena")
 
         let create = app.buttons["onboarding.createCard"]
         XCTAssertTrue(create.waitForExistence(timeout: 5))

@@ -23,6 +23,10 @@ struct ExchangeView: View {
     @State private var session: (any ExchangeSession)?
     /// 재시도마다 증가 — `.task(id:)`가 새 세션으로 판을 다시 돈다.
     @State private var attempt = 0
+    /// 찾는 중 문구가 중앙에 내려앉는 등장 (F9) — 화면당 한 번.
+    @State private var arrived = false
+    /// 완료 화면 등장 시퀀스 (카드 → 제목 → 이스터에그).
+    @State private var celebrated = false
 
     var body: some View {
         NavigationStack {
@@ -30,17 +34,20 @@ struct ExchangeView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(DS.Spacing.m)
                 .background(DS.Palette.background)
-                .navigationTitle("맞대기")
+                // 완료 뒤에는 "맞대기"가 끝난 상황 — 타이틀도 닫기도 걷어낸다 (F8)
+                .navigationTitle(isCompleted ? "" : "맞대기")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("닫기") {
-                            Task { await session?.cancel() }
-                            dismiss()
+                    if !isCompleted {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("닫기") {
+                                Task { await session?.cancel() }
+                                dismiss()
+                            }
+                            // 크롬은 무채 — 이 화면의 빨강은 겹 성립 순간과 CTA 몫이다 (U1 원칙 1)
+                            .tint(.primary)
+                            .accessibilityIdentifier("exchange.close")
                         }
-                        // 크롬은 무채 — 이 화면의 빨강은 겹 성립 순간과 CTA 몫이다 (U1 원칙 1)
-                        .tint(.primary)
-                        .accessibilityIdentifier("exchange.close")
                     }
                 }
                 .task(id: attempt) { await run() }
@@ -54,6 +61,11 @@ struct ExchangeView: View {
         case .searching, .connecting, .merging: true
         case .completed, .failed: false
         }
+    }
+
+    private var isCompleted: Bool {
+        if case .completed = phase { return true }
+        return false
     }
 
     @ViewBuilder
@@ -80,7 +92,7 @@ struct ExchangeView: View {
     }
 
     // Dynamic Type 극단에서 제목+캡션이 화면을 넘칠 수 있어 completedView/failedView와
-    // 같은 패턴으로 스크롤 가능하게 한다.
+    // 같은 패턴으로 스크롤 가능하게 한다. 내용이 화면보다 작으면 세로 중앙에 앉는다 (F9).
     private func progress(title: String, caption: String) -> some View {
         ScrollView {
             VStack(spacing: DS.Spacing.l) {
@@ -96,8 +108,14 @@ struct ExchangeView: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.top, DS.Spacing.xl)
+            // 위에서 중앙으로 내려앉는 등장 (F9)
+            .opacity(arrived ? 1 : 0)
+            .offset(y: arrived ? 0 : -28)
+            .onAppear {
+                withAnimation(reduceMotion ? nil : DS.Motion.settle) { arrived = true }
+            }
         }
+        .defaultScrollAnchor(.center)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title). \(caption)")
     }
@@ -120,8 +138,10 @@ struct ExchangeView: View {
 
     // Dynamic Type 극단에서 내용이 화면을 넘칠 수 있다 — 내용은 스크롤,
     // 행동 버튼은 safeAreaInset으로 항상 화면 안에 남긴다.
+    // 겹치는 관심사는 카드 하단 알약 줄로 카드 안에 들어간다 (F3) — 별도 줄 폐기.
     private func completedView(_ record: GyeopRecord) -> some View {
-        ScrollView {
+        let shared = model.myCard.map { record.counterpartCard.sharedInterests(with: $0) } ?? []
+        return ScrollView {
             VStack(spacing: DS.Spacing.l) {
                 VStack(spacing: DS.Spacing.s) {
                     Text("겹이 쌓였어요")
@@ -131,27 +151,30 @@ struct ExchangeView: View {
                         .font(DS.Typo.body)
                         .foregroundStyle(DS.Palette.secondaryText)
                 }
+                .opacity(celebrated ? 1 : 0)
+                .offset(y: celebrated ? 0 : -16)
+                .animation(reduceMotion ? nil : DS.Motion.settle.delay(0.15), value: celebrated)
 
-                CardView(card: record.counterpartCard)
+                CardView(card: record.counterpartCard, overlap: shared)
                     .padding(.horizontal, DS.Spacing.xl)
+                    .scaleEffect(celebrated ? 1 : 0.9)
+                    .opacity(celebrated ? 1 : 0)
+                    .animation(reduceMotion ? nil : DS.Motion.cardAppear, value: celebrated)
 
-                if let myCard = model.myCard {
-                    let shared = record.counterpartCard.sharedInterests(with: myCard)
-                    if !shared.isEmpty {
-                        // 겹친 칩 순차 페이드인 (결정 R8: 0.3s)
-                        StaggeredOverlapChips(items: shared)
-                            .padding(.horizontal, DS.Spacing.xl)
-                    }
-                    if !myCard.emoji.isEmpty, myCard.emoji == record.counterpartCard.emoji {
-                        // 이모지 겹침도 "겹침" — 와인 톤(overlapInk)으로, 빨강은 제목·CTA 둘만 (U1)
-                        Text("이모지도 겹쳤어요 \(myCard.emoji) — 오늘의 이스터에그")
-                            .font(DS.Typo.headline)
-                            .foregroundStyle(DS.Palette.overlapInk)
-                            .multilineTextAlignment(.center)
-                    }
+                if let myCard = model.myCard,
+                   !myCard.emoji.isEmpty, myCard.emoji == record.counterpartCard.emoji {
+                    // 이모지 겹침도 "겹침" — 와인 톤(overlapInk)으로, 빨강은 제목·CTA 둘만 (U1)
+                    Text("이모지도 겹쳤어요 \(myCard.emoji), 오늘의 이스터에그")
+                        .font(DS.Typo.headline)
+                        .foregroundStyle(DS.Palette.overlapInk)
+                        .multilineTextAlignment(.center)
+                        .opacity(celebrated ? 1 : 0)
+                        .animation(reduceMotion ? nil : DS.Motion.settle.delay(0.3), value: celebrated)
                 }
             }
         }
+        // 융합에서 넘어온 흐름을 잇는 등장 — 카드가 먼저, 제목이 반 박자 뒤에
+        .onAppear { celebrated = true }
         .safeAreaInset(edge: .bottom) {
             Button {
                 dismiss()
@@ -245,43 +268,6 @@ struct ExchangeView: View {
                 phase = .failed(failure)
             }
         }
-    }
-}
-
-/// 겹친 관심사 칩 — 하나씩 0.3s 페이드인, 칩 사이 `chipStaggerStep` 간격 (결정 R8).
-/// Reduce Motion에서는 전부 즉시 표시.
-private struct StaggeredOverlapChips: View {
-    let items: [String]
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var shown = false
-
-    var body: some View {
-        LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: 96), spacing: DS.Spacing.s)],
-            spacing: DS.Spacing.s
-        ) {
-            ForEach(Array(items.enumerated()), id: \.element) { index, item in
-                Text(item)
-                    .font(DS.Typo.headline)
-                    .foregroundStyle(DS.Palette.overlapInk)
-                    .padding(.horizontal, DS.Spacing.s)
-                    .padding(.vertical, DS.Spacing.xs)
-                    .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
-                    .background(DS.Palette.overlapBg, in: Capsule())
-                    .overlay(Capsule().strokeBorder(DS.Palette.overlapLine))
-                    .opacity(shown ? 1 : 0)
-                    .animation(
-                        reduceMotion
-                            ? nil
-                            : .smooth(duration: DS.Motion.Moment.chipFadeDuration)
-                                .delay(Double(index) * DS.Motion.Moment.chipStaggerStep),
-                        value: shown
-                    )
-            }
-        }
-        .onAppear { shown = true }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("겹치는 관심사 \(items.joined(separator: ", "))")
     }
 }
 

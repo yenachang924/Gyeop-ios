@@ -29,7 +29,7 @@ public struct ClipOverlapView: View {
                         .font(DS.Typo.largeTitle)
                         .multilineTextAlignment(.center)
                         .accessibilityIdentifier("clip.overlap.title")
-                    Text("여기서 대화를 시작하세요 — 앱이 아니라, 지금 눈앞의 사람과.")
+                    Text("여기서 대화를 시작하세요. 앱이 아니라, 지금 눈앞의 사람과.")
                         .font(DS.Typo.body)
                         .foregroundStyle(DS.Palette.secondaryText)
                         .multilineTextAlignment(.center)
@@ -78,9 +78,9 @@ public struct ClipOverlapView: View {
 
     private var talkLine: String {
         if let first = sharedInterests.first {
-            return "\"\(first) 좋아하세요? 저도요\" — 첫 마디는 이미 준비됐어요."
+            return "\"\(first) 좋아하세요? 저도요\" 첫 마디는 이미 준비됐어요."
         }
-        return "성향이 닿아 있어요 — 서로 없는 걸 갖고 있다는 것도 대화가 됩니다."
+        return "성향이 닿아 있어요. 서로 없는 걸 갖고 있다는 것도 대화가 됩니다."
     }
 
     /// 겹친 관심사는 강조, 상대만 가진 관심사는 흐리게 — 프로토타입 overlap-chips 구성.

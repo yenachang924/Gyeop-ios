@@ -2,7 +2,7 @@ import Core
 import DesignSystem
 import SwiftUI
 
-/// 온보딩 3/3 — 닉네임 · 한 줄 · 이모지 원탭. 전부 선택사항 — 비워도 진행된다.
+/// 온보딩 3/3 — 닉네임 · 한 줄 · 이모지 원탭. 닉네임은 필수(F4), 나머지는 선택.
 struct ProfileStepView: View {
     @Binding var draft: OnboardingDraft
     let onCreate: () async -> Void
@@ -11,10 +11,20 @@ struct ProfileStepView: View {
     @State private var isCreating = false
     @State private var emojiQuery = ""
 
+    /// 이름 없는 카드는 텅 빈다 — 만남 앞의 주저함을 버리게 하는 장치로 필수 (F4).
+    private var nicknameMissing: Bool {
+        draft.nickname.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
     private var visibleEmojis: [EmojiIcon] {
         let query = emojiQuery.trimmingCharacters(in: .whitespaces)
         guard !query.isEmpty else {
-            return Array(EmojiCatalog.all.prefix(EmojiCatalog.initialDisplayCount))
+            // 초반 선택(관심사)과 같은 이름의 이모지를 앞으로 — 사용자 맞춤 정렬 (F5).
+            // 이름 일치만 승격한다: 카테고리 승격은 1차 노출 16개의 결정성을 깨뜨린다.
+            let picked = Set(draft.interests)
+            let mine = EmojiCatalog.all.filter { picked.contains($0.name) }
+            let rest = EmojiCatalog.all.filter { !picked.contains($0.name) }
+            return Array((mine + rest).prefix(EmojiCatalog.initialDisplayCount))
         }
         return EmojiCatalog.all.filter { $0.matches(query) }
     }
@@ -22,12 +32,12 @@ struct ProfileStepView: View {
     var body: some View {
         Form {
             Section {
-                Text("유일한 자유 입력이에요. 비워도 괜찮아요.")
+                Text("이름은 꼭 필요해요. 나머지는 비워도 괜찮아요.")
                     .font(DS.Typo.subheadline)
                     .foregroundStyle(DS.Palette.secondaryText)
             }
 
-            Section("닉네임") {
+            Section("닉네임 · 필수") {
                 TextField("예나", text: $draft.nickname)
                     .accessibilityIdentifier("onboarding.nickname")
             }
@@ -51,7 +61,7 @@ struct ProfileStepView: View {
             } header: {
                 Text("나를 나타내는 이모지 · 선택")
             } footer: {
-                Text("안 골라도 진행돼요 — 검색하면 전체 이모지를 볼 수 있어요")
+                Text("안 골라도 진행돼요. 검색하면 전체 이모지를 볼 수 있어요.")
             }
 
             Section {
@@ -71,7 +81,7 @@ struct ProfileStepView: View {
                             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
                     }
                 }
-                .disabled(isCreating)
+                .disabled(isCreating || nicknameMissing)
                 .accessibilityIdentifier("onboarding.createCard")
             }
         }

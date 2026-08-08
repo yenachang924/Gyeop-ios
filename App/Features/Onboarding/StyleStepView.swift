@@ -9,6 +9,8 @@ struct StyleStepView: View {
     let onNext: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// 진입 시 셀이 하나씩 내려앉는 등장 (F12) — Reduce Motion은 즉시 표시.
+    @State private var appeared = false
 
     private static let examples: [LeisureStyle: String] = [
         LeisureStyle(energy: .calm, venue: .indoor): "보드게임 · 독서",
@@ -25,16 +27,19 @@ struct StyleStepView: View {
                 VStack(alignment: .leading, spacing: DS.Spacing.s) {
                     Text("쉬는 날의 나는")
                         .font(DS.Typo.largeTitle)
-                    Text("하나만 — 성향의 결이 카드의 질감을 정해요")
+                    Text("하나만, 성향의 결이 카드의 질감을 정해요")
                         .font(DS.Typo.body)
                         .foregroundStyle(DS.Palette.secondaryText)
                 }
 
                 Grid(horizontalSpacing: DS.Spacing.s, verticalSpacing: DS.Spacing.s) {
-                    ForEach(LeisureStyle.Energy.allCases, id: \.self) { energy in
+                    ForEach(Array(LeisureStyle.Energy.allCases.enumerated()), id: \.element) { row, energy in
                         GridRow {
-                            ForEach(LeisureStyle.Venue.allCases, id: \.self) { venue in
-                                styleCell(LeisureStyle(energy: energy, venue: venue))
+                            ForEach(Array(LeisureStyle.Venue.allCases.enumerated()), id: \.element) { column, venue in
+                                styleCell(
+                                    LeisureStyle(energy: energy, venue: venue),
+                                    entranceIndex: row * LeisureStyle.Venue.allCases.count + column
+                                )
                             }
                         }
                     }
@@ -42,6 +47,7 @@ struct StyleStepView: View {
             }
             .padding(DS.Spacing.m)
         }
+        .onAppear { appeared = true }
         .background(DS.Palette.background)
         .navigationTitle("2 / 3")
         .navigationBarTitleDisplayMode(.inline)
@@ -56,7 +62,7 @@ struct StyleStepView: View {
         }
     }
 
-    private func styleCell(_ style: LeisureStyle) -> some View {
+    private func styleCell(_ style: LeisureStyle, entranceIndex: Int) -> some View {
         let isSelected = selected == style
 
         // 선택 상태는 무채 잉크 채움 — 관심사 칩과 같은 관습 (U1 원칙 1).
@@ -74,6 +80,13 @@ struct StyleStepView: View {
         // 4택1 선택 스프링 — 관심사 칩과 같은 결 (quick)
         .scaleEffect(isSelected ? 1.03 : 1)
         .animation(reduceMotion ? nil : DS.Motion.quick, value: selected)
+        // 진입 등장 — 셀이 순서대로 내려앉는다 (F12)
+        .opacity(appeared ? 1 : 0)
+        .offset(y: appeared ? 0 : 14)
+        .animation(
+            reduceMotion ? nil : DS.Motion.settle.delay(Double(entranceIndex) * 0.06),
+            value: appeared
+        )
         .accessibilityLabel("여가 성향 \(style.label)")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityIdentifier("onboarding.style.\(style.energy.rawValue)-\(style.venue.rawValue)")

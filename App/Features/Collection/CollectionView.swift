@@ -69,6 +69,8 @@ struct CollectionView: View {
                 selectedCard = card
             } label: {
                 CardView(card: card)
+                    // "본인의 영역" — 내 카드에만 은은한 쉬머링 (F7)
+                    .overlay { ShimmerFrame() }
             }
             .buttonStyle(.plain)
             .matchedTransitionSource(id: card.id, in: cardZoom)
@@ -85,7 +87,7 @@ struct CollectionView: View {
                 ContentUnavailableView(
                     "아직 겹이 없어요",
                     systemImage: "person.2",
-                    description: Text("옆 사람과 아이폰을 맞대보세요 — 그게 전부입니다")
+                    description: Text("옆 사람과 아이폰을 맞대보세요. 그게 전부입니다.")
                 )
             } else {
                 LazyVGrid(
@@ -103,6 +105,39 @@ struct CollectionView: View {
                         .accessibilityIdentifier("collection.card.\(gyeop.counterpartCard.nickname)")
                     }
                 }
+            }
+        }
+    }
+}
+
+/// 내 카드 주변을 도는 은은한 광택 테두리 (F7 — 쉬머링 ~4%). 라이트·다크 공통으로
+/// 액센트 틴트를 쓴다 — 흰 광택은 라이트 배경에서 사라진다. 강도는 `DS.Opacity.shimmer`,
+/// 실기기 체감 튜닝 대상. Reduce Motion에서는 회전 없이 고정 광택만 남는다.
+private struct ShimmerFrame: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var spinning = false
+
+    var body: some View {
+        AngularGradient(
+            stops: [
+                .init(color: .clear, location: 0),
+                .init(color: DS.Palette.accent, location: 0.22),
+                .init(color: .clear, location: 0.5),
+                .init(color: DS.Palette.accent, location: 0.72),
+                .init(color: .clear, location: 1),
+            ],
+            center: .center
+        )
+        // 그라디언트 면을 돌리고 테두리 모양으로 오려낸다 — 모서리가 회전에 어긋나지 않는다.
+        .scaleEffect(1.6)
+        .rotationEffect(.degrees(spinning ? 360 : 0))
+        .mask { RoundedRectangle(cornerRadius: DS.Radius.card).strokeBorder(lineWidth: 3) }
+        .opacity(DS.Opacity.shimmer)
+        .allowsHitTesting(false)
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.linear(duration: 6).repeatForever(autoreverses: false)) {
+                spinning = true
             }
         }
     }

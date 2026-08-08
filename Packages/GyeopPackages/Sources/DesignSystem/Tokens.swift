@@ -122,6 +122,9 @@ public enum DS {
         /// D-day 등 상시 노출되는 카운터 숫자 — Weather/Fitness/Screen Time처럼 Rounded 디자인,
         /// monospacedDigit으로 자릿수 변화에도 레이아웃이 흔들리지 않는다.
         public static let counter = Font.system(.title, design: .rounded).weight(.heavy).monospacedDigit()
+        /// 카드 대표 이모지 (F5 — 카드에서 더 크게). 이모지는 글자가 아니라 픽토그램이라
+        /// Dynamic Type 대상에서 제외한다 — 카드 정보는 접근성 레이블이 전달한다.
+        public static let cardEmoji = Font.system(size: 56)
     }
 
     /// 상태 전환 애니메이션 프리셋. 시스템 시트·탭 전환과 같은 계열의 스프링을 재사용해
@@ -134,6 +137,11 @@ public enum DS {
         public static let quick = Animation.spring(response: 0.2, dampingFraction: 0.9)
         /// 카드 등장(리빌·첫 표시) — 스케일 인과 함께 쓴다. standard보다 한 호흡 길고 여유 있게.
         public static let cardAppear = Animation.spring(response: 0.4, dampingFraction: 0.75)
+        /// 카드 딜 인 (F6 — 토스 카드 발급 모티브): 아래에서 떠오르며 틸트가 풀린다.
+        /// cardAppear보다 길고, 유동 무드에 맞춰 거의 안 튕긴다.
+        public static let cardDeal = Animation.spring(response: 0.55, dampingFraction: 0.85)
+        /// 화면 요소가 제자리에 내려앉는 등장 (F9 상대 찾는 중 · F12 성향 셀) — 무바운스.
+        public static let settle = Animation.smooth(duration: 0.45)
         /// 관심사를 고를 때 카드가 "물드는" 색 보간 — 축하가 아니라 반영이므로 무바운스.
         public static let dye = Animation.smooth(duration: 0.5)
         /// "겹!" 융합 — 결정 R7: `.smooth` 스프링, response 0.5, 거의 무바운스(단조 감속).
@@ -162,5 +170,8 @@ public enum DS {
     /// 커스텀 합성 뷰는 `.disabled()`가 상호작용만 막고 겉모습은 그대로라, 직접 흐려줄 때 이 값을 쓴다.
     public enum Opacity {
         public static let disabled: Double = 0.4
+        /// 컬렉션 내 카드 주변 쉬머링 강도 (F7 — "아주 은은하게 4% 정도").
+        /// 실기기 체감 튜닝 대상 — 값 조정은 여기서만.
+        public static let shimmer: Double = 0.04
     }
 }

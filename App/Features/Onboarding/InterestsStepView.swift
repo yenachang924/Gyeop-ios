@@ -9,6 +9,8 @@ struct InterestsStepView: View {
     let onNext: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// 선택이 바뀔 때마다 +1 — 카드 프리뷰의 stir(F11 "섞는 맛")를 깨운다.
+    @State private var stirCount = 0
 
     /// 아직 성향·닉네임·이모지를 고르기 전이라 중립값으로 시드를 낸다 — 이후 단계에서
     /// 실제 값이 채워지면 같은 규칙(`CardSeed`)으로 다시 계산되어 최종 카드와 이어진다.
@@ -68,23 +70,24 @@ struct InterestsStepView: View {
                             .padding(DS.Spacing.m)
                     }
                     .transition(.opacity)
-                    .accessibilityLabel("카드 미리보기 — 관심사를 고르면 색이 채워져요")
+                    .accessibilityLabel("카드 미리보기, 관심사를 고르면 색이 채워져요")
                     .accessibilityIdentifier("onboarding.interests.preview.empty")
             } else {
-                CardView(card: previewCard)
+                CardView(card: previewCard, stirToken: stirCount)
                     .transition(.scale(scale: 0.94).combined(with: .opacity))
-                    .accessibilityLabel("카드 미리보기 — 선택한 관심사로 물든 카드")
+                    .accessibilityLabel("카드 미리보기, 선택한 관심사로 물든 카드")
                     .accessibilityIdentifier("onboarding.interests.preview.filled")
             }
         }
         .animation(reduceMotion ? nil : DS.Motion.dye, value: selected)
+        .onChange(of: selected) { stirCount += 1 }
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
             Text("요즘 나를 이루는 것")
                 .font(DS.Typo.largeTitle)
-            Text("최대 \(UserProfile.maxInterests)개 — 이 선택이 곧 카드의 색이 됩니다")
+            Text("최대 \(UserProfile.maxInterests)개, 이 선택이 곧 카드의 색이 됩니다")
                 .font(DS.Typo.body)
                 .foregroundStyle(DS.Palette.secondaryText)
         }
