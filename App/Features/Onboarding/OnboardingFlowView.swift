@@ -9,20 +9,12 @@ struct OnboardingFlowView: View {
     @Environment(AppModel.self) private var model
 
     @State private var path: [Step] = []
-    @State private var draft = Draft()
+    @State private var draft = OnboardingDraft()
 
     enum Step: Hashable {
         case style
         case profile
         case reveal(CardSnapshot)
-    }
-
-    struct Draft {
-        var interests: [String] = []
-        var style: LeisureStyle?
-        var nickname = ""
-        var tagline = ""
-        var emoji = ""
     }
 
     var body: some View {

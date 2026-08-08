@@ -4,7 +4,7 @@ import SwiftUI
 
 /// 온보딩 3/3 — 닉네임 · 한 줄 · 이모지 원탭
 struct ProfileStepView: View {
-    @Binding var draft: OnboardingFlowView.Draft
+    @Binding var draft: OnboardingDraft
     let onCreate: () async -> Void
 
     @State private var isCreating = false

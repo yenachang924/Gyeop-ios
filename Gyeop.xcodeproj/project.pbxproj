@@ -13,6 +13,7 @@
 		3141FDC6408BA41C1F32BBF8 /* emoji-icons.csv in Resources */ = {isa = PBXBuildFile; fileRef = EE5F0DB1E684956C240C7993 /* emoji-icons.csv */; };
 		3191FDA00910CD022ACCC193 /* CardKit in Frameworks */ = {isa = PBXBuildFile; productRef = CCA957920C427472008FB9E4 /* CardKit */; };
 		348E0B6EB13908037F956664 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF396ED85073133240235C7A /* WelcomeView.swift */; };
+		4845F680AABE071714A9F6FC /* OnboardingDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B8BBBC567132FCFDD3F9BD2 /* OnboardingDraft.swift */; };
 		56F8704BC3A29AC15159ADC5 /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = C624FB5B92E45527785D84F5 /* Core */; };
 		58D46EA90DB166CF49C524DB /* GyeopClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = 8B25C63ADE80AD156FF1590D /* GyeopClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5D509A29E200FB2EE6BD26DD /* CardDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A315153ABBD0D3E154457254 /* CardDetailView.swift */; };
@@ -77,6 +78,7 @@
 		2B4B1EA1770D8AE18ED44731 /* EmojiCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiCatalog.swift; sourceTree = "<group>"; };
 		3F61AB8788D0608FCA8CD1F6 /* GyeopPackages */ = {isa = PBXFileReference; lastKnownFileType = folder; name = GyeopPackages; path = Packages/GyeopPackages; sourceTree = SOURCE_ROOT; };
 		42DA513B14E1385CA8F5209F /* Gyeop.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Gyeop.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6B8BBBC567132FCFDD3F9BD2 /* OnboardingDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingDraft.swift; sourceTree = "<group>"; };
 		77762B5D57F8BEB9881E4F14 /* InterestsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterestsStepView.swift; sourceTree = "<group>"; };
 		7BB9415FD921160F6E33BDE5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		863A4BB1552A39DBD063E27E /* CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionView.swift; sourceTree = "<group>"; };
@@ -169,6 +171,7 @@
 			isa = PBXGroup;
 			children = (
 				77762B5D57F8BEB9881E4F14 /* InterestsStepView.swift */,
+				6B8BBBC567132FCFDD3F9BD2 /* OnboardingDraft.swift */,
 				8AE100902A9F49506C6D2A50 /* OnboardingFlowView.swift */,
 				F2B532C58FBE7B2E92053F29 /* ProfileStepView.swift */,
 				96FA8444B0DB1FC4BBA71E12 /* StyleStepView.swift */,
@@ -421,6 +424,7 @@
 				61AF2EDDE559D5AF86611CC2 /* ExchangeView.swift in Sources */,
 				AD283490731BEF482F78C764 /* GyeopApp.swift in Sources */,
 				0C5F8F682F8F459D586F288E /* InterestsStepView.swift in Sources */,
+				4845F680AABE071714A9F6FC /* OnboardingDraft.swift in Sources */,
 				D2A9F6636C1E41DC29A1863E /* OnboardingFlowView.swift in Sources */,
 				911B838843CD755B11384B7E /* ProfileStepView.swift in Sources */,
 				17DD98D19E804442087A10EE /* SettingsView.swift in Sources */,
