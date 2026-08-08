@@ -103,7 +103,7 @@ Welcome·클립 화면은 세트에 없음. 결론: **10장 전부 정렬 완료
 
 ## [결정 지점] — 소유자 판단 필요
 
-1. **커밋 안 된 POSTECH 팔레트 작업** (작업 트리: `Tokens.swift` accent indigo→POSTECH Red 등 5색 + `heroTitleStyle` + `CardAmbientBackground.swift` 신규 + App 뷰 12파일). 코멘트엔 "Figma 확정본(2026-08-08)"으로 표기 — 가드레일 "토큰 기존 값 변경 금지"보다 먼저 만들어진 작업이다. **승인해 커밋할지, 되돌릴지** 결정 필요. 승인 시 `CardAmbientBackground`의 비결정성(hashValue)은 수정 대상.
+1. ~~커밋 안 된 POSTECH 팔레트 작업~~ → **결정됨 (2026-08-08): 되돌림.** 팔레트·타이포 판단은 소유자가 Figma에서 진행한다. 작업 트리에서 폐기 완료 — 토큰은 커밋된 기존 값(accent=indigo) 유지. 코드 반영은 Figma 확정 → docs 갱신 후에만.
 2. **배선표 수정 제안 2건**: (a) SIWA 로그인 게이트(스코프 ⑤ ★출시와 배선표 불일치) (b) 받은 카드 상세(`CardDetailView`) — 배선표에 추가하거나 화면 제거.
 3. **R2 프롬프트 범위 보정**: "AppClip 타깃 생성"은 완료 상태. R2의 실작업은 ③-1~4 (레인 재구성·실배선·인보케이션 정합·keep 경로). 어소시에이티드 도메인은 전부 `PLACEHOLDER.gyeop.example` 자리 표시(실도메인 확정 대기, `realign-and-testflight.md` D-1).
 
