@@ -141,6 +141,8 @@ struct ExchangeView: View {
     // 겹치는 관심사는 카드 하단 알약 줄로 카드 안에 들어간다 (F3) — 별도 줄 폐기.
     private func completedView(_ record: GyeopRecord) -> some View {
         let shared = model.myCard.map { record.counterpartCard.sharedInterests(with: $0) } ?? []
+        // 겹치는 관심사가 없으면 상대 성향 라벨이 알약 자리를 지킨다 (F14)
+        let pills = shared.isEmpty ? [record.counterpartCard.leisureStyle.label] : shared
         return ScrollView {
             VStack(spacing: DS.Spacing.l) {
                 VStack(spacing: DS.Spacing.s) {
@@ -155,7 +157,7 @@ struct ExchangeView: View {
                 .offset(y: celebrated ? 0 : -16)
                 .animation(reduceMotion ? nil : DS.Motion.settle.delay(0.15), value: celebrated)
 
-                CardView(card: record.counterpartCard, overlap: shared)
+                CardView(card: record.counterpartCard, overlap: pills)
                     .padding(.horizontal, DS.Spacing.xl)
                     .scaleEffect(celebrated ? 1 : 0.9)
                     .opacity(celebrated ? 1 : 0)

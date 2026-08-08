@@ -47,6 +47,8 @@ struct StyleStepView: View {
             }
             .padding(DS.Spacing.m)
         }
+        // 내용이 화면보다 작으면 세로 중앙에 앉는다 (F13 — 상단 고정 폐기)
+        .defaultScrollAnchor(.center)
         .onAppear { appeared = true }
         .background(DS.Palette.background)
         .navigationTitle("2 / 3")

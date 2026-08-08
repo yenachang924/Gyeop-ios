@@ -1,0 +1,399 @@
+<!-- 겹 1차 시연 피드백 — 시각 제안 3종 (소유자 선택용)
+     생성: 2026-08-08 · 기준 커밋: d001f21 (F1~F12 반영 후)
+     주의: 코드가 바뀌면 이 목업은 기준 자격을 잃는다 — 비교 전 생성 시점 확인. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>겹 — 시각 제안 3종</title>
+<style>
+  /* 겹 DesignSystem 토큰의 CSS 근사 — Tokens.swift 기준 */
+  :root {
+    --bg: #F2F2F7;
+    --surface: #FFFFFF;
+    --ink: #111114;
+    --ink-2: #6C6C72;
+    --line: #E3E3E8;
+    --accent: #A61955;
+    --overlap-bg: #F7E1E8;
+    --overlap-line: #E3B9C7;
+    --overlap-ink: #731441;
+    --gold: #DABA65;
+    --orange: #F6A700;
+    --mint: #74D6E4;
+    --teal: #2F6F74;
+    --silver: #C5C6CA;
+    --gray: #7A7772;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1C1C1E;
+      --surface: #2C2C2E;
+      --ink: #F2F2F7;
+      --ink-2: #98989E;
+      --line: #3A3A3C;
+      --accent: #E0517F;
+      --overlap-bg: #38121F;
+      --overlap-line: #5C2438;
+      --overlap-ink: #F2AFC6;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1C1C1E;
+    --surface: #2C2C2E;
+    --ink: #F2F2F7;
+    --ink-2: #98989E;
+    --line: #3A3A3C;
+    --accent: #E0517F;
+    --overlap-bg: #38121F;
+    --overlap-line: #5C2438;
+    --overlap-ink: #F2AFC6;
+  }
+
+  * { margin: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+    line-height: 1.6;
+    padding: 32px 20px 80px;
+  }
+  main { max-width: 880px; margin: 0 auto; display: grid; gap: 56px; }
+
+  header h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; text-wrap: balance; }
+  header p.meta { font-size: 12px; color: var(--ink-2); margin-top: 6px; }
+  header p.lead { font-size: 15px; color: var(--ink-2); margin-top: 12px; max-width: 62ch; }
+  .pill-note {
+    display: inline-block; font-size: 12px; font-weight: 600;
+    color: var(--overlap-ink); background: var(--overlap-bg);
+    border: 1px solid var(--overlap-line); border-radius: 999px;
+    padding: 2px 10px; margin-top: 10px;
+  }
+
+  section > h2 { font-size: 21px; font-weight: 800; letter-spacing: -0.01em; }
+  section > h2 span.no {
+    color: var(--accent); font-variant-numeric: tabular-nums; margin-right: 6px;
+  }
+  section > p.desc { font-size: 14px; color: var(--ink-2); margin-top: 6px; max-width: 66ch; }
+
+  .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 20px; }
+  .option {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    padding: 16px; display: grid; gap: 12px; align-content: start;
+  }
+  .option h3 { font-size: 15px; font-weight: 700; }
+  .option h3 em { font-style: normal; color: var(--accent); margin-right: 4px; }
+  .option p { font-size: 13px; color: var(--ink-2); }
+  .option .tag { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: var(--ink-2); text-transform: uppercase; }
+
+  /* ── 카드 목업 (aspect 0.7, radius 20 — DS.Radius.card) ── */
+  .card {
+    aspect-ratio: 0.7; border-radius: 20px; padding: 22px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    color: #fff; position: relative; overflow: hidden;
+  }
+  .card .emoji { position: absolute; top: 18px; left: 20px; font-size: 44px; line-height: 1; }
+  .card .name { font-size: 19px; font-weight: 600; position: relative; }
+  .card .line { font-size: 13px; opacity: 0.95; position: relative; }
+  .card .pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; position: relative; }
+  .card .pills span {
+    font-size: 11px; color: var(--overlap-ink); background: var(--overlap-bg);
+    border: 1px solid var(--overlap-line); border-radius: 999px; padding: 2px 8px;
+  }
+
+  /* ⓐ 현행 메시 근사 + blur 강화 */
+  .mesh-a {
+    background:
+      radial-gradient(55% 45% at 20% 15%, #2E4E9E 0%, transparent 70%),
+      radial-gradient(60% 50% at 85% 30%, #3F9FC0 0%, transparent 72%),
+      radial-gradient(65% 55% at 30% 80%, #7FC98F 0%, transparent 70%),
+      radial-gradient(50% 45% at 80% 85%, #3F6FB0 0%, transparent 75%),
+      #2E4E9E;
+  }
+  .mesh-a::before {
+    content: ""; position: absolute; inset: -20%;
+    background: inherit; filter: blur(28px); z-index: 0;
+  }
+  /* ⓑ 수채화 연속 스펙트럼 */
+  .mesh-b {
+    background:
+      linear-gradient(160deg,
+        #3D5FA8 0%, #3F9FC0 22%, #57BFA0 40%, #8FC97F 55%,
+        #D9B25C 72%, #D9825C 88%, #B95C8A 100%);
+  }
+  .mesh-b::before {
+    content: ""; position: absolute; inset: -30%;
+    background: radial-gradient(40% 35% at 65% 25%, rgba(255,255,255,0.28), transparent 70%),
+                radial-gradient(45% 40% at 25% 70%, rgba(255,255,255,0.18), transparent 70%);
+    filter: blur(24px);
+  }
+  /* ⓒ 화면보호기풍 유동 배경 */
+  .mesh-c {
+    background:
+      radial-gradient(70% 60% at 30% 25%, #4E7ED0 0%, transparent 65%),
+      radial-gradient(75% 65% at 75% 45%, #C05C9E 0%, transparent 68%),
+      radial-gradient(80% 70% at 40% 85%, #E0985C 0%, transparent 65%),
+      #2E3E7E;
+    background-size: 200% 200%;
+    animation: drift 9s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    from { background-position: 0% 0%; }
+    to   { background-position: 100% 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mesh-c { animation: none; }
+    .bubble { transition: none; }
+  }
+
+  /* ── 2/3 레퍼런스 목업 ── */
+  .phone {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 20px;
+    aspect-ratio: 0.62; padding: 18px 14px; display: flex; flex-direction: column;
+    justify-content: center; gap: 10px; overflow: hidden;
+  }
+  .phone .ttl { font-size: 15px; font-weight: 800; text-align: left; }
+  .grid22 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .grid22 div {
+    border: 1px solid var(--line); border-radius: 12px; padding: 14px 8px;
+    font-size: 12px; font-weight: 600; text-align: center; color: var(--ink-2);
+  }
+  .grid22 div.sel { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .bubbles { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; min-height: 150px; }
+  .bubble {
+    border-radius: 999px; border: 1px solid var(--line); background: var(--bg);
+    color: var(--ink-2); font-size: 12px; font-weight: 600;
+    width: 64px; height: 64px; display: grid; place-items: center;
+    cursor: pointer; transition: all 0.35s cubic-bezier(0.3, 1.2, 0.4, 1);
+    -webkit-user-select: none; user-select: none;
+  }
+  .bubble.on {
+    width: 88px; height: 88px; background: var(--ink); color: var(--bg);
+    border-color: var(--ink); font-size: 13px;
+  }
+
+  .axis { display: grid; gap: 14px; }
+  .axis .blob {
+    width: 96px; height: 96px; border-radius: 50%; margin: 0 auto;
+    background: radial-gradient(circle at 35% 30%, var(--mint), var(--teal));
+    transition: background 0.5s, border-radius 0.5s;
+  }
+  .axis label { font-size: 11px; color: var(--ink-2); display: grid; gap: 4px; }
+  .axis input { width: 100%; accent-color: var(--accent); }
+
+  /* ── 아이콘 컬러웨이 ── */
+  .iconbox { display: grid; place-items: center; padding: 12px 0; }
+  .appicon {
+    width: 108px; height: 108px; border-radius: 24px; position: relative;
+    background: #FFFFFF; border: 1px solid var(--line); overflow: hidden;
+  }
+  .appicon i {
+    position: absolute; width: 62px; height: 62px; border-radius: 50%;
+  }
+  .appicon i.me  { left: 12px;  top: 23px; }
+  .appicon i.you { right: 12px; top: 23px; }
+
+  table { border-collapse: collapse; width: 100%; margin-top: 16px; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2); }
+  td.hex { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; }
+  .sw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-right: 6px; border: 1px solid var(--line); }
+
+  .verdict {
+    margin-top: 16px; padding: 14px 16px; border-left: 3px solid var(--accent);
+    background: var(--surface); border-radius: 0 12px 12px 0; font-size: 14px;
+  }
+  .verdict b { color: var(--accent); }
+</style>
+
+<main>
+  <header>
+    <h1>겹 — 1차 시연 피드백 시각 제안 3종</h1>
+    <p class="meta">2026-08-08 · 기준 커밋 d001f21 · 결정 기록: docs/design-decisions.md §1차 시연 피드백 라운드</p>
+    <p class="lead">실기기 확인 전에 방향만 빠르게 고르기 위한 CSS 근사 목업입니다.
+      실제 질감(MeshGradient 셰이더·햅틱·스프링)은 기기에서만 정확합니다.
+      각 섹션에서 하나씩 골라 주세요.</p>
+    <span class="pill-note">라이트·다크 모두 대응 — 기기 설정을 바꿔가며 보세요</span>
+  </header>
+
+  <!-- ① 카드 색 표현 -->
+  <section>
+    <h2><span class="no">①</span>1/3 카드 색 표현 — "수채화, 섞는 맛"</h2>
+    <p class="desc">피드백: "과하게 구획되어 있어. blur를 더 주거나, 수채화 연속 스펙트럼
+      무지개 모티브. 화면보호기 느낌 + variation." 셋 다 이모지·이름·한줄평 구성(F2)은 동일합니다.</p>
+    <div class="row">
+      <article class="option">
+        <span class="tag">유지 + 강화</span>
+        <div class="card mesh-a">
+          <span class="emoji">🧗</span>
+          <div class="name">예나</div>
+          <div class="line">새벽 러닝에 빠졌어요</div>
+        </div>
+        <h3><em>ⓐ</em>현행 메시 + blur 강화</h3>
+        <p>지금의 5×5 결정론 메시에 블러 반경만 키워 경계를 풀어줍니다.
+          "같은 입력=같은 카드"의 비교 가능성이 가장 잘 보존되고, 코드 변경이 최소입니다.
+          stir 연출(이번 반영분)과 조합하면 섞는 맛이 이미 상당할 수 있어요.</p>
+      </article>
+      <article class="option">
+        <span class="tag">재설계</span>
+        <div class="card mesh-b">
+          <span class="emoji">🧗</span>
+          <div class="name">예나</div>
+          <div class="line">새벽 러닝에 빠졌어요</div>
+        </div>
+        <h3><em>ⓑ</em>수채화 연속 스펙트럼</h3>
+        <p>구획 없는 무지개 연속 그라디언트 위에 물번짐 하이라이트.
+          가장 "수채화"에 가깝지만, 카드 간 개성 차이(시드 결정성의 체감)가 줄어들 수 있습니다.
+          시드는 스펙트럼의 시작 각도·번짐 위치를 정하는 방식으로 재설계해야 합니다.</p>
+      </article>
+      <article class="option">
+        <span class="tag">유동 + variation</span>
+        <div class="card mesh-c">
+          <span class="emoji">🧗</span>
+          <div class="name">예나</div>
+          <div class="line">새벽 러닝에 빠졌어요</div>
+        </div>
+        <h3><em>ⓒ</em>화면보호기풍 유동 배경</h3>
+        <p>색면이 아주 느리게 흐르는 살아있는 카드(목업은 9초 주기).
+          "정적"이라는 지적에 가장 정면으로 답하지만, 정지 상태가 없어
+          "같은 카드"라는 인상이 약해지고 배터리·Reduce Motion 고려가 필요합니다.</p>
+      </article>
+    </div>
+    <div class="verdict"><b>제안:</b> 실기기에서 stir 반영분을 먼저 보고 → 부족하면 ⓐ(blur 강화)를
+      기본, ⓑ는 시드 재설계 비용이 있어 별도 사이클로. ⓒ는 온보딩 프리뷰에만 한정 적용하는
+      절충도 가능합니다(컬렉션 카드는 정지).</div>
+  </section>
+
+  <!-- ② 2/3 인터랙션 -->
+  <section>
+    <h2><span class="no">②</span>2/3 선택 인터랙션 — 애플 앱 레퍼런스</h2>
+    <p class="desc">위치는 화면 중앙으로 확정(F13, 코드 반영 완료). 아래는 "면적을 선택하는
+      방식"에 대한 애플 순정 앱 레퍼런스 3가지입니다. B·C는 눌러보세요.</p>
+    <div class="row">
+      <article class="option">
+        <span class="tag">현행 · 중앙 이동만</span>
+        <div class="phone">
+          <div class="ttl">쉬는 날의 나는</div>
+          <div class="grid22">
+            <div>잔잔·실내</div><div>잔잔·실외</div>
+            <div class="sel">활발·실내</div><div>활발·실외</div>
+          </div>
+        </div>
+        <h3><em>A</em>2×2 격자 유지</h3>
+        <p><b>레퍼런스: 설정 앱의 선택 그리드.</b> 한 눈에 4택1이 읽히고 접근성·구현 부담이
+          없습니다. F12 순차 등장 + F13 중앙 배치가 이미 반영된 상태입니다.</p>
+      </article>
+      <article class="option">
+        <span class="tag">면적 선택</span>
+        <div class="phone">
+          <div class="ttl">쉬는 날의 나는</div>
+          <div class="bubbles" id="bubbles">
+            <span class="bubble">잔잔<br>실내</span>
+            <span class="bubble on">활발<br>실내</span>
+            <span class="bubble">잔잔<br>실외</span>
+            <span class="bubble">활발<br>실외</span>
+          </div>
+        </div>
+        <h3><em>B</em>버블 — Apple Music 온보딩</h3>
+        <p><b>레퍼런스: Apple Music 첫 실행의 장르 버블.</b> 누르면 커지는 원 =
+          "면적이 곧 선택 강도". 유동 무드와 결이 잘 맞고, 겹의 원(카드 융합 연출)과
+          형태 언어가 이어집니다. 4개뿐이라 배치가 심심하지 않게 흩뜨려야 합니다.</p>
+      </article>
+      <article class="option">
+        <span class="tag">2축 연속</span>
+        <div class="phone">
+          <div class="ttl">쉬는 날의 나는</div>
+          <div class="axis">
+            <div class="blob" id="blob"></div>
+            <label>잔잔 ↔ 활발
+              <input type="range" id="ax1" min="0" max="100" value="30">
+            </label>
+            <label>실내 ↔ 실외
+              <input type="range" id="ax2" min="0" max="100" value="40">
+            </label>
+          </div>
+        </div>
+        <h3><em>C</em>2축 블롭 — 마음챙김 "심리 상태"</h3>
+        <p><b>레퍼런스: 건강 앱 &gt; 마음챙김의 심리 상태 기록(iOS 17).</b> 슬라이더를
+          움직이면 블롭의 색·형태가 연속적으로 변합니다. 가장 유동적이지만, 결과는 결국
+          4분면으로 양자화되므로 "연속처럼 보이는데 4개"라는 어긋남이 생길 수 있습니다.</p>
+      </article>
+    </div>
+    <div class="verdict"><b>제안:</b> 기본값 <b>B(버블)</b> — 유동 무드·원형 모티브·"면적 선택"
+      요구를 모두 만족하면서 결과가 여전히 명확한 4택1입니다. C는 아름답지만 4택1과의
+      어긋남이 UX 부채가 됩니다. A는 이미 반영돼 있으니 실기기에서 B와 비교해 보세요.</div>
+  </section>
+
+  <!-- ③ 앱 아이콘 컬러웨이 -->
+  <section>
+    <h2><span class="no">③</span>앱 아이콘 — POSTECH 라운지 컬러웨이 (F16)</h2>
+    <p class="desc">형태는 결정 R10(겹친 두 원, 완전 불투명 노멀 블렌드) 유지.
+      색만 라운지 팔레트로 교체한 3안입니다. 왼쪽 원 = 나, 오른쪽 원 = 상대.</p>
+    <div class="row">
+      <article class="option">
+        <div class="iconbox"><div class="appicon">
+          <i class="me" style="background: linear-gradient(135deg, #74D6E4, #2F6F74);"></i>
+          <i class="you" style="background: linear-gradient(225deg, #F6A700, #DABA65);"></i>
+        </div></div>
+        <h3><em>A</em>공간 × 온기</h3>
+        <p>나 = Mint Cyan→Deep Teal(라운지의 공간감), 상대 = Orange→Gold(포인트·온기).
+          차가움과 따뜻함이 만나는 대비가 "겹"의 서사와 맞습니다.</p>
+      </article>
+      <article class="option">
+        <div class="iconbox"><div class="appicon">
+          <i class="me" style="background: linear-gradient(135deg, #A61955, #DABA65);"></i>
+          <i class="you" style="background: linear-gradient(225deg, #2F6F74, #74D6E4);"></i>
+        </div></div>
+        <h3><em>B</em>브랜드 정면</h3>
+        <p>나 = POSTECH Red→Gold, 상대 = Deep Teal→Mint Cyan. 브랜드 빨강이 아이콘에
+          직접 등장해 앱 액센트(POSTECH Red)와 가장 일관됩니다.</p>
+      </article>
+      <article class="option">
+        <div class="iconbox"><div class="appicon">
+          <i class="me" style="background: linear-gradient(135deg, #A61955, #E0517F);"></i>
+          <i class="you" style="background: linear-gradient(225deg, #DABA65, #F6A700);"></i>
+        </div></div>
+        <h3><em>C</em>레드 모노 + 골드</h3>
+        <p>나 = Red 톤온톤, 상대 = Gold→Orange. 가장 절제된 안 — 홈 화면의 다른
+          아이콘들 사이에서 단정하게 읽힙니다.</p>
+      </article>
+    </div>
+    <table>
+      <thead><tr><th>라운지 팔레트</th><th>Hex</th><th>용도 (원문)</th></tr></thead>
+      <tbody>
+        <tr><td><span class="sw" style="background:#A61955"></span>POSTECH Red</td><td class="hex">#A61955</td><td>메인 컬러, 로고/헤드라인 포인트</td></tr>
+        <tr><td><span class="sw" style="background:#F6A700"></span>POSTECH Orange</td><td class="hex">#F6A700</td><td>서브 포인트, 강조 요소</td></tr>
+        <tr><td><span class="sw" style="background:#7A7772"></span>POSTECH Gray</td><td class="hex">#7A7772</td><td>보조 텍스트, 중립 톤</td></tr>
+        <tr><td><span class="sw" style="background:#C5C6CA"></span>POSTECH Silver</td><td class="hex">#C5C6CA</td><td>라이트 배경, 구분선, 서브 배경</td></tr>
+        <tr><td><span class="sw" style="background:#DABA65"></span>POSTECH Gold</td><td class="hex">#DABA65</td><td>포인트, 고급감 있는 보조 강조</td></tr>
+        <tr><td><span class="sw" style="background:#74D6E4"></span>Mint Cyan</td><td class="hex">#74D6E4</td><td>공간감 포인트, 하단 간접조명 느낌</td></tr>
+        <tr><td><span class="sw" style="background:#2F6F74"></span>Deep Teal</td><td class="hex">#2F6F74</td><td>민트시안 보조, 깊이감 있는 포인트</td></tr>
+      </tbody>
+    </table>
+    <div class="verdict"><b>제안:</b> 기본값 <b>A</b> — 파운데이션(라운지)의 정체성이 가장 잘
+      드러나고, 두 원의 색 대비가 커서 작은 크기에서도 "두 사람"이 읽힙니다.
+      선택되면 1024px 최종본을 Figma 프레임으로 재작업합니다.</div>
+  </section>
+</main>
+
+<script>
+  document.querySelectorAll("#bubbles .bubble").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll("#bubbles .bubble").forEach(function (x) { x.classList.remove("on"); });
+      b.classList.add("on");
+    });
+  });
+  var blob = document.getElementById("blob");
+  function paintBlob() {
+    var energy = document.getElementById("ax1").value / 100; // 잔잔→활발
+    var venue = document.getElementById("ax2").value / 100;  // 실내→실외
+    var c1 = energy < 0.5 ? "#74D6E4" : "#F6A700";
+    var c2 = venue < 0.5 ? "#2F6F74" : "#8FC97F";
+    blob.style.background = "radial-gradient(circle at 35% 30%, " + c1 + ", " + c2 + ")";
+    blob.style.borderRadius = (50 - energy * 12) + "% " + (50 + energy * 10) + "% " +
+      (50 - venue * 10) + "% " + (50 + venue * 12) + "%";
+  }
+  ["ax1", "ax2"].forEach(function (id) {
+    document.getElementById(id).addEventListener("input", paintBlob);
+  });
+  paintBlob();
+</script>
