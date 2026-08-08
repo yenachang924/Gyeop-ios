@@ -8,6 +8,8 @@ struct StyleStepView: View {
     @Binding var selected: LeisureStyle?
     let onNext: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private static let examples: [LeisureStyle: String] = [
         LeisureStyle(energy: .calm, venue: .indoor): "보드게임 · 독서",
         LeisureStyle(energy: .calm, venue: .outdoor): "산책 · 일몰",
@@ -67,6 +69,9 @@ struct StyleStepView: View {
         }
         .buttonStyle(.bordered)
         .tint(selected == style ? DS.Palette.accent : .secondary)
+        // 4택1 선택 스프링 — 관심사 칩과 같은 결 (quick)
+        .scaleEffect(selected == style ? 1.03 : 1)
+        .animation(reduceMotion ? nil : DS.Motion.quick, value: selected)
         .accessibilityLabel("여가 성향 \(style.label)")
         .accessibilityAddTraits(selected == style ? .isSelected : [])
         .accessibilityIdentifier("onboarding.style.\(style.energy.rawValue)-\(style.venue.rawValue)")

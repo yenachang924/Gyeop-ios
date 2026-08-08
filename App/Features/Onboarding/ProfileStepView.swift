@@ -7,6 +7,7 @@ struct ProfileStepView: View {
     @Binding var draft: OnboardingDraft
     let onCreate: () async -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isCreating = false
     @State private var emojiQuery = ""
 
@@ -87,6 +88,9 @@ struct ProfileStepView: View {
                             draft.emoji == icon.emoji ? DS.Palette.accent.opacity(0.25) : .clear,
                             in: RoundedRectangle(cornerRadius: DS.Radius.chip)
                         )
+                        // 이모지 원탭 선택 스프링 — 다른 선택 컨트롤과 같은 결 (quick)
+                        .scaleEffect(draft.emoji == icon.emoji ? 1.08 : 1)
+                        .animation(reduceMotion ? nil : DS.Motion.quick, value: draft.emoji)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("이모지 \(icon.name)")

@@ -107,3 +107,138 @@ final class OnboardingFlowUITests: XCTestCase {
         XCTAssertTrue(app.buttons["reveal.toCollection"].waitForExistence(timeout: 5))
     }
 }
+
+/// U2 데모 레코딩 드라이버 — 시그니처 모션 3장면을 화면 레코딩용으로 천천히 재생한다.
+/// 일반 테스트 런에서는 스킵: `TEST_RUNNER_DEMO_RECORDING=1`을 준 xcodebuild test에서만 실행
+/// (TEST_RUNNER_ 접두사는 러너 프로세스 환경으로 벗겨져 들어온다).
+/// 레코딩은 병행하는 `xcrun simctl io <udid> recordVideo`가 담당한다.
+final class U2DemoRecordingUITests: XCTestCase {
+
+    private func guardDemo() throws {
+        guard ProcessInfo.processInfo.environment["DEMO_RECORDING"] == "1" else {
+            throw XCTSkip("데모 레코딩 전용 — TEST_RUNNER_DEMO_RECORDING=1일 때만 실행")
+        }
+    }
+
+    /// 장면 감상용 정지 — 애니메이션이 끝까지 재생될 시간을 준다.
+    private func hold(_ seconds: TimeInterval) {
+        RunLoop.current.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    /// 온보딩을 최소 동작으로 통과 — 장면 1·2의 공통 준비.
+    @MainActor
+    private func completeOnboarding(_ app: XCUIApplication, interests: [String]) {
+        let first = app.buttons["onboarding.interest.\(interests[0])"]
+        XCTAssertTrue(first.waitForExistence(timeout: 5))
+        for name in interests {
+            app.buttons["onboarding.interest.\(name)"].tap()
+        }
+        app.buttons["onboarding.interests.next"].tap()
+
+        let style = app.buttons["onboarding.style.active-indoor"]
+        XCTAssertTrue(style.waitForExistence(timeout: 5))
+        style.tap()
+        app.buttons["onboarding.style.next"].tap()
+
+        let create = app.buttons["onboarding.createCard"]
+        XCTAssertTrue(create.waitForExistence(timeout: 5))
+        create.tap()
+    }
+
+    /// 장면 1 — 내 카드: 리빌 스프링 스케일 인(cardAppear) + 5×5 MeshGradient 카드.
+    @MainActor
+    func testScene1_MyCardReveal() throws {
+        try guardDemo()
+        let app = XCUIApplication()
+        app.launchArguments = ["-uitest-reset"]
+        app.launch()
+
+        completeOnboarding(app, interests: ["클라이밍", "보드게임", "커피"])
+
+        let toCollection = app.buttons["reveal.toCollection"]
+        XCTAssertTrue(toCollection.waitForExistence(timeout: 5))
+        hold(3.0) // 카드 등장 스프링 + 카드 감상
+        toCollection.tap()
+        XCTAssertTrue(app.buttons["collection.myCard"].waitForExistence(timeout: 5))
+        hold(2.0)
+    }
+
+    /// 장면 2 — 겹! 순간: 융합(goo) → 링 파동 1회 → "겹!" → 겹친 칩 순차 페이드인.
+    /// Mock 상대(하람)의 관심사와 2개 겹치도록 클라이밍·보드게임을 고른다.
+    @MainActor
+    func testScene2_GyeopMoment() throws {
+        try guardDemo()
+        let app = XCUIApplication()
+        app.launchArguments = ["-uitest-reset"]
+        app.launch()
+
+        completeOnboarding(app, interests: ["클라이밍", "보드게임"])
+
+        let toCollection = app.buttons["reveal.toCollection"]
+        XCTAssertTrue(toCollection.waitForExistence(timeout: 5))
+        toCollection.tap()
+
+        let exchange = app.buttons["collection.exchange"]
+        XCTAssertTrue(exchange.waitForExistence(timeout: 5))
+        hold(1.0)
+        exchange.tap()
+
+        // Mock 스크립트(0.6s 간격) → 융합 1.5s → 완료 화면
+        let done = app.buttons["exchange.done"]
+        XCTAssertTrue(done.waitForExistence(timeout: 20))
+        hold(3.0) // 칩 스태거 + 이스터에그 감상
+        done.tap()
+        hold(1.5)
+    }
+
+    /// 장면 3 — 온보딩 마이크로(칩 스프링·프리뷰 물들기·이모지 팝) + 컬렉션 ↔ 카드 상세 줌.
+    @MainActor
+    func testScene3_OnboardingMicrosAndZoom() throws {
+        try guardDemo()
+        let app = XCUIApplication()
+        app.launchArguments = ["-uitest-reset"]
+        app.launch()
+
+        // 칩을 천천히 — 자리표시 → 카드 전환, 고를 때마다 색이 물들고, 해제하면 되돌아온다
+        let first = app.buttons["onboarding.interest.클라이밍"]
+        XCTAssertTrue(first.waitForExistence(timeout: 5))
+        first.tap()
+        hold(1.2)
+        // LazyVGrid는 화면 밖 요소를 만들지 않는다 — 첫 화면에 보이는 칩만 쓴다
+        app.buttons["onboarding.interest.수영"].tap()
+        hold(1.2)
+        app.buttons["onboarding.interest.달리기"].tap()
+        hold(1.2)
+        app.buttons["onboarding.interest.달리기"].tap() // 해제 — 색이 다시 물든다
+        hold(1.2)
+        app.buttons["onboarding.interests.next"].tap()
+
+        let style = app.buttons["onboarding.style.active-indoor"]
+        XCTAssertTrue(style.waitForExistence(timeout: 5))
+        style.tap()
+        hold(1.0)
+        app.buttons["onboarding.style.next"].tap()
+
+        let emoji = app.buttons["onboarding.emoji.클라이밍"]
+        XCTAssertTrue(emoji.waitForExistence(timeout: 5))
+        emoji.tap()
+        hold(1.0)
+        app.buttons["onboarding.createCard"].tap()
+
+        let toCollection = app.buttons["reveal.toCollection"]
+        XCTAssertTrue(toCollection.waitForExistence(timeout: 5))
+        hold(1.5)
+        toCollection.tap()
+
+        // 컬렉션 ↔ 카드 상세 — matchedTransitionSource + zoom 전환
+        let myCard = app.buttons["collection.myCard"]
+        XCTAssertTrue(myCard.waitForExistence(timeout: 5))
+        hold(1.0)
+        myCard.tap()
+        let close = app.buttons["닫기"]
+        XCTAssertTrue(close.waitForExistence(timeout: 5))
+        hold(1.5)
+        close.tap()
+        hold(1.5)
+    }
+}

@@ -5,9 +5,11 @@ import SwiftUI
 /// 시드 → 카드 비주얼 파라미터의 결정적 변환.
 /// **계약: 같은 시드 = 같은 파라미터 = 픽셀 동일 렌더.**
 ///
-/// 시드(sha256 hex)로 SplitMix64 PRNG를 초기화해 3×3 MeshGradient 제어점 9개의
-/// 색상(H)·채도(S)·명도(B)를 뽑는다. 채도·명도는 카드 위 흰 텍스트가 항상 WCAG AA
-/// 4.5:1 대비를 만족하도록 좁힌 범위(`saturationRange`·`brightnessRange`) 안에서 결정된다.
+/// 시드(sha256 hex)로 SplitMix64 PRNG를 초기화해 5×5 MeshGradient 제어점 25개의
+/// 색상(H)·채도(S)·명도(B)를 뽑는다 (결정 R2 — 5×5는 3×3보다 색이 유기적으로 스며들어
+/// "같은 입력=같은 카드" 개념이 시각적으로 더 잘 산다). 채도·명도는 카드 위 흰 텍스트가
+/// 항상 WCAG AA 4.5:1 대비를 만족하도록 좁힌 범위(`saturationRange`·`brightnessRange`)
+/// 안에서 결정된다.
 public struct CardVisual: Equatable, Sendable {
     /// 하나의 MeshGradient 제어점. HSB(SwiftUI `Color(hue:saturation:brightness:)`) 성분.
     public struct ControlPoint: Equatable, Sendable {
@@ -16,10 +18,12 @@ public struct CardVisual: Equatable, Sendable {
         public let brightness: Double
     }
 
-    /// 3×3 MeshGradient 제어점 9개 (행 우선: 좌상단 → 우하단).
+    /// 5×5 MeshGradient 제어점 25개 (행 우선: 좌상단 → 우하단).
     public let controlPoints: [ControlPoint]
 
-    public static let controlPointCount = 9
+    /// MeshGradient 격자 한 변의 제어점 수 (결정 R2: 5×5).
+    public static let meshDimension = 5
+    public static let controlPointCount = meshDimension * meshDimension
     public static let saturationRange: ClosedRange<Double> = 0.70...0.80
     public static let brightnessRange: ClosedRange<Double> = 0.45...0.62
     /// WCAG AA 기준 흰 텍스트 최소 대비.
@@ -38,9 +42,15 @@ public struct CardVisual: Equatable, Sendable {
         }
     }
 
-    /// MeshGradient에 바로 넣을 수 있는 9색.
+    /// MeshGradient에 바로 넣을 수 있는 25색.
     public var colors: [Color] {
         controlPoints.map { Color(hue: $0.hue, saturation: $0.saturation, brightness: $0.brightness) }
+    }
+
+    /// 카드를 한 색으로 대표할 때 쓰는 중앙 제어점 색 — "겹!" 융합 연출의 원(GyeopMomentView) 등.
+    /// 격자 중앙이라 카드 첫인상과 가장 가깝고, 시드가 같으면 언제나 같은 색이다.
+    public var dominantColor: Color {
+        colors[Self.controlPointCount / 2]
     }
 
     private static func seedValue(from hex: String) -> UInt64 {

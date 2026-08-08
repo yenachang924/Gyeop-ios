@@ -13,6 +13,8 @@ struct ExchangeView: View {
     private enum Phase: Equatable {
         case searching
         case connecting(name: String)
+        /// "겹!" 융합 연출 (결정 R7) — 끝나면 completed로 넘어간다.
+        case merging(GyeopRecord)
         case completed(GyeopRecord)
         case failed(ExchangeFailure)
     }
@@ -47,7 +49,7 @@ struct ExchangeView: View {
 
     private var isInProgress: Bool {
         switch phase {
-        case .searching, .connecting: true
+        case .searching, .connecting, .merging: true
         case .completed, .failed: false
         }
     }
@@ -63,6 +65,9 @@ struct ExchangeView: View {
 
         case .connecting(let name):
             progress(title: "\(name)님과 연결 중", caption: "그대로 잠시만요")
+
+        case .merging(let record):
+            momentView(record)
 
         case .completed(let record):
             completedView(record)
@@ -91,6 +96,22 @@ struct ExchangeView: View {
         .accessibilityLabel("\(title). \(caption)")
     }
 
+    /// "겹!" 순간 — 융합 연출이 끝나면 완료 화면으로. 연출 뷰가 Reduce Motion을 자체 처리한다.
+    private func momentView(_ record: GyeopRecord) -> some View {
+        VStack(spacing: DS.Spacing.l) {
+            Spacer()
+            GyeopMomentView(
+                myCard: model.myCard ?? record.counterpartCard,
+                counterpartCard: record.counterpartCard
+            ) {
+                phase = .completed(record)
+            }
+            .aspectRatio(1, contentMode: .fit)
+            .frame(maxWidth: .infinity)
+            Spacer()
+        }
+    }
+
     // Dynamic Type 극단에서 내용이 화면을 넘칠 수 있다 — 내용은 스크롤,
     // 행동 버튼은 safeAreaInset으로 항상 화면 안에 남긴다.
     private func completedView(_ record: GyeopRecord) -> some View {
@@ -111,10 +132,9 @@ struct ExchangeView: View {
                 if let myCard = model.myCard {
                     let shared = record.counterpartCard.sharedInterests(with: myCard)
                     if !shared.isEmpty {
-                        Text("겹치는 관심사: \(shared.joined(separator: " · "))")
-                            .font(DS.Typo.headline)
-                            .foregroundStyle(DS.Palette.accent)
-                            .multilineTextAlignment(.center)
+                        // 겹친 칩 순차 페이드인 (결정 R8: 0.3s)
+                        StaggeredOverlapChips(items: shared)
+                            .padding(.horizontal, DS.Spacing.xl)
                     }
                     if !myCard.emoji.isEmpty, myCard.emoji == record.counterpartCard.emoji {
                         Text("이모지도 겹쳤어요 \(myCard.emoji) — 오늘의 이스터에그")
@@ -212,12 +232,48 @@ struct ExchangeView: View {
                 break // completed가 바로 뒤따른다
             case .completed(let record):
                 await model.recordGyeop(record)
-                phase = .completed(record)
+                phase = .merging(record)
             case .failed(let failure):
                 if failure == .cancelled { return } // 닫기 버튼 경로 — 화면도 곧 사라진다
                 phase = .failed(failure)
             }
         }
+    }
+}
+
+/// 겹친 관심사 칩 — 하나씩 0.3s 페이드인, 칩 사이 `chipStaggerStep` 간격 (결정 R8).
+/// Reduce Motion에서는 전부 즉시 표시.
+private struct StaggeredOverlapChips: View {
+    let items: [String]
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var shown = false
+
+    var body: some View {
+        LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: 96), spacing: DS.Spacing.s)],
+            spacing: DS.Spacing.s
+        ) {
+            ForEach(Array(items.enumerated()), id: \.element) { index, item in
+                Text(item)
+                    .font(DS.Typo.headline)
+                    .foregroundStyle(DS.Palette.accent)
+                    .padding(.horizontal, DS.Spacing.s)
+                    .padding(.vertical, DS.Spacing.xs)
+                    .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
+                    .background(DS.Palette.accent.opacity(0.15), in: Capsule())
+                    .opacity(shown ? 1 : 0)
+                    .animation(
+                        reduceMotion
+                            ? nil
+                            : .smooth(duration: DS.Motion.Moment.chipFadeDuration)
+                                .delay(Double(index) * DS.Motion.Moment.chipStaggerStep),
+                        value: shown
+                    )
+            }
+        }
+        .onAppear { shown = true }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("겹치는 관심사 \(items.joined(separator: ", "))")
     }
 }
 

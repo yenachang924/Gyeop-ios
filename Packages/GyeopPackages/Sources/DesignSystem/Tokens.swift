@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 /// 디자인 토큰. 뷰 코드는 색·폰트·간격 리터럴을 직접 쓰지 않고 전부 여기서 가져온다 (CLAUDE.md UI 원칙).
@@ -69,6 +70,30 @@ public enum DS {
         public static let standard = Animation.spring(response: 0.35, dampingFraction: 0.8)
         /// 버튼·토글처럼 잦고 가벼운 반응 — 거의 안 튕긴다.
         public static let quick = Animation.spring(response: 0.2, dampingFraction: 0.9)
+        /// 카드 등장(리빌·첫 표시) — 스케일 인과 함께 쓴다. standard보다 한 호흡 길고 여유 있게.
+        public static let cardAppear = Animation.spring(response: 0.4, dampingFraction: 0.75)
+        /// 관심사를 고를 때 카드가 "물드는" 색 보간 — 축하가 아니라 반영이므로 무바운스.
+        public static let dye = Animation.smooth(duration: 0.5)
+        /// "겹!" 융합 — 결정 R7: `.smooth` 스프링, response 0.5, 거의 무바운스(단조 감속).
+        public static let merge = Animation.smooth(duration: 0.5)
+        /// "겹!" 링 파동 1회 — 확장하며 사라진다. 무바운스(파동은 되돌아오지 않는다).
+        public static let ringPulse = Animation.smooth(duration: Moment.ringDuration)
+
+        /// "겹!" 순간(융합 → 링 → 워드 → 칩) 타이밍 상수 — 실기기 감각 튜닝 대상 (U2).
+        public enum Moment {
+            /// 링 파동 시작 — 융합이 착지하는 시점에 맞춘다.
+            public static let ringDelay: TimeInterval = 0.45
+            /// 링 파동 길이.
+            public static let ringDuration: TimeInterval = 0.7
+            /// "겹!" 워드 등장 시점.
+            public static let wordDelay: TimeInterval = 0.55
+            /// 연출 전체 길이 — 이후 겹침 결과를 공개한다 (navigation-map §1: 1.5s).
+            public static let total: TimeInterval = 1.5
+            /// 겹친 칩 하나의 페이드인 길이 (결정 R8: 0.3s 순차 페이드인).
+            public static let chipFadeDuration: TimeInterval = 0.3
+            /// 칩 사이 순차 지연 간격.
+            public static let chipStaggerStep: TimeInterval = 0.1
+        }
     }
 
     /// 시스템 컨트롤(Button 등)은 `.disabled(true)`에서 자동으로 흐려지므로 이 토큰이 필요 없다.

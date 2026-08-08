@@ -4,14 +4,25 @@ import SwiftUI
 
 /// 정체성 카드 렌더. 앱에서 커스텀 비주얼이 허용된 유일한 컴포넌트 (CLAUDE.md UI 원칙).
 ///
-/// 시드 → 비주얼 결정성 계약은 `CardVisual`에 있다. 질감(Metal `layerEffect`)은
-/// `cardTexture(_:)` 자리만 잡아뒀다 — 파라미터는 D1 결정 대기.
+/// 시드 → 비주얼 결정성 계약은 `CardVisual`에 있다. 질감은 결정 R2에서
+/// "그레인 없음"으로 확정 — `cardTexture(_:)`의 항등 변환이 곧 최종 스펙이다.
 public struct CardView: View {
     private let card: CardSnapshot
 
     public init(card: CardSnapshot) {
         self.card = card
     }
+
+    /// 등간격 제어점 격자 (결정 R2: 5×5). 위치는 고정, 색만 시드가 정한다 —
+    /// 위치까지 흔들면 "같은 입력=같은 카드"의 비교 가능성이 흐려진다.
+    private static let meshPoints: [SIMD2<Float>] = {
+        let n = CardVisual.meshDimension
+        return (0..<n).flatMap { row in
+            (0..<n).map { column in
+                SIMD2(Float(column) / Float(n - 1), Float(row) / Float(n - 1))
+            }
+        }
+    }()
 
     public var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.m) {
@@ -38,13 +49,9 @@ public struct CardView: View {
         .aspectRatio(0.7, contentMode: .fit)
         .background {
             MeshGradient(
-                width: 3,
-                height: 3,
-                points: [
-                    [0, 0], [0.5, 0], [1, 0],
-                    [0, 0.5], [0.5, 0.5], [1, 0.5],
-                    [0, 1], [0.5, 1], [1, 1],
-                ],
+                width: CardVisual.meshDimension,
+                height: CardVisual.meshDimension,
+                points: Self.meshPoints,
                 colors: CardVisual(seed: card.seed).colors
             )
             .cardTexture()

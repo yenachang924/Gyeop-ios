@@ -8,6 +8,8 @@ struct InterestsStepView: View {
     @Binding var selected: [String]
     let onNext: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     /// 아직 성향·닉네임·이모지를 고르기 전이라 중립값으로 시드를 낸다 — 이후 단계에서
     /// 실제 값이 채워지면 같은 규칙(`CardSeed`)으로 다시 계산되어 최종 카드와 이어진다.
     private var previewCard: CardSnapshot {
@@ -50,26 +52,32 @@ struct InterestsStepView: View {
         }
     }
 
-    @ViewBuilder
+    /// 프리뷰가 "물드는" 0.5s 전환 — 자리표시 ↔ 카드 스왑과, 선택이 바뀔 때의
+    /// MeshGradient 색 보간이 전부 `DS.Motion.dye` 트랜잭션을 탄다.
     private var preview: some View {
-        if selected.isEmpty {
-            RoundedRectangle(cornerRadius: DS.Radius.card)
-                .fill(DS.Palette.surface)
-                .aspectRatio(1.6, contentMode: .fit)
-                .overlay {
-                    Text("고르는 순간, 카드가 물들어요")
-                        .font(DS.Typo.body)
-                        .foregroundStyle(DS.Palette.secondaryText)
-                        .multilineTextAlignment(.center)
-                        .padding(DS.Spacing.m)
-                }
-                .accessibilityLabel("카드 미리보기 — 관심사를 고르면 색이 채워져요")
-                .accessibilityIdentifier("onboarding.interests.preview.empty")
-        } else {
-            CardView(card: previewCard)
-                .accessibilityLabel("카드 미리보기 — 선택한 관심사로 물든 카드")
-                .accessibilityIdentifier("onboarding.interests.preview.filled")
+        ZStack {
+            if selected.isEmpty {
+                RoundedRectangle(cornerRadius: DS.Radius.card)
+                    .fill(DS.Palette.surface)
+                    .aspectRatio(1.6, contentMode: .fit)
+                    .overlay {
+                        Text("고르는 순간, 카드가 물들어요")
+                            .font(DS.Typo.body)
+                            .foregroundStyle(DS.Palette.secondaryText)
+                            .multilineTextAlignment(.center)
+                            .padding(DS.Spacing.m)
+                    }
+                    .transition(.opacity)
+                    .accessibilityLabel("카드 미리보기 — 관심사를 고르면 색이 채워져요")
+                    .accessibilityIdentifier("onboarding.interests.preview.empty")
+            } else {
+                CardView(card: previewCard)
+                    .transition(.scale(scale: 0.94).combined(with: .opacity))
+                    .accessibilityLabel("카드 미리보기 — 선택한 관심사로 물든 카드")
+                    .accessibilityIdentifier("onboarding.interests.preview.filled")
+            }
         }
+        .animation(reduceMotion ? nil : DS.Motion.dye, value: selected)
     }
 
     private var header: some View {
@@ -114,6 +122,9 @@ struct InterestsStepView: View {
         }
         .buttonStyle(.bordered)
         .tint(isSelected ? DS.Palette.accent : .secondary)
+        // 선택 스프링 스케일 — 잦은 인터랙션이라 quick (살짝만 커진다)
+        .scaleEffect(isSelected ? 1.04 : 1)
+        .animation(reduceMotion ? nil : DS.Motion.quick, value: isSelected)
         .disabled(!isSelected && isFull)
         .accessibilityLabel("관심사 \(icon.name)")
         .accessibilityAddTraits(isSelected ? .isSelected : [])

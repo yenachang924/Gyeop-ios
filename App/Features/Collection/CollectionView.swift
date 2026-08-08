@@ -9,6 +9,8 @@ struct CollectionView: View {
     @State private var selectedCard: CardSnapshot?
     @State private var showingExchange = false
     @State private var showingSettings = false
+    /// 컬렉션 ↔ 카드 상세 줌 전환 — 시스템 zoom 전환이 matchedGeometry 페어링을 대신한다.
+    @Namespace private var cardZoom
 
     var body: some View {
         NavigationStack {
@@ -44,6 +46,7 @@ struct CollectionView: View {
             }
             .sheet(item: $selectedCard) { card in
                 CardDetailView(card: card, myCard: model.myCard)
+                    .navigationTransition(.zoom(sourceID: card.id, in: cardZoom))
             }
             .sheet(isPresented: $showingExchange, onDismiss: {
                 Task { await model.enterCollection() }
@@ -66,6 +69,7 @@ struct CollectionView: View {
                 CardView(card: card)
             }
             .buttonStyle(.plain)
+            .matchedTransitionSource(id: card.id, in: cardZoom)
             .accessibilityIdentifier("collection.myCard")
         }
     }
@@ -93,6 +97,7 @@ struct CollectionView: View {
                             CardView(card: gyeop.counterpartCard)
                         }
                         .buttonStyle(.plain)
+                        .matchedTransitionSource(id: gyeop.counterpartCard.id, in: cardZoom)
                         .accessibilityIdentifier("collection.card.\(gyeop.counterpartCard.nickname)")
                     }
                 }

@@ -18,10 +18,11 @@ struct CardVisualTests {
         )
     }
 
-    @Test("제어점은 9개, 색상 각도는 전부 0...1 범위")
+    @Test("제어점은 5×5=25개, 색상 각도는 전부 0...1 범위")
     func controlPointCount() {
         let visual = CardVisual(seed: MockData.sampleCards[0].seed)
-        #expect(visual.controlPoints.count == 9)
+        #expect(CardVisual.controlPointCount == CardVisual.meshDimension * CardVisual.meshDimension)
+        #expect(visual.controlPoints.count == 25)
         #expect(visual.controlPoints.allSatisfy { (0.0...1.0).contains($0.hue) })
     }
 }

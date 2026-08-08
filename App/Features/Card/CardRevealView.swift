@@ -7,7 +7,11 @@ import SwiftUI
 /// Metal 셰이더 실구현이 오면 이 화면은 그대로 두고 CardView만 진화한다.
 struct CardRevealView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let card: CardSnapshot
+
+    /// 카드 등장 스프링 스케일 인 (DS.Motion.cardAppear) — 리빌의 "짠" 한 번.
+    @State private var appeared = false
 
     var body: some View {
         // Dynamic Type 극단에서도 깨지지 않게 — 내용은 스크롤, 버튼은 하단 고정
@@ -25,8 +29,13 @@ struct CardRevealView: View {
 
                 CardView(card: card)
                     .padding(.horizontal, DS.Spacing.xl)
+                    .scaleEffect(appeared ? 1 : 0.86)
+                    .opacity(appeared ? 1 : 0)
             }
             .padding(DS.Spacing.m)
+        }
+        .onAppear {
+            withAnimation(reduceMotion ? nil : DS.Motion.cardAppear) { appeared = true }
         }
         .safeAreaInset(edge: .bottom) {
             Button {
