@@ -1,117 +1,63 @@
 # AppClip
 
-> **2026-08-08 통합 세션: 타깃 활성화 완료.** `GyeopClip` 타깃이 project.yml에 연결됐고 본앱에
-> 임베드된다 (아래 "활성화 절차"는 이미 실행됨). 남은 것은 실도메인 확정 후 entitlements의
-> `PLACEHOLDER.gyeop.example` 교체와 App Store Connect 경험 등록 — `docs/review-kit.md` §4,
-> `docs/submission-checklist.md` 참조. 클립 조립부(`ClipModel.live()`)의 Mock 교환은
-> 실기기 MPC 검증 후 본앱과 같은 방식으로 교체 예정(아래 4번 항목).
+> **2026-08-08 정렬 스프린트(R2): 클립 레인 재구성 + 실배선 완료.**
+> `docs/navigation-map.md` §1 클립 레인과 1:1로 재구성됐고, Mock 3종 배선은
+> 실구현(CardKit 카드 엔진 · 실기기 MPC · App Group SwiftData + 30일 보존 집행)으로
+> 교체됐다. 남은 것은 실도메인 확정 후 entitlements의 `PLACEHOLDER.gyeop.example` 교체와
+> 실기기 검증(`docs/device-required.md`) — 아래 "알려진 갭" 참조.
 
-App Clip 타깃의 자리였다. 원래 계획: 부모 앱 번들 ID·entitlements(App Clip
-association)·서명이 필요해서, Developer Program 세팅이 끝난 뒤 S6 세션이 활성화한다. `project.yml`과
-`App/` 디렉토리는 S1/S6만 수정하므로 (CLAUDE.md 소유권 규칙), 그 세션은 그 경계 밖의 것만 만들었다.
-
-## 지금 여기 있는 것
+## 구조
 
 ```
 AppClip/
-  App/                     Xcode 타깃이 될 얇은 소스 (project.yml 활성화 후 sources:로 연결)
-    AppClipApp.swift         @main 진입점 — 인보케이션 URL을 ClipModel로 흘려보내는 배선만
-    AppClip.entitlements     자리 표시 entitlements (associated domain 값은 소유자 결정 대기)
-  AppClipKit/                로컬 SPM 패키지 — 플로우 로직·마이그레이션·URL 파싱·뷰 전부 여기
-    Package.swift             ../../Packages/GyeopPackages의 Core/DesignSystem/CardKit에 의존
-    Sources/AppClipKit/...
-    Tests/AppClipKitTests/... `cd AppClip/AppClipKit && swift test`로 지금 바로 검증 가능
+  App/                        GyeopClip 타깃 소스 (project.yml `GyeopClip`)
+    AppClipApp.swift            @main — 인보케이션 URL을 ClipModel로 흘려보내는 배선만
+    ClipAssembly.swift          조립 지점 — ClipModel.live(): 실구현을 Core 계약에 꽂는 유일한 곳
+    ClipOnboardingFlowView.swift  온보딩 3단계 조립 — 본앱 뷰를 **소스 공유로 재사용**
+    AppClip.entitlements        App Group + associated domain (도메인은 자리 표시)
+  UITests/                    GyeopClipUITests — 클립 레인 관통 + 설치 유도 게이트 검증
+  AppClipKit/                 로컬 SPM 패키지 — 상태 머신·마이그레이션·URL 파싱·클립 전용 뷰
 ```
 
-`project.yml`이 잠겨 있어 Xcode 타깃을 만들 수 없으므로, 검증 가능한 로직·뷰는 전부 별도의 로컬
-Swift Package(`AppClipKit`)로 뺐다. App의 `GyeopApp.swift` ↔ `AppModel` 패턴과 동일하게,
-`App/AppClipApp.swift`는 `AppClipKit.ClipModel` + `ClipRootView`를 띄우기만 하는 얇은 껍데기다.
+- **온보딩 3단계 재사용**: `InterestsStepView`·`StyleStepView`·`ProfileStepView`·
+  `OnboardingDraft`·`EmojiCatalog`(+CSV)를 GyeopClip 타깃이 소스 공유로 컴파일한다
+  (project.yml `GyeopClip.sources`). 본앱과 화면·accessibility identifier가 동일하다 —
+  **본앱 온보딩을 고치는 세션(R3)은 identifier를 바꾸면 클립 UI 테스트도 깨진다는 걸 알 것.**
+- **레인**: `ClipStage` = reception → onboarding → card → bump → overlap → keep → done
+  (+failed). **SKOverlay는 keep의 「전체 앱 받기」 탭에서만** 뜬다 — 그 이전 화면 어디에도
+  설치 유도 UI가 없고, UI 테스트가 각 단계에서 이를 단언한다.
+- **실배선** (`ClipAssembly.swift`): 카드 `CardKit.CardGenerator`, 저장
+  `SwiftDataGyeopRepository.appGroup(id:)`(생성 실패 시 인메모리 강등) + 실행마다
+  `pruneGyeops(before: ClipRetentionPolicy.cutoffDate())`로 30일 보존 집행, 교환은
+  실기기 `MultipeerExchangeSession` / 시뮬레이터 `MockExchangeSession`.
+- **마이그레이션**: 겹 성립 시 `ClipPendingGyeopWriter`가 App Group UserDefaults 우편함
+  (`com.gyeop.clip.pendingGyeops`)에 적재 → 본앱 `AppModel.bootstrap()`의
+  `ClipMigrationReceiver.migrate()`가 병합. App Group ID는 양쪽 다 `group.com.gyeop.app`.
+  ⚠️ 키 문자열은 여전히 AppClipKit·DataKit에 중복 하드코딩 — Core 공유 상수화는 계약 변경이라
+  세션 합의 대기 (`docs/security-backlog.md`에도 기록됨).
+- **인보케이션 URL**: `https://<도메인>/clip?t=<교환 토큰>&n=<발신자 닉네임·선택>`
+  (개발 폴백 `gyeop://clip` 동일 쿼리) — navigation-map §1에 기록됨. 시뮬레이터는
+  `_XCAppClipURL`로 주입 (Xcode 스킴 env + simctl `SIMCTL_CHILD__XCAppClipURL` 디버그 폴백).
 
-**지금 검증된 것:** `swift test` 12개 테스트 통과 — 인보케이션 URL 파싱, 30일 보존 정책, 클립→풀앱
-마이그레이션 쓰기측(App Group UserDefaults 왕복), 초대 수신→온보딩→교환→설치 제안 전체 플로우(Mock
-기반), 겹 성립 시 마이그레이션 훅 호출, 실패→재시도 복구. CardKit의 `CardView`(정체성 카드 렌더)도
-실제로 물려서 씀 — Mock/스텁이 아니다.
+## 검증 상태 (2026-08-08)
 
-**아직 못 하는 것:** Xcode 타깃이 없어서 시뮬레이터에서 `_XCAppClipURL`로 실제 클립 경험을 띄우는
-완료 기준은 이번 세션에서 만족시킬 수 없다. 아래 활성화 절차 이후에 가능하다.
+- `cd AppClip/AppClipKit && swift test` — 14개 통과 (레인 상태 머신·keep 이전 설치 불가·
+  우편함 훅·URL 파싱·30일 정책).
+- `cd Packages/GyeopPackages && swift test` — 64개 통과 (ClipMigrationReceiver·pruneGyeops 포함).
+- GyeopClip UI 테스트 2개 통과 — `_XCAppClipURL` 인보케이션으로 reception→done 관통,
+  keep 이전 화면마다 설치 유도 부재 단언, 실패→재시도.
+- **클립 크기: 1.6MB** (Release·iphoneos·미서명 .app — 실행 바이너리 1.53MB + CSV 13KB).
+  GyeopKit·DataKit 추가 후에도 35MB 예산 대비 약 4.6%. 외부 의존성 0.
 
-## 활성화 절차 (S1/S6만)
+## 알려진 갭
 
-1. `project.yml`의 `# --- AppClip (자리) ---` 블록을 아래로 교체하고 `xcodegen generate`:
-
-   ```yaml
-   GyeopClip:
-     type: application.on-demand-install-capable
-     platform: iOS
-     sources: [AppClip/App]
-     dependencies:
-       - package: GyeopPackages
-         products: [Core, DesignSystem, CardKit]
-       - package: AppClipKit
-         products: [AppClipKit]
-     settings:
-       base:
-         PRODUCT_BUNDLE_IDENTIFIER: com.gyeop.app.Clip
-         GENERATE_INFOPLIST_FILE: YES
-         INFOPLIST_KEY_CFBundleDisplayName: 겹 클립
-         CODE_SIGN_ENTITLEMENTS: AppClip/App/AppClip.entitlements
-         TARGETED_DEVICE_FAMILY: "1"
-   ```
-
-   `packages:` 섹션에 로컬 패키지 참조 추가:
-   ```yaml
-   packages:
-     GyeopPackages:
-       path: Packages/GyeopPackages
-     AppClipKit:
-       path: AppClip/AppClipKit
-   ```
-
-   Info.plist에 App Clip 필수 키 추가 필요 (`NSAppClip` 딕셔너리 — `NSAppClipRequestEphemeralUserNotification`
-   등). xcodegen의 `info:` 블록 또는 `INFOPLIST_KEY_*`로 배선.
-
-2. 부모 앱(`App/`)에 매칭 entitlements 추가 — 지금 `App/`에는 entitlements 파일 자체가 없다. 새로 만들어서:
-   - `com.apple.developer.associated-domains`: `applinks:` + `appclips:` 둘 다, `AppClip.entitlements`와
-     같은 실도메인 (지금은 둘 다 자리 표시).
-   - `com.apple.security.application-groups`: `group.com.gyeop.app` (클립과 동일 그룹).
-   - `project.yml`의 `Gyeop` 타깃 settings에 `CODE_SIGN_ENTITLEMENTS` 추가.
-
-3. 어소시에이티드 도메인 실도메인 확정 후 `AppClip.entitlements`와 부모 entitlements의
-   `PLACEHOLDER.gyeop.example`을 교체.
-
-4. `AppClipKit.ClipModel.live()`가 쓰는 `MockCardGenerator`/`MockGyeopRepository`/`MockExchangeSession`을
-   실배선으로 교체하는 지점 — App 조립 지점(`AppModel.live()`와 대응)에서 S1/S6이 CardKit 실구현·
-   App Group SwiftData 스토어·GyeopKit 실 `ExchangeSession`을 주입. `ClipModel.init`이 이미
-   생성자 주입 형태라 교체 지점은 `ClipModel.live()` 하나뿐이다.
-
-5. 클립→풀앱 마이그레이션은 이미 양쪽이 맞물려 있다 — 클립은 겹 성립 시
-   `AppClipKit.ClipPendingGyeopWriter`로 App Group `UserDefaults(suiteName:)`에 `GyeopRecord`를
-   쌓고(`ClipModel.live()`에 이미 배선됨), DataKit 세션이 별도로 만든
-   `DataKit.ClipMigrationReceiver.migrate()`가 같은 키(`com.gyeop.clip.pendingGyeops`)를 읽어
-   풀 앱 저장소로 병합한다. 남은 건 두 세션이 **같은 App Group ID 문자열**을 실제로 주고받는 것뿐 —
-   지금은 클립 쪽 `"group.com.gyeop.app"` 하나만 존재하고 DataKit 쪽 호출부(어디서 어떤 ID로
-   `ClipMigrationReceiver`를 생성하는지)는 아직 없어 보인다. App 조립 지점에서 두 값이 같은지
-   확인하고 `AppModel.bootstrap()` 근처에서 1회 호출로 연결할 것.
-   ⚠️ 키 문자열(`pendingGyeopsKey`)이 AppClip·DataKit 양쪽에 하드코딩 중복돼 있다 — Core로 옮겨
-   공유 상수화하는 걸 권장하지만, Core 변경은 관련 세션 합의가 필요해 이번 세션에서 하지 않았다.
-
-## 알려진 갭 (다음 사람이 알아야 할 것)
-
-- **"온보딩 공용 뷰 재사용"이 지금은 구조적으로 불가능하다.** `App/Features/Onboarding/*`와
-  `App/Support/EmojiCatalog.swift`는 App 타깃 전용 파일이라 Clip이 의존할 수 있는 패키지 안에 없다.
-  그래서 `ClipOnboardingView`는 같은 DesignSystem 토큰·문구 톤으로 새로 만든 축약형(한 화면,
-  CSV 번들 로드 없이 12개 하드코딩 관심사)이지 진짜 "재사용"이 아니다. 온보딩을 진짜 공유하려면
-  App 소유 세션이 그 파일들을 패키지(예: 새 `OnboardingKit` 또는 DesignSystem)로 옮겨야 한다 —
-  Core 계약 변경과 마찬가지로 관련 세션 합의가 필요한 작업이라 이 세션에서 임의로 하지 않았다.
-- **참조 문서 불일치.** 이 세션에 전달된 지시가 가리킨 `docs/gyeop-prototype.html`,
-  `docs/implementation-scope.md`는 레포에 없다(레포 루트의 `gyeop-spec.md`, `implementation-scope.md`만
-  존재). 카피는 `gyeop-spec.md` F1·F2 기준 임시 확정 — `OnboardingFlowView.swift`가 이미 쓰고 있는
-  것과 같은 관례(프로토타입 파일이 오면 교체).
-- **35MB 예산.** 지금 AppClipKit이 추가하는 의존성은 Core/DesignSystem/CardKit(어차피 계획된 것)뿐,
-  서드파티 추가 없음. 관심사 카탈로그도 CSV 번들 대신 Swift 배열 12개로 하드코딩해 리소스 크기를
-  줄였다. GyeopKit(MPC/UWB)·DataKit(SwiftData)은 의도적으로 의존성에서 뺐다 — 실배선 전까지는
-  Mock만 쓰므로 필요 없다.
-- **SKOverlay 호출 시점은 뷰 계층에서 강제된다.** `ClipInstallSuggestionView`는 `ClipStage.suggestingInstall`
-  에서만 그려지고, 그 뷰 자체가 `.appClipInstallSuggestion(isPresented: true)`를 무조건 건다 —
-  즉 "교환 완료 후에만 설치 제안"이 화면 라우팅 구조로 보장된다(별도의 조건 분기가 아니라 도달
-  가능한 상태 자체가 이미 그 조건이다).
+- **발신자 카드 실표시 불가** — 인보케이션 URL에는 토큰·닉네임뿐, 카드 데이터는 교환에서야
+  도착한다. reception 화면은 닉네임 자리 표시(GroupBox)로 대체 중 — 토큰→카드 조회가 생기면
+  `CardView`로 교체.
+- **어소시에이티드 도메인 자리 표시** — 실도메인 확정 시 `AppClip.entitlements`·부모
+  entitlements·project.yml 데모 URL의 `PLACEHOLDER.gyeop.example` 교체.
+- **실기기 검증 대기** — MPC 맞대기(클립 Info.plist에 로컬 네트워크 키 추가됨), App Group
+  교차 프로세스 마이그레이션 (`docs/device-required.md` 통합 실행 계획 8번).
+- **R3 소관으로 남긴 것** — 온보딩 카피·이모지 카탈로그 교체(③-7)·관심사 실시간 카드
+  프리뷰(③-8)·`vibe` 「다음」 버튼(③-10)·이모지 이스터에그(③-5). 클립은 본앱 뷰를
+  소스 공유하므로 R3가 고치면 클립도 같이 좋아진다.

@@ -62,13 +62,21 @@ targets:
         TEST_TARGET_NAME: Gyeop
 
   # AppClip — 도메인은 자리 표시(PLACEHOLDER.gyeop.example), 실도메인 확정 시 entitlements 교체
+  # 온보딩 3단계는 본앱 뷰를 소스 공유로 재사용한다 (navigation-map §1 클립 레인 2~4).
   GyeopClip:
     type: application.on-demand-install-capable
     platform: iOS
-    sources: [AppClip/App]
+    sources:
+      - AppClip/App
+      - App/Features/Onboarding/InterestsStepView.swift
+      - App/Features/Onboarding/StyleStepView.swift
+      - App/Features/Onboarding/ProfileStepView.swift
+      - App/Features/Onboarding/OnboardingDraft.swift
+      - App/Support/EmojiCatalog.swift
+      - App/Resources/emoji-icons.csv
     dependencies:
       - package: GyeopPackages
-        products: [Core, DesignSystem, CardKit]
+        products: [Core, DesignSystem, CardKit, GyeopKit, DataKit]
       - package: AppClipKit
         products: [AppClipKit]
     settings:
@@ -83,9 +91,25 @@ targets:
         UILaunchScreen: {}
         ITSAppUsesNonExemptEncryption: false
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        # 클립도 실기기 MPC 맞대기를 한다 — 본앱과 같은 로컬 네트워크 권한·서비스명
+        NSLocalNetworkUsageDescription: 근처 사람과 아이폰을 맞대 카드를 교환하려면 로컬 네트워크 접근이 필요합니다.
+        NSBonjourServices: [_gyeop-exchange._tcp, _gyeop-exchange._udp]
         NSAppClip:
           NSAppClipRequestEphemeralUserNotification: false
           NSAppClipRequestLocationConfirmation: false
+
+  GyeopClipUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - AppClip/UITests
+    dependencies:
+      - target: GyeopClip
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.gyeop.app.Clip.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: GyeopClip
 
 schemes:
   Gyeop:
@@ -101,6 +125,7 @@ schemes:
 
   # 시뮬레이터에서 클립 경험 확인용 — _XCAppClipURL로 인보케이션 URL 주입
   # (실도메인 확정 전에는 자리 표시 도메인 URL로 파서 경로만 검증)
+  # URL 스펙: /clip?t=<교환 토큰>&n=<발신자 닉네임·선택> — docs/navigation-map.md §1
   GyeopClip:
     build:
       targets:
@@ -109,5 +134,10 @@ schemes:
       config: Debug
       environmentVariables:
         - variable: _XCAppClipURL
-          value: https://PLACEHOLDER.gyeop.example/clip?inviter=demo-runner
+          # n=지수 (URL 인코딩) — 파서 계약 InvocationURLParser(?t=&n=)와 일치
+          value: https://PLACEHOLDER.gyeop.example/clip?t=demo-token&n=%EC%A7%80%EC%88%98
           isEnabled: true
+    test:
+      config: Debug
+      targets:
+        - GyeopClipUITests

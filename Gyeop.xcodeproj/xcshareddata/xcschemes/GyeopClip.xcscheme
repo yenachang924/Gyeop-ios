@@ -39,7 +39,20 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4EEC88EC9466B5948A04989D"
+               BuildableName = "GyeopClipUITests.xctest"
+               BlueprintName = "GyeopClipUITests"
+               ReferencedContainer = "container:Gyeop.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
+      <CommandLineArguments>
+      </CommandLineArguments>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -66,7 +79,7 @@
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "_XCAppClipURL"
-            value = "https://PLACEHOLDER.gyeop.example/clip?inviter=demo-runner"
+            value = "https://PLACEHOLDER.gyeop.example/clip?t=demo-token&amp;n=%EC%A7%80%EC%88%98"
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>

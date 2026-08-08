@@ -13,6 +13,18 @@ public actor SwiftDataGyeopRepository: GyeopRepository {
         )
     }
 
+    /// App Group 공유 컨테이너 스토어 — App Clip이 쓴다. 클립과 본앱이 같은 그룹 ID를
+    /// 쓰면 같은 컨테이너를 본다 (겹 기록 자체의 본앱 병합은 UserDefaults 우편함
+    /// `ClipMigrationReceiver` 경로가 담당 — 이 스토어는 클립의 로컬 영속이다).
+    public static func appGroup(id: String) throws -> SwiftDataGyeopRepository {
+        SwiftDataGyeopRepository(
+            modelContainer: try ModelContainer(
+                for: UserProfileEntity.self, MyCardEntity.self, GyeopEntity.self,
+                configurations: ModelConfiguration(groupContainer: .identifier(id))
+            )
+        )
+    }
+
     public static func inMemory() throws -> SwiftDataGyeopRepository {
         SwiftDataGyeopRepository(
             modelContainer: try ModelContainer(
@@ -72,6 +84,17 @@ public actor SwiftDataGyeopRepository: GyeopRepository {
             sortBy: [SortDescriptor(\.occurredAt, order: .reverse)]
         )
         return try modelContext.fetch(descriptor).map { $0.toDomain() }
+    }
+
+    /// 클립 30일 보존 정책 집행 — `cutoff` 이전의 겹 기록을 지운다.
+    /// 클립 조립 지점이 실행 시마다 `ClipRetentionPolicy.cutoffDate()`로 호출한다.
+    /// 본앱 스토어에는 호출부가 없다 — 본앱의 겹은 기한 없이 남는 게 제품 규칙이다.
+    public func pruneGyeops(before cutoff: Date) async throws {
+        try modelContext.delete(
+            model: GyeopEntity.self,
+            where: #Predicate { $0.occurredAt < cutoff }
+        )
+        try modelContext.save()
     }
 
     // MARK: - 계정 삭제 (심사 필수)

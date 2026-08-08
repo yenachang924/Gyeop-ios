@@ -1,25 +1,38 @@
 import AppClipKit
+import DesignSystem
 import SwiftUI
 
-/// GyeopClip 앱 타깃의 유일한 진입점. 로직은 전부 AppClipKit(로컬 패키지)에 있고
-/// 이 파일은 인보케이션 URL을 모델로 흘려보내는 배선만 한다.
-///
-/// 타깃 자체는 아직 project.yml에 연결돼 있지 않다 — 활성화 절차는
-/// AppClip/README.md 참조 (S1/S6 소관, Developer Program 세팅 후).
+/// GyeopClip 앱 타깃의 진입점. 레인 라우팅은 AppClipKit(ClipRootView),
+/// 실구현 조립은 ClipAssembly, 온보딩 3단계는 본앱 뷰 소스 공유 — 이 파일은
+/// 인보케이션 URL을 모델로 흘려보내는 배선만 한다.
 @main
 struct GyeopClipApp: App {
     @State private var model = ClipModel.live()
 
     var body: some Scene {
         WindowGroup {
-            ClipRootView(model: model)
-                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
-                    guard let url = activity.webpageURL else { return }
+            ClipRootView(model: model) {
+                ClipOnboardingFlowView(model: model)
+            }
+            .tint(DS.Palette.accent)
+            .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+                guard let url = activity.webpageURL else { return }
+                model.receive(invocationURL: url)
+            }
+            .onOpenURL { url in
+                model.receive(invocationURL: url)
+            }
+            .task {
+                #if DEBUG
+                // Xcode 없이 simctl로 띄울 때도 인보케이션을 주입할 수 있게
+                // (`SIMCTL_CHILD__XCAppClipURL=…`) 환경 변수를 직접 읽는 폴백.
+                // Xcode 실행 경로(NSUserActivity)와 겹쳐도 receive는 같은 URL 재파싱이라 무해하다.
+                if let raw = ProcessInfo.processInfo.environment["_XCAppClipURL"],
+                   let url = URL(string: raw) {
                     model.receive(invocationURL: url)
                 }
-                .onOpenURL { url in
-                    model.receive(invocationURL: url)
-                }
+                #endif
+            }
         }
     }
 }

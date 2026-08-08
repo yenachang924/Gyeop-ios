@@ -147,4 +147,20 @@ struct SwiftDataGyeopRepositoryTests {
         #expect(try await repo.myCard() == nil)
         #expect(try await repo.gyeops().isEmpty)
     }
+
+    @Test("pruneGyeops는 기준선 이전 기록만 지운다 (클립 30일 보존 집행)")
+    func pruneDeletesOnlyRecordsBeforeCutoff() async throws {
+        let repo = try SwiftDataGyeopRepository.inMemory()
+        // sampleGyeops는 참조일 + 0·1·2일 간격 — 서로 다른 상대라 24h 규칙에 안 걸린다
+        for gyeop in MockData.sampleGyeops {
+            try await repo.record(gyeop)
+        }
+        let cutoff = MockData.referenceDate.addingTimeInterval(1.5 * 86_400)
+
+        try await repo.pruneGyeops(before: cutoff)
+
+        let remaining = try await repo.gyeops()
+        #expect(remaining.count == 1)
+        #expect(remaining.allSatisfy { $0.occurredAt >= cutoff })
+    }
 }

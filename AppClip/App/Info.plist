@@ -27,6 +27,13 @@
 		<key>NSAppClipRequestLocationConfirmation</key>
 		<false/>
 	</dict>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_gyeop-exchange._tcp</string>
+		<string>_gyeop-exchange._udp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>근처 사람과 아이폰을 맞대 카드를 교환하려면 로컬 네트워크 접근이 필요합니다.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>
