@@ -14,10 +14,10 @@ struct CardRevealView: View {
         ScrollView {
             VStack(spacing: DS.Spacing.l) {
                 VStack(spacing: DS.Spacing.s) {
-                    Text("당신의 카드가 완성됐어요")
+                    Text("이게 나예요")
                         .font(DS.Typo.largeTitle)
                         .multilineTextAlignment(.center)
-                    Text("같은 입력이면 언제나 같은 카드 — 카드가 곧 당신입니다")
+                    Text("같은 입력이면, 언제나 같은 카드. 카드가 곧 나입니다.")
                         .font(DS.Typo.body)
                         .foregroundStyle(DS.Palette.secondaryText)
                         .multilineTextAlignment(.center)

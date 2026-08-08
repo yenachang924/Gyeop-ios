@@ -116,6 +116,12 @@ struct ExchangeView: View {
                             .foregroundStyle(DS.Palette.accent)
                             .multilineTextAlignment(.center)
                     }
+                    if !myCard.emoji.isEmpty, myCard.emoji == record.counterpartCard.emoji {
+                        Text("이모지도 겹쳤어요 \(myCard.emoji) — 오늘의 이스터에그")
+                            .font(DS.Typo.headline)
+                            .foregroundStyle(DS.Palette.success)
+                            .multilineTextAlignment(.center)
+                    }
                 }
             }
         }

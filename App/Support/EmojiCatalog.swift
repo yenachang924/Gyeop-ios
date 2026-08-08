@@ -1,17 +1,28 @@
 import Core
 import Foundation
 
-/// 번들 리소스 emoji-icons.csv (원본: docs/assets/emoji-icons.csv)
+/// 번들 리소스 emoji-icons.csv (원본: docs/assets/emoji-icons.csv, 138행)
 /// 온보딩의 관심사 선택지와 이모지 원탭 피커가 이 카탈로그 하나를 공유한다.
 struct EmojiIcon: Identifiable, Hashable {
     let emoji: String
     let name: String
     let category: String
+    let keywords: [String]
 
     var id: String { name }
+
+    /// 이름·키워드·이모지 자체 어디든 포함되면 검색 일치로 본다 (대소문자 무시).
+    func matches(_ query: String) -> Bool {
+        guard !query.isEmpty else { return true }
+        if name.localizedStandardContains(query) || emoji == query { return true }
+        return keywords.contains { $0.localizedStandardContains(query) }
+    }
 }
 
 enum EmojiCatalog {
+    /// 검색 전, 그리드에 1차로 노출하는 개수 — 카탈로그 순서 그대로(결정적).
+    static let initialDisplayCount = 16
+
     static let all: [EmojiIcon] = load()
 
     private static func load() -> [EmojiIcon] {
@@ -28,8 +39,11 @@ enum EmojiCatalog {
                 let columns = line.split(separator: ",").map {
                     $0.trimmingCharacters(in: .whitespaces)
                 }
-                guard columns.count == 3 else { return nil }
-                return EmojiIcon(emoji: columns[0], name: columns[1], category: columns[2])
+                guard columns.count == 4 else { return nil }
+                let keywords = columns[3].split(separator: ";").map {
+                    $0.trimmingCharacters(in: .whitespaces)
+                }
+                return EmojiIcon(emoji: columns[0], name: columns[1], category: columns[2], keywords: keywords)
             }
     }
 }

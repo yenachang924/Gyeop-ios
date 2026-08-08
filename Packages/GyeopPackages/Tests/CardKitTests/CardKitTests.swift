@@ -140,6 +140,33 @@ struct CardSeedTests {
         let after = generator.makeCard(from: profile).seed
         #expect(before != after)
     }
+
+    @Test("이모지를 비워도 시드는 결정적이고, 채운 경우와는 다른 시드다 — 온보딩 전부 선택사항화")
+    func emptyEmojiIsDeterministicAndDistinct() {
+        let withoutEmoji = CardSeed.hash(
+            nickname: "", emoji: "", interests: [],
+            leisureStyle: LeisureStyle(energy: .calm, venue: .indoor)
+        )
+        #expect(
+            withoutEmoji == CardSeed.hash(
+                nickname: "", emoji: "", interests: [],
+                leisureStyle: LeisureStyle(energy: .calm, venue: .indoor)
+            )
+        )
+
+        let withEmoji = CardSeed.hash(
+            nickname: "", emoji: "🧗", interests: [],
+            leisureStyle: LeisureStyle(energy: .calm, venue: .indoor)
+        )
+        #expect(withoutEmoji != withEmoji)
+
+        // 빈 시드도 카드 비주얼 계약(채도·명도 범위)을 그대로 만족해야 한다.
+        let visual = CardVisual(seed: withoutEmoji)
+        for point in visual.controlPoints {
+            #expect(CardVisual.saturationRange.contains(point.saturation))
+            #expect(point.brightness <= CardVisual.brightnessRange.upperBound)
+        }
+    }
 }
 
 #if canImport(UIKit)

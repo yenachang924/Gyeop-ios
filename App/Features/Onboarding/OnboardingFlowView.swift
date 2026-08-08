@@ -3,8 +3,7 @@ import DesignSystem
 import SwiftUI
 
 /// 온보딩 3단계: 관심사(최대 5) → 성향 2×2 → 닉네임·한 줄·이모지 원탭 → 카드 리빌.
-/// ⚠️ 카피는 gyeop-prototype.html 부재로 gyeop-spec.md F1 기준 임시 확정 —
-/// 프로토타입 파일이 커밋되면 그 카피로 교체할 것.
+/// 카피는 docs/gyeop-prototype.html 기준.
 struct OnboardingFlowView: View {
     @Environment(AppModel.self) private var model
 

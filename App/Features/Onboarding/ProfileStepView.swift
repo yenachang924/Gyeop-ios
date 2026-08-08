@@ -2,33 +2,48 @@ import Core
 import DesignSystem
 import SwiftUI
 
-/// 온보딩 3/3 — 닉네임 · 한 줄 · 이모지 원탭
+/// 온보딩 3/3 — 닉네임 · 한 줄 · 이모지 원탭. 전부 선택사항 — 비워도 진행된다.
 struct ProfileStepView: View {
     @Binding var draft: OnboardingDraft
     let onCreate: () async -> Void
 
     @State private var isCreating = false
+    @State private var emojiQuery = ""
 
-    private var canCreate: Bool {
-        !draft.nickname.trimmingCharacters(in: .whitespaces).isEmpty && !draft.emoji.isEmpty
+    private var visibleEmojis: [EmojiIcon] {
+        let query = emojiQuery.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else {
+            return Array(EmojiCatalog.all.prefix(EmojiCatalog.initialDisplayCount))
+        }
+        return EmojiCatalog.all.filter { $0.matches(query) }
     }
 
     var body: some View {
         Form {
+            Section {
+                Text("유일한 자유 입력이에요. 비워도 괜찮아요.")
+                    .font(DS.Typo.subheadline)
+                    .foregroundStyle(DS.Palette.secondaryText)
+            }
+
             Section("닉네임") {
-                TextField("상대가 부를 이름", text: $draft.nickname)
+                TextField("예나", text: $draft.nickname)
                     .accessibilityIdentifier("onboarding.nickname")
             }
 
-            Section("한 줄") {
-                TextField("예: 퇴근하고 클라이밍 가실 분", text: $draft.tagline)
+            Section("요즘의 나, 한 줄") {
+                TextField("새벽 러닝에 빠졌어요", text: $draft.tagline)
                     .accessibilityIdentifier("onboarding.tagline")
             }
 
             Section {
+                TextField("이모지 검색", text: $emojiQuery)
+                    .accessibilityIdentifier("onboarding.emoji.search")
                 emojiGrid
             } header: {
-                Text("대표 이모지 — 하나만 탭")
+                Text("나를 나타내는 이모지 · 선택")
+            } footer: {
+                Text("안 골라도 진행돼요 — 검색하면 전체 이모지를 볼 수 있어요")
             }
 
             Section {
@@ -43,12 +58,12 @@ struct ProfileStepView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
                     } else {
-                        Text("카드 만들기")
+                        Text("카드 완성")
                             .font(DS.Typo.headline)
                             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
                     }
                 }
-                .disabled(!canCreate || isCreating)
+                .disabled(isCreating)
                 .accessibilityIdentifier("onboarding.createCard")
             }
         }
@@ -61,9 +76,9 @@ struct ProfileStepView: View {
             columns: [GridItem(.adaptive(minimum: DS.minTapTarget), spacing: DS.Spacing.xs)],
             spacing: DS.Spacing.xs
         ) {
-            ForEach(EmojiCatalog.all) { icon in
+            ForEach(visibleEmojis) { icon in
                 Button {
-                    draft.emoji = icon.emoji
+                    draft.emoji = (draft.emoji == icon.emoji) ? "" : icon.emoji
                 } label: {
                     Text(icon.emoji)
                         .font(DS.Typo.title)
