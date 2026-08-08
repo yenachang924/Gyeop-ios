@@ -4,11 +4,10 @@ import SwiftUI
 
 /// 정체성 카드 렌더. 앱에서 커스텀 비주얼이 허용된 유일한 컴포넌트 (CLAUDE.md UI 원칙).
 ///
-/// 현재는 시드 기반 MeshGradient까지 — Metal `layerEffect` 질감·60fps 검증은
-/// CardKit 소유 세션이 이어받는다. 시드 → 비주얼 결정성 계약은 `CardVisual`에 있다.
+/// 시드 → 비주얼 결정성 계약은 `CardVisual`에 있다. 질감(Metal `layerEffect`)은
+/// `cardTexture(_:)` 자리만 잡아뒀다 — 파라미터는 D1 결정 대기.
 public struct CardView: View {
     private let card: CardSnapshot
-    @Environment(\.colorScheme) private var colorScheme
 
     public init(card: CardSnapshot) {
         self.card = card
@@ -18,14 +17,19 @@ public struct CardView: View {
         VStack(alignment: .leading, spacing: DS.Spacing.m) {
             Text(card.emoji)
                 .font(DS.Typo.largeTitle)
+                .foregroundStyle(.white)
                 .accessibilityLabel("\(card.nickname)의 대표 이모지")
 
             Spacer(minLength: DS.Spacing.l)
 
+            // 배경(MeshGradient)은 흰 텍스트 대비 4.5:1을 보장하도록 생성되므로
+            // (CardVisual) 시스템 컬러 대신 고정 흰색을 쓴다 — 다크·라이트 모드 무관.
             Text(card.nickname)
                 .font(DS.Typo.title)
+                .foregroundStyle(.white)
             Text(card.tagline)
                 .font(DS.Typo.body)
+                .foregroundStyle(.white)
 
             interestChips
         }
@@ -41,8 +45,9 @@ public struct CardView: View {
                     [0, 0.5], [0.5, 0.5], [1, 0.5],
                     [0, 1], [0.5, 1], [1, 1],
                 ],
-                colors: CardVisual(seed: card.seed).meshColors(scheme: colorScheme)
+                colors: CardVisual(seed: card.seed).colors
             )
+            .cardTexture()
         }
         .clipShape(RoundedRectangle(cornerRadius: DS.Radius.card))
         .accessibilityElement(children: .combine)
