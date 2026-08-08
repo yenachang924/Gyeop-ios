@@ -98,3 +98,16 @@ schemes:
       config: Debug
       targets:
         - GyeopUITests
+
+  # 시뮬레이터에서 클립 경험 확인용 — _XCAppClipURL로 인보케이션 URL 주입
+  # (실도메인 확정 전에는 자리 표시 도메인 URL로 파서 경로만 검증)
+  GyeopClip:
+    build:
+      targets:
+        GyeopClip: all
+    run:
+      config: Debug
+      environmentVariables:
+        - variable: _XCAppClipURL
+          value: https://PLACEHOLDER.gyeop.example/clip?inviter=demo-runner
+          isEnabled: true

@@ -28,9 +28,11 @@
 		AF91342C48377BB0C1A5D98E /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 26CBD19128079A45A2709B14 /* DesignSystem */; };
 		C83929052B6621691135B5BE /* CardRevealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18B40EEA992A9D7F9C8781BE /* CardRevealView.swift */; };
 		CA2EC43AA355E8511F0FCFF7 /* GyeopKit in Frameworks */ = {isa = PBXBuildFile; productRef = 83E8E335BB8635ECB9DA9439 /* GyeopKit */; };
+		CF5C38C0128772C12E175A51 /* ScreenshotAndAccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45DD91276E5EC32C4317322 /* ScreenshotAndAccessibilityUITests.swift */; };
 		D182DE960D0EA71A5C5E2BE3 /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = D602563F4F418C874E302642 /* Core */; };
 		D2A9F6636C1E41DC29A1863E /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE100902A9F49506C6D2A50 /* OnboardingFlowView.swift */; };
 		D8BBD02EB328DCF238743E87 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 91C41E5E7F91A062F0610DAD /* DesignSystem */; };
+		E612FD2E4388FAADC46B6E5C /* ExchangeFailureUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2825339C19E2BDFFA262E122 /* ExchangeFailureUITests.swift */; };
 		E8FD3EB8967292E2A1C68E51 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C7C9C994FD97CF40E62B6319 /* Assets.xcassets */; };
 		F66944B889FA9929FEC23B41 /* CollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 863A4BB1552A39DBD063E27E /* CollectionView.swift */; };
 		F9A9158551F6C392A5B0448D /* AppClipApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C754AAF26F03ED129DC0A3D1 /* AppClipApp.swift */; };
@@ -71,6 +73,7 @@
 		040CA6E8AD22284574773BEE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		0FF3A254426E2CC7FEE77275 /* OnboardingFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowUITests.swift; sourceTree = "<group>"; };
 		18B40EEA992A9D7F9C8781BE /* CardRevealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardRevealView.swift; sourceTree = "<group>"; };
+		2825339C19E2BDFFA262E122 /* ExchangeFailureUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeFailureUITests.swift; sourceTree = "<group>"; };
 		2B4B1EA1770D8AE18ED44731 /* EmojiCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiCatalog.swift; sourceTree = "<group>"; };
 		3F61AB8788D0608FCA8CD1F6 /* GyeopPackages */ = {isa = PBXFileReference; lastKnownFileType = folder; name = GyeopPackages; path = Packages/GyeopPackages; sourceTree = SOURCE_ROOT; };
 		42DA513B14E1385CA8F5209F /* Gyeop.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Gyeop.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -87,6 +90,7 @@
 		C7C9C994FD97CF40E62B6319 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CF54E2B1267F18D983CEDFF5 /* GyeopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GyeopApp.swift; sourceTree = "<group>"; };
 		D097092EBED5A441532FA073 /* Gyeop.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Gyeop.entitlements; sourceTree = "<group>"; };
+		D45DD91276E5EC32C4317322 /* ScreenshotAndAccessibilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotAndAccessibilityUITests.swift; sourceTree = "<group>"; };
 		DC80FB69DB55CB461315692F /* AppClip.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AppClip.entitlements; sourceTree = "<group>"; };
 		DF396ED85073133240235C7A /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		E16E99F9D82C3109EA3DA8DF /* GyeopUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = GyeopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -175,7 +179,9 @@
 		5F0F4ECA5D998277C9F41044 /* UITests */ = {
 			isa = PBXGroup;
 			children = (
+				2825339C19E2BDFFA262E122 /* ExchangeFailureUITests.swift */,
 				0FF3A254426E2CC7FEE77275 /* OnboardingFlowUITests.swift */,
+				D45DD91276E5EC32C4317322 /* ScreenshotAndAccessibilityUITests.swift */,
 			);
 			path = UITests;
 			sourceTree = "<group>";
@@ -435,7 +441,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E612FD2E4388FAADC46B6E5C /* ExchangeFailureUITests.swift in Sources */,
 				7C3FCB18EC57B9D6A053F2FD /* OnboardingFlowUITests.swift in Sources */,
+				CF5C38C0128772C12E175A51 /* ScreenshotAndAccessibilityUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

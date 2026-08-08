@@ -91,32 +91,35 @@ struct ExchangeView: View {
         .accessibilityLabel("\(title). \(caption)")
     }
 
+    // Dynamic Type 극단에서 내용이 화면을 넘칠 수 있다 — 내용은 스크롤,
+    // 행동 버튼은 safeAreaInset으로 항상 화면 안에 남긴다.
     private func completedView(_ record: GyeopRecord) -> some View {
-        VStack(spacing: DS.Spacing.l) {
-            VStack(spacing: DS.Spacing.s) {
-                Text("겹이 쌓였어요")
-                    .font(DS.Typo.largeTitle)
-                    .foregroundStyle(DS.Palette.success)
-                Text("\(record.counterpartCard.nickname)님의 카드를 받았습니다")
-                    .font(DS.Typo.body)
-                    .foregroundStyle(DS.Palette.secondaryText)
-            }
+        ScrollView {
+            VStack(spacing: DS.Spacing.l) {
+                VStack(spacing: DS.Spacing.s) {
+                    Text("겹이 쌓였어요")
+                        .font(DS.Typo.largeTitle)
+                        .foregroundStyle(DS.Palette.success)
+                    Text("\(record.counterpartCard.nickname)님의 카드를 받았습니다")
+                        .font(DS.Typo.body)
+                        .foregroundStyle(DS.Palette.secondaryText)
+                }
 
-            CardView(card: record.counterpartCard)
-                .padding(.horizontal, DS.Spacing.xl)
+                CardView(card: record.counterpartCard)
+                    .padding(.horizontal, DS.Spacing.xl)
 
-            if let myCard = model.myCard {
-                let shared = record.counterpartCard.sharedInterests(with: myCard)
-                if !shared.isEmpty {
-                    Text("겹치는 관심사: \(shared.joined(separator: " · "))")
-                        .font(DS.Typo.headline)
-                        .foregroundStyle(DS.Palette.accent)
-                        .multilineTextAlignment(.center)
+                if let myCard = model.myCard {
+                    let shared = record.counterpartCard.sharedInterests(with: myCard)
+                    if !shared.isEmpty {
+                        Text("겹치는 관심사: \(shared.joined(separator: " · "))")
+                            .font(DS.Typo.headline)
+                            .foregroundStyle(DS.Palette.accent)
+                            .multilineTextAlignment(.center)
+                    }
                 }
             }
-
-            Spacer()
-
+        }
+        .safeAreaInset(edge: .bottom) {
             Button {
                 dismiss()
             } label: {
@@ -130,8 +133,7 @@ struct ExchangeView: View {
     }
 
     private func failedView(_ failure: ExchangeFailure) -> some View {
-        VStack(spacing: DS.Spacing.l) {
-            Spacer()
+        ScrollView {
             // 실패는 거절이 아니다 — 경고색 없이 중립으로 (DS.Palette.failure 원칙)
             VStack(spacing: DS.Spacing.s) {
                 Text(failureTitle(failure))
@@ -143,7 +145,9 @@ struct ExchangeView: View {
                     .foregroundStyle(DS.Palette.secondaryText)
                     .multilineTextAlignment(.center)
             }
-            Spacer()
+            .padding(.top, DS.Spacing.xl)
+        }
+        .safeAreaInset(edge: .bottom) {
             Button {
                 phase = .searching
                 attempt += 1

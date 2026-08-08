@@ -10,22 +10,25 @@ struct CardRevealView: View {
     let card: CardSnapshot
 
     var body: some View {
-        VStack(spacing: DS.Spacing.l) {
-            VStack(spacing: DS.Spacing.s) {
-                Text("당신의 카드가 완성됐어요")
-                    .font(DS.Typo.largeTitle)
-                    .multilineTextAlignment(.center)
-                Text("같은 입력이면 언제나 같은 카드 — 카드가 곧 당신입니다")
-                    .font(DS.Typo.body)
-                    .foregroundStyle(DS.Palette.secondaryText)
-                    .multilineTextAlignment(.center)
+        // Dynamic Type 극단에서도 깨지지 않게 — 내용은 스크롤, 버튼은 하단 고정
+        ScrollView {
+            VStack(spacing: DS.Spacing.l) {
+                VStack(spacing: DS.Spacing.s) {
+                    Text("당신의 카드가 완성됐어요")
+                        .font(DS.Typo.largeTitle)
+                        .multilineTextAlignment(.center)
+                    Text("같은 입력이면 언제나 같은 카드 — 카드가 곧 당신입니다")
+                        .font(DS.Typo.body)
+                        .foregroundStyle(DS.Palette.secondaryText)
+                        .multilineTextAlignment(.center)
+                }
+
+                CardView(card: card)
+                    .padding(.horizontal, DS.Spacing.xl)
             }
-
-            CardView(card: card)
-                .padding(.horizontal, DS.Spacing.xl)
-
-            Spacer()
-
+            .padding(DS.Spacing.m)
+        }
+        .safeAreaInset(edge: .bottom) {
             Button {
                 Task { await model.enterCollection() }
             } label: {
@@ -35,8 +38,8 @@ struct CardRevealView: View {
             }
             .buttonStyle(.borderedProminent)
             .accessibilityIdentifier("reveal.toCollection")
+            .padding(.horizontal, DS.Spacing.m)
         }
-        .padding(DS.Spacing.m)
         .background(DS.Palette.background)
         .navigationBarBackButtonHidden()
     }

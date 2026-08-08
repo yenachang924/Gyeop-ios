@@ -54,11 +54,16 @@ final class AppModel {
     /// 실기기 MPC / 시뮬레이터 Mock. SwiftData 컨테이너 생성 실패 시 인메모리
     /// Mock으로 강등 (앱은 죽지 않는다).
     static func live() -> AppModel {
+        // 시뮬레이터 QA·UI 테스트용: 목업 교환을 실패 시나리오로 강제
+        let mockFailure: ExchangeFailure? =
+            CommandLine.arguments.contains("-mock-exchange-fail") ? .timedOut : nil
+
         // UI 테스트는 매번 첫 실행이어야 한다 — 인메모리 저장소 + 로그인 게이트 생략
         if CommandLine.arguments.contains("-uitest-reset") {
             return AppModel(
                 cardGenerator: CardGenerator(),
-                repository: MockGyeopRepository()
+                repository: MockGyeopRepository(),
+                makeExchangeSession: { _ in MockExchangeSession(failure: mockFailure) }
             )
         }
         do {
@@ -71,7 +76,7 @@ final class AppModel {
                     #if targetEnvironment(simulator)
                     // MPC는 실기기 전용 (docs/device-required.md) — 시뮬레이터는 스크립트 Mock
                     _ = card
-                    return MockExchangeSession()
+                    return MockExchangeSession(failure: mockFailure)
                     #else
                     return MultipeerExchangeSession(displayName: exchangeDisplayName(for: card))
                     #endif
