@@ -26,7 +26,7 @@
 
 - [ ] ⏳ Apple Developer Program 팀·번들 ID(com.gyeop.app, .Clip) 등록 확인
 - [ ] 🔲 앱 레코드 생성 + 메타데이터 (review-kit.md §5 초안 그대로)
-- [ ] 🔲 스크린샷 업로드 — UI 테스트 xcresult 첨부에서 추출 (review-kit.md §1)
+- [ ] 🔧 스크린샷 업로드 — 6.9" 10장 `docs/screenshots/` 준비됨, ASC 업로드만 남음 (review-kit.md §1)
 - [ ] 🔧 개인정보 처리방침 게시 (docs/privacy-policy.md → 공개 URL) + 라벨 "수집 안 함"
 - [ ] 🔧 리뷰 노트 + 시연 영상 URL (review-kit.md §3 초안)
 - [ ] ⏳ App Clip 경험 등록 — **헤더 이미지(D2 산출물)** + **실도메인·AASA** 대기 (review-kit.md §4)

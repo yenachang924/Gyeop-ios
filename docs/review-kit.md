@@ -2,21 +2,21 @@
 
 제출(App Store Connect) 때 그대로 옮겨 쓰는 재료 모음. 상태 표시: ✅ 준비됨 · 🔲 촬영/작성 필요 · ⏳ 외부 대기
 
-## 1. 스크린샷 세트 (6.9" — iPhone 17 Pro, 세로 고정)
+## 1. 스크린샷 세트 (6.9" — iPhone 17 Pro Max, 1320×2868, 세로 고정)
 
-시뮬레이터 `Cmd+S` 캡처, 상태바 정리는 `xcrun simctl status_bar override` 사용.
+✅ **준비됨** — `docs/screenshots/asc-6.9-*.png` 10장 (온보딩 3, 카드 리빌, 컬렉션 빈/찬,
+맞대기 탐색/성립, 카드 상세, 설정). 재촬영은 자동화돼 있다:
 
-| # | 화면 | 진입 방법 | 상태 |
-|---|---|---|---|
-| 1 | 온보딩 — 관심사 선택 | 첫 실행 → 로그인 뒤 1/3 단계 | 🔲 |
-| 2 | 온보딩 — 성향 2×2 | 2/3 단계 | 🔲 |
-| 3 | 카드 리빌 ("당신의 카드가 완성됐어요") | 온보딩 완주 직후 | 🔲 |
-| 4 | 맞대기 — 탐색 중 | 컬렉션 우상단 맞대기 버튼 | 🔲 |
-| 5 | 맞대기 — 겹 성립 (상대 카드 + 겹치는 관심사) | 시뮬레이터 Mock 교환 완료 | 🔲 |
-| 6 | 컬렉션 — 카드 그리드 + D-day | 겹 2~3개 쌓은 뒤 | 🔲 |
-| 7 | 카드 상세 — 겹치는 관심사 하이라이트 | 받은 카드 탭 | 🔲 |
+```bash
+xcodebuild -project Gyeop.xcodeproj -scheme Gyeop \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' \
+  -resultBundlePath /tmp/asc.xcresult \
+  -only-testing:GyeopUITests/ScreenshotAndAccessibilityUITests/testFullFlowWithScreenshots test
+xcrun xcresulttool export attachments --path /tmp/asc.xcresult --output-path /tmp/asc-screens
+```
 
-*스크린샷 자동 촬영 스크립트는 `docs/device-required.md` 통합 실행 계획의 시뮬레이터 절차와 같은 흐름을 쓴다.*
+업로드 전 선택: 상태바 정리(`xcrun simctl status_bar override --time "9:41" ...`) 후 재촬영,
+ASC에는 7장 이내 큐레이션(1·2·4·5·7·8·9번 권장).
 
 ## 2. 맞대기 2대 시연 영상 촬영 목록 (리뷰 노트 첨부용)
 
