@@ -121,7 +121,7 @@ public actor MultipeerExchangeSession: ExchangeSession {
         Log.nearby.info("exchange overlap: \(shared.count, privacy: .public) shared interests")
 
         let record = GyeopRecord(
-            id: GyeopID.make(runnerA: myCard.ownerID, runnerB: counterpart.ownerID, serverCorrectedDate: .now),
+            id: GyeopID.make(participantA: myCard.ownerID, participantB: counterpart.ownerID, serverCorrectedDate: .now),
             counterpartCard: counterpart,
             method: .multipeer,
             occurredAt: .now

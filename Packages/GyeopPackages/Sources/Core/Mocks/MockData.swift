@@ -13,9 +13,9 @@ public enum MockData {
         endDate: Date(timeIntervalSince1970: 1_797_600_000)
     )
 
-    public static let sampleProfiles: [RunnerProfile] = [
-        RunnerProfile(
-            id: "runner-haram",
+    public static let sampleProfiles: [UserProfile] = [
+        UserProfile(
+            id: "user-haram",
             nickname: "하람",
             tagline: "퇴근하고 클라이밍 가실 분",
             emoji: "🧗",
@@ -23,8 +23,8 @@ public enum MockData {
             leisureStyle: LeisureStyle(energy: .active, venue: .indoor),
             createdAt: referenceDate
         ),
-        RunnerProfile(
-            id: "runner-doyun",
+        UserProfile(
+            id: "user-doyun",
             nickname: "도윤",
             tagline: "영일대 일몰 수집 중",
             emoji: "🌅",
@@ -32,8 +32,8 @@ public enum MockData {
             leisureStyle: LeisureStyle(energy: .calm, venue: .outdoor),
             createdAt: referenceDate
         ),
-        RunnerProfile(
-            id: "runner-seyeon",
+        UserProfile(
+            id: "user-seyeon",
             nickname: "세연",
             tagline: "보드게임 정원 채우러 왔습니다",
             emoji: "🎲",
@@ -52,8 +52,8 @@ public enum MockData {
             let occurredAt = referenceDate.addingTimeInterval(TimeInterval(index) * 86_400)
             return GyeopRecord(
                 id: GyeopID.make(
-                    runnerA: "runner-me",
-                    runnerB: card.ownerID,
+                    participantA: "user-me",
+                    participantB: card.ownerID,
                     serverCorrectedDate: occurredAt
                 ),
                 counterpartCard: card,

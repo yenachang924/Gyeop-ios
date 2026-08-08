@@ -6,8 +6,8 @@ import Foundation
 /// 다른 세션은 `MockGyeopRepository`로 개발한다.
 public protocol GyeopRepository: Sendable {
     // 내 프로필·카드
-    func saveMyProfile(_ profile: RunnerProfile) async throws
-    func myProfile() async throws -> RunnerProfile?
+    func saveMyProfile(_ profile: UserProfile) async throws
+    func myProfile() async throws -> UserProfile?
     func saveMyCard(_ card: CardSnapshot) async throws
     func myCard() async throws -> CardSnapshot?
 

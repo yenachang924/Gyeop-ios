@@ -33,7 +33,7 @@ struct InterestsStepView: View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
             Text("관심사를 골라주세요")
                 .font(DS.Typo.largeTitle)
-            Text("최대 \(RunnerProfile.maxInterests)개 — 겹치는 관심사가 첫 대화가 됩니다")
+            Text("최대 \(UserProfile.maxInterests)개 — 겹치는 관심사가 첫 대화가 됩니다")
                 .font(DS.Typo.body)
                 .foregroundStyle(DS.Palette.secondaryText)
         }
@@ -52,7 +52,7 @@ struct InterestsStepView: View {
 
     private func interestChip(_ icon: EmojiIcon) -> some View {
         let isSelected = selected.contains(icon.name)
-        let isFull = selected.count >= RunnerProfile.maxInterests
+        let isFull = selected.count >= UserProfile.maxInterests
 
         return Button {
             if isSelected {

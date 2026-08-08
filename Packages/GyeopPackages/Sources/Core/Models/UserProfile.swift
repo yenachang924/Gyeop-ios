@@ -1,8 +1,8 @@
 import Foundation
 
-/// 러너 본인 프로필. 온보딩 3단계(관심사 → 성향 → 닉네임·한 줄·이모지)의 결과물이며
+/// 사용자 본인 프로필. 온보딩 3단계(관심사 → 성향 → 닉네임·한 줄·이모지)의 결과물이며
 /// 카드 생성(`CardGenerating`)의 유일한 입력이다.
-public struct RunnerProfile: Codable, Hashable, Sendable, Identifiable {
+public struct UserProfile: Codable, Hashable, Sendable, Identifiable {
     public let id: String
     public var nickname: String
     /// 한 줄 소개

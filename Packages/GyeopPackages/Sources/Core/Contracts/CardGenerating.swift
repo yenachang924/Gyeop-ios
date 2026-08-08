@@ -6,11 +6,11 @@ import Foundation
 /// 다른 세션은 `MockCardGenerator`로 개발한다.
 public protocol CardGenerating: Sendable {
     /// - Parameter version: 카드 버전. 관심사 변경 시 호출부가 올려서 넘긴다.
-    func makeCard(from profile: RunnerProfile, version: Int) -> CardSnapshot
+    func makeCard(from profile: UserProfile, version: Int) -> CardSnapshot
 }
 
 extension CardGenerating {
-    public func makeCard(from profile: RunnerProfile) -> CardSnapshot {
+    public func makeCard(from profile: UserProfile) -> CardSnapshot {
         makeCard(from: profile, version: 1)
     }
 }

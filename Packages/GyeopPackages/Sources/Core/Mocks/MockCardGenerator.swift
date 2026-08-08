@@ -5,7 +5,7 @@ import Foundation
 public struct MockCardGenerator: CardGenerating {
     public init() {}
 
-    public func makeCard(from profile: RunnerProfile, version: Int) -> CardSnapshot {
+    public func makeCard(from profile: UserProfile, version: Int) -> CardSnapshot {
         let canonical = [
             profile.id,
             profile.nickname,

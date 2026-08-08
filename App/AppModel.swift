@@ -162,12 +162,12 @@ final class AppModel {
         interests: [String],
         style: LeisureStyle
     ) async -> CardSnapshot? {
-        let profile = RunnerProfile(
-            id: "runner-\(UUID().uuidString.lowercased())",
+        let profile = UserProfile(
+            id: "user-\(UUID().uuidString.lowercased())",
             nickname: nickname,
             tagline: tagline,
             emoji: emoji,
-            interests: Array(interests.prefix(RunnerProfile.maxInterests)),
+            interests: Array(interests.prefix(UserProfile.maxInterests)),
             leisureStyle: style,
             createdAt: .now
         )

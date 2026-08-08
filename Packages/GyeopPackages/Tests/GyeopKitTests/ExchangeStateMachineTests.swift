@@ -201,8 +201,8 @@ struct ExchangeStateMachineTests {
 struct ExchangeTieBreakTests {
     @Test("두 기기가 반대 결론을 내려야 동시 초대 경합이 없다")
     func symmetricOppositeDecision() {
-        let a = "runner-a"
-        let b = "runner-b"
+        let a = "user-a"
+        let b = "user-b"
         #expect(ExchangeTieBreak.shouldInitiate(local: a, remote: b) != ExchangeTieBreak.shouldInitiate(local: b, remote: a))
     }
 

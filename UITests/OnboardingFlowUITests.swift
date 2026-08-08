@@ -30,7 +30,7 @@ final class OnboardingFlowUITests: XCTestCase {
 
         let tagline = app.textFields["onboarding.tagline"]
         tagline.tap()
-        tagline.typeText("test runner")
+        tagline.typeText("test user")
 
         app.buttons["onboarding.emoji.클라이밍"].tap()
 

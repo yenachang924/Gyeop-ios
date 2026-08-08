@@ -3,7 +3,7 @@ import Foundation
 /// 인메모리 목업 저장소. DataKit의 SwiftData 실구현이 오기 전까지의 접점이자
 /// 테스트·프리뷰의 기본 저장소.
 public actor MockGyeopRepository: GyeopRepository {
-    private var profile: RunnerProfile?
+    private var profile: UserProfile?
     private var card: CardSnapshot?
     private var records: [String: GyeopRecord] = [:]
 
@@ -13,11 +13,11 @@ public actor MockGyeopRepository: GyeopRepository {
         }
     }
 
-    public func saveMyProfile(_ profile: RunnerProfile) async throws {
+    public func saveMyProfile(_ profile: UserProfile) async throws {
         self.profile = profile
     }
 
-    public func myProfile() async throws -> RunnerProfile? { profile }
+    public func myProfile() async throws -> UserProfile? { profile }
 
     public func saveMyCard(_ card: CardSnapshot) async throws {
         self.card = card

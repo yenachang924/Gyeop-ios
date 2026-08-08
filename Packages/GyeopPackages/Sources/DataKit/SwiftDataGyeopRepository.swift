@@ -8,7 +8,7 @@ public actor SwiftDataGyeopRepository: GyeopRepository {
     public static func live() throws -> SwiftDataGyeopRepository {
         SwiftDataGyeopRepository(
             modelContainer: try ModelContainer(
-                for: RunnerProfileEntity.self, MyCardEntity.self, GyeopEntity.self
+                for: UserProfileEntity.self, MyCardEntity.self, GyeopEntity.self
             )
         )
     }
@@ -16,7 +16,7 @@ public actor SwiftDataGyeopRepository: GyeopRepository {
     public static func inMemory() throws -> SwiftDataGyeopRepository {
         SwiftDataGyeopRepository(
             modelContainer: try ModelContainer(
-                for: RunnerProfileEntity.self, MyCardEntity.self, GyeopEntity.self,
+                for: UserProfileEntity.self, MyCardEntity.self, GyeopEntity.self,
                 configurations: ModelConfiguration(isStoredInMemoryOnly: true)
             )
         )
@@ -24,17 +24,17 @@ public actor SwiftDataGyeopRepository: GyeopRepository {
 
     // MARK: - GyeopRepository
 
-    public func saveMyProfile(_ profile: RunnerProfile) async throws {
-        if let existing = try fetchSingleton(RunnerProfileEntity.self) {
+    public func saveMyProfile(_ profile: UserProfile) async throws {
+        if let existing = try fetchSingleton(UserProfileEntity.self) {
             existing.update(with: profile)
         } else {
-            modelContext.insert(RunnerProfileEntity(profile: profile))
+            modelContext.insert(UserProfileEntity(profile: profile))
         }
         try modelContext.save()
     }
 
-    public func myProfile() async throws -> RunnerProfile? {
-        try fetchSingleton(RunnerProfileEntity.self)?.toDomain()
+    public func myProfile() async throws -> UserProfile? {
+        try fetchSingleton(UserProfileEntity.self)?.toDomain()
     }
 
     public func saveMyCard(_ card: CardSnapshot) async throws {
@@ -79,7 +79,7 @@ public actor SwiftDataGyeopRepository: GyeopRepository {
     /// 로컬에 저장된 프로필·카드·겹 기록을 전부 지운다. Keychain 토큰 삭제는
     /// `AccountDeletionService`가 이 메서드와 함께 묶어서 호출한다.
     public func deleteAllLocalData() async throws {
-        try modelContext.delete(model: RunnerProfileEntity.self)
+        try modelContext.delete(model: UserProfileEntity.self)
         try modelContext.delete(model: MyCardEntity.self)
         try modelContext.delete(model: GyeopEntity.self)
         try modelContext.save()

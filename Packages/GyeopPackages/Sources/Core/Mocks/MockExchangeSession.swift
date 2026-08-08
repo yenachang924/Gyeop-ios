@@ -57,8 +57,8 @@ public actor MockExchangeSession: ExchangeSession {
 
             let record = GyeopRecord(
                 id: GyeopID.make(
-                    runnerA: card.ownerID,
-                    runnerB: counterpart.ownerID,
+                    participantA: card.ownerID,
+                    participantB: counterpart.ownerID,
                     serverCorrectedDate: .now
                 ),
                 counterpartCard: counterpart,

@@ -15,8 +15,8 @@ struct DeterministicHashTests {
     @Test("러너 순서를 바꿔도 같은 GyeopID")
     func orderIndependence() {
         let date = Date(timeIntervalSince1970: 1_785_000_000)
-        let a = GyeopID.make(runnerA: "runner-1", runnerB: "runner-2", serverCorrectedDate: date)
-        let b = GyeopID.make(runnerA: "runner-2", runnerB: "runner-1", serverCorrectedDate: date)
+        let a = GyeopID.make(participantA: "user-1", participantB: "user-2", serverCorrectedDate: date)
+        let b = GyeopID.make(participantA: "user-2", participantB: "user-1", serverCorrectedDate: date)
         #expect(a == b)
     }
 
@@ -24,14 +24,14 @@ struct DeterministicHashTests {
     func timeSlotBucketing() {
         let base = Date(timeIntervalSince1970: 1_785_000_000)
         let sameSlot = GyeopID.make(
-            runnerA: "a", runnerB: "b",
+            participantA: "a", participantB: "b",
             serverCorrectedDate: base.addingTimeInterval(200)
         )
         let nextSlot = GyeopID.make(
-            runnerA: "a", runnerB: "b",
+            participantA: "a", participantB: "b",
             serverCorrectedDate: base.addingTimeInterval(600)
         )
-        let reference = GyeopID.make(runnerA: "a", runnerB: "b", serverCorrectedDate: base)
+        let reference = GyeopID.make(participantA: "a", participantB: "b", serverCorrectedDate: base)
         #expect(reference == sameSlot)
         #expect(reference != nextSlot)
     }

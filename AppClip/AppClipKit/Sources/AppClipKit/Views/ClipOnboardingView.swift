@@ -59,7 +59,7 @@ public struct ClipOnboardingView: View {
                 emojiGrid
             }
 
-            Section("관심사 — 최대 \(RunnerProfile.maxInterests)개") {
+            Section("관심사 — 최대 \(UserProfile.maxInterests)개") {
                 interestGrid
             }
 
@@ -135,7 +135,7 @@ public struct ClipOnboardingView: View {
 
     private func interestChip(_ icon: ClipInterest) -> some View {
         let isSelected = interests.contains(icon.name)
-        let isFull = interests.count >= RunnerProfile.maxInterests
+        let isFull = interests.count >= UserProfile.maxInterests
 
         return Button {
             if isSelected {

@@ -61,14 +61,14 @@ struct SwiftDataGyeopRepositoryTests {
         let repo = try SwiftDataGyeopRepository.inMemory()
         let card = MockData.sampleCards[0]
         let first = GyeopRecord(
-            id: GyeopID.make(runnerA: "runner-me", runnerB: card.ownerID, serverCorrectedDate: MockData.referenceDate),
+            id: GyeopID.make(participantA: "user-me", participantB: card.ownerID, serverCorrectedDate: MockData.referenceDate),
             counterpartCard: card,
             method: .mock,
             occurredAt: MockData.referenceDate
         )
         let secondSameDay = GyeopRecord(
             id: GyeopID.make(
-                runnerA: "runner-me", runnerB: card.ownerID,
+                participantA: "user-me", participantB: card.ownerID,
                 serverCorrectedDate: MockData.referenceDate.addingTimeInterval(3600)
             ),
             counterpartCard: card,
@@ -87,14 +87,14 @@ struct SwiftDataGyeopRepositoryTests {
         let repo = try SwiftDataGyeopRepository.inMemory()
         let card = MockData.sampleCards[0]
         let first = GyeopRecord(
-            id: GyeopID.make(runnerA: "runner-me", runnerB: card.ownerID, serverCorrectedDate: MockData.referenceDate),
+            id: GyeopID.make(participantA: "user-me", participantB: card.ownerID, serverCorrectedDate: MockData.referenceDate),
             counterpartCard: card,
             method: .mock,
             occurredAt: MockData.referenceDate
         )
         let nextDay = GyeopRecord(
             id: GyeopID.make(
-                runnerA: "runner-me", runnerB: card.ownerID,
+                participantA: "user-me", participantB: card.ownerID,
                 serverCorrectedDate: MockData.referenceDate.addingTimeInterval(25 * 3600)
             ),
             counterpartCard: card,
@@ -114,13 +114,13 @@ struct SwiftDataGyeopRepositoryTests {
         let cardA = MockData.sampleCards[0]
         let cardB = MockData.sampleCards[1]
         let recordA = GyeopRecord(
-            id: GyeopID.make(runnerA: "runner-me", runnerB: cardA.ownerID, serverCorrectedDate: MockData.referenceDate),
+            id: GyeopID.make(participantA: "user-me", participantB: cardA.ownerID, serverCorrectedDate: MockData.referenceDate),
             counterpartCard: cardA,
             method: .mock,
             occurredAt: MockData.referenceDate
         )
         let recordB = GyeopRecord(
-            id: GyeopID.make(runnerA: "runner-me", runnerB: cardB.ownerID, serverCorrectedDate: MockData.referenceDate),
+            id: GyeopID.make(participantA: "user-me", participantB: cardB.ownerID, serverCorrectedDate: MockData.referenceDate),
             counterpartCard: cardB,
             method: .mock,
             occurredAt: MockData.referenceDate

@@ -61,12 +61,12 @@ public final class ClipModel {
         interests: [String],
         style: LeisureStyle
     ) async {
-        let profile = RunnerProfile(
-            id: "clip-runner-\(UUID().uuidString.lowercased())",
+        let profile = UserProfile(
+            id: "clip-user-\(UUID().uuidString.lowercased())",
             nickname: nickname,
             tagline: tagline,
             emoji: emoji,
-            interests: Array(interests.prefix(RunnerProfile.maxInterests)),
+            interests: Array(interests.prefix(UserProfile.maxInterests)),
             leisureStyle: style,
             createdAt: .now
         )

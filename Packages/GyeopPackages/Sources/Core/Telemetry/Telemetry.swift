@@ -154,14 +154,14 @@ public enum Metric {
 /// 두 기기가 **독립적으로 계산해도 같은 값**이 나오는 ID를 만들어
 /// 서버에서 자연스럽게 중복이 제거되게 한다.
 ///
-/// - 러너 ID를 정렬해 순서 의존성 제거
+/// - 두 참여자 ID를 정렬해 순서 의존성 제거
 /// - 타임슬롯(5분 버킷)으로 양쪽의 미세한 시각 차이를 흡수
 /// - 서버 시각 보정값을 쓴다 (기기 시계는 신뢰하지 않는다)
 public enum GyeopID {
     public static let slotSeconds: TimeInterval = 300  // 5분
 
-    public static func make(runnerA: String, runnerB: String, serverCorrectedDate: Date) -> String {
-        let pair = [runnerA, runnerB].sorted().joined(separator: "|")
+    public static func make(participantA: String, participantB: String, serverCorrectedDate: Date) -> String {
+        let pair = [participantA, participantB].sorted().joined(separator: "|")
         let slot = Int(serverCorrectedDate.timeIntervalSince1970 / slotSeconds)
         return DeterministicHash.sha256Hex("\(pair)|\(slot)")
     }

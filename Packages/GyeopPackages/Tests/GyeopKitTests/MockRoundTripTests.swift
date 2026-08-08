@@ -31,9 +31,9 @@ struct MockRoundTripTests {
         // 실제 맞대기라면 두 기기 모두 서버 보정 시각이 같은 5분 슬롯에 들어오므로
         // 여기서는 동일한 serverCorrectedDate로 재계산해 GyeopID 결정성만 검증한다
         // (MockExchangeSession은 각자 .now를 쓰므로 id 자체는 다를 수 있다 — 슬롯 경계 문제).
-        let expectedID = GyeopID.make(runnerA: cardA.ownerID, runnerB: cardB.ownerID, serverCorrectedDate: occurredAt)
-        let recomputedFromA = GyeopID.make(runnerA: cardA.ownerID, runnerB: recordA.counterpartCard.ownerID, serverCorrectedDate: occurredAt)
-        let recomputedFromB = GyeopID.make(runnerA: cardB.ownerID, runnerB: recordB.counterpartCard.ownerID, serverCorrectedDate: occurredAt)
+        let expectedID = GyeopID.make(participantA: cardA.ownerID, participantB: cardB.ownerID, serverCorrectedDate: occurredAt)
+        let recomputedFromA = GyeopID.make(participantA: cardA.ownerID, participantB: recordA.counterpartCard.ownerID, serverCorrectedDate: occurredAt)
+        let recomputedFromB = GyeopID.make(participantA: cardB.ownerID, participantB: recordB.counterpartCard.ownerID, serverCorrectedDate: occurredAt)
 
         #expect(recomputedFromA == expectedID)
         #expect(recomputedFromB == expectedID)

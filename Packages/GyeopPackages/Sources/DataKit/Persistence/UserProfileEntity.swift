@@ -2,9 +2,9 @@ import Core
 import Foundation
 import SwiftData
 
-/// "내 프로필" 저장 스키마 — 러너 계정당 항상 1건(싱글턴)이다.
+/// "내 프로필" 저장 스키마 — 사용자 계정당 항상 1건(싱글턴)이다.
 @Model
-final class RunnerProfileEntity {
+final class UserProfileEntity {
     @Attribute(.unique) var id: String
     var nickname: String
     var tagline: String
@@ -14,7 +14,7 @@ final class RunnerProfileEntity {
     var venueRaw: String
     var createdAt: Date
 
-    init(profile: RunnerProfile) {
+    init(profile: UserProfile) {
         id = profile.id
         nickname = profile.nickname
         tagline = profile.tagline
@@ -25,7 +25,7 @@ final class RunnerProfileEntity {
         createdAt = profile.createdAt
     }
 
-    func update(with profile: RunnerProfile) {
+    func update(with profile: UserProfile) {
         id = profile.id
         nickname = profile.nickname
         tagline = profile.tagline
@@ -36,8 +36,8 @@ final class RunnerProfileEntity {
         createdAt = profile.createdAt
     }
 
-    func toDomain() -> RunnerProfile {
-        RunnerProfile(
+    func toDomain() -> UserProfile {
+        UserProfile(
             id: id,
             nickname: nickname,
             tagline: tagline,
