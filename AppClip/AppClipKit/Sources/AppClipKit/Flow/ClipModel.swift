@@ -49,6 +49,13 @@ public final class ClipModel {
         stage = .onboarding
     }
 
+    /// `interests` 뒤로 스와이프 → `clip` (navigation-map §1-2, 시스템 제스처).
+    /// 온보딩 단계에서만 — 카드가 만들어진 뒤에는 되돌아가지 않는다.
+    public func backToReception() {
+        guard case .onboarding = stage else { return }
+        stage = .reception
+    }
+
     /// 온보딩 완주 → 카드 생성 → `card`. 클립 저장 실패는 레인을 막지 않는다 —
     /// 클립의 핵심 동작(교환)은 메모리의 카드만으로 성립하고, 영속·마이그레이션은 부가다.
     public func completeOnboarding(
@@ -115,6 +122,12 @@ public final class ClipModel {
 
     /// `keep` 「나중에 할게요」 → `done` (거절 비용 0 — SKOverlay 없이 컬렉션으로)
     public func declineInstall() {
+        guard case .keep(let record) = stage else { return }
+        stage = .done(record)
+    }
+
+    /// `keep` 「전체 앱 받기」 → SKOverlay → 완료(닫힘) 시 `done` (navigation-map §1-8)
+    public func finishInstallSuggestion() {
         guard case .keep(let record) = stage else { return }
         stage = .done(record)
     }

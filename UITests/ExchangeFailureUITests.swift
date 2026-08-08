@@ -18,6 +18,7 @@ final class ExchangeFailureUITests: XCTestCase {
         let style = app.buttons["onboarding.style.active-indoor"]
         XCTAssertTrue(style.waitForExistence(timeout: 5))
         style.tap()
+        app.buttons["onboarding.style.next"].tap()
         let nickname = app.textFields["onboarding.nickname"]
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))
         nickname.tap()

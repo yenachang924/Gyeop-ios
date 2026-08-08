@@ -2,7 +2,8 @@ import Core
 import DesignSystem
 import SwiftUI
 
-/// 온보딩 2/3 — 여가 성향 2×2 (정적/동적 × 실내/실외). 원탭 선택 즉시 다음으로.
+/// 온보딩 2/3 — 여가 성향 2×2 (정적/동적 × 실내/실외). 4택1로 고르면 선택이 표시되고,
+/// 「다음」으로 넘어간다 — 미선택이면 다음 비활성 (navigation-map §1-3).
 struct StyleStepView: View {
     @Binding var selected: LeisureStyle?
     let onNext: () -> Void
@@ -40,12 +41,20 @@ struct StyleStepView: View {
         .background(DS.Palette.background)
         .navigationTitle("2 / 3")
         .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .bottom) {
+            Button("다음") { onNext() }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .frame(maxWidth: .infinity)
+                .padding(DS.Spacing.m)
+                .disabled(selected == nil)
+                .accessibilityIdentifier("onboarding.style.next")
+        }
     }
 
     private func styleCell(_ style: LeisureStyle) -> some View {
         Button {
             selected = style
-            onNext()
         } label: {
             VStack(spacing: DS.Spacing.s) {
                 Text(style.label)
@@ -59,6 +68,7 @@ struct StyleStepView: View {
         .buttonStyle(.bordered)
         .tint(selected == style ? DS.Palette.accent : .secondary)
         .accessibilityLabel("여가 성향 \(style.label)")
+        .accessibilityAddTraits(selected == style ? .isSelected : [])
         .accessibilityIdentifier("onboarding.style.\(style.energy.rawValue)-\(style.venue.rawValue)")
     }
 }

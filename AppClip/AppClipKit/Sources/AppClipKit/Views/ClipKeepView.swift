@@ -4,19 +4,27 @@ import DesignSystem
 import SwiftUI
 
 /// 8 `keep` — 보관·전환 제안. **클립 레인에서 유일하게 설치를 언급하는 화면.**
-/// 「전체 앱 받기」 탭에서만 SKOverlay가 뜨고, 「나중에 할게요」는 거절 비용 0으로
-/// `done`(나의 겹)으로 간다 (navigation-map §1-8).
+/// 「전체 앱 받기」 탭에서만 SKOverlay가 뜨고, 오버레이가 닫히면(App Store 상호작용
+/// 완료) `done`으로 간다. 「나중에 할게요」는 거절 비용 0으로 곧장 `done`(나의 겹)
+/// (navigation-map §1-8).
 public struct ClipKeepView: View {
     let myCard: CardSnapshot?
     let record: GyeopRecord
     let onLater: () -> Void
+    let onInstallDismissed: () -> Void
 
     @State private var isPresentingOverlay = false
 
-    public init(myCard: CardSnapshot?, record: GyeopRecord, onLater: @escaping () -> Void) {
+    public init(
+        myCard: CardSnapshot?,
+        record: GyeopRecord,
+        onLater: @escaping () -> Void,
+        onInstallDismissed: @escaping () -> Void = {}
+    ) {
         self.myCard = myCard
         self.record = record
         self.onLater = onLater
+        self.onInstallDismissed = onInstallDismissed
     }
 
     private var sharedCount: Int {
@@ -89,13 +97,17 @@ public struct ClipKeepView: View {
             .padding(.horizontal, DS.Spacing.m)
         }
         .background(DS.Palette.background)
-        .appClipInstallSuggestion(isPresented: isPresentingOverlay)
+        .appClipInstallSuggestion(isPresented: isPresentingOverlay) {
+            isPresentingOverlay = false
+            onInstallDismissed()
+        }
     }
 }
 
 #Preview {
     ClipKeepView(
         myCard: MockData.sampleCards[0],
-        record: MockData.sampleGyeops[1]
-    ) {}
+        record: MockData.sampleGyeops[1],
+        onLater: {}
+    )
 }

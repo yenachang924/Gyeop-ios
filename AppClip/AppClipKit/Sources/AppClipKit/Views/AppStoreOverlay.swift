@@ -9,14 +9,44 @@ import UIKit
 /// (= 교환 완료 후)에서만 그려진다. 그 이전 화면 어디에도 설치 유도 UI가 없다.
 @MainActor
 public enum AppStoreOverlayPresenter {
-    public static func presentInstallSuggestion(in scene: UIWindowScene?) {
+    /// SKOverlay.delegate는 약한 참조라, 오버레이가 떠 있는 동안 우리가 붙잡아야 한다.
+    private static var activeDelegate: OverlayDismissalDelegate?
+
+    public static func presentInstallSuggestion(
+        in scene: UIWindowScene?,
+        onDismiss: @escaping () -> Void = {}
+    ) {
         guard let scene else {
             ClipLog.flow.error("SKOverlay 제시 실패 — UIWindowScene 없음")
             return
         }
         let configuration = SKOverlay.AppClipConfiguration(position: .bottom)
         let overlay = SKOverlay(configuration: configuration)
+        let delegate = OverlayDismissalDelegate {
+            activeDelegate = nil
+            onDismiss()
+        }
+        activeDelegate = delegate
+        overlay.delegate = delegate
         overlay.present(in: scene)
+    }
+}
+
+/// 오버레이가 닫힌 시점(= App Store 상호작용 완료)을 알려주는 최소 델리게이트.
+/// SKOverlay 콜백은 메인 스레드로 온다 — @preconcurrency 준수로 격리를 보장받는다.
+@MainActor
+private final class OverlayDismissalDelegate: NSObject, @preconcurrency SKOverlayDelegate {
+    private let onDismiss: () -> Void
+
+    init(onDismiss: @escaping () -> Void) {
+        self.onDismiss = onDismiss
+    }
+
+    func storeOverlayDidFinishDismissal(
+        _ overlay: SKOverlay,
+        transitionContext: SKOverlay.TransitionContext
+    ) {
+        onDismiss()
     }
 }
 
@@ -39,6 +69,7 @@ private struct SceneAccessor: UIViewControllerRepresentable {
 
 private struct AppStoreOverlayModifier: ViewModifier {
     let isPresented: Bool
+    let onDismiss: () -> Void
 
     @State private var scene: UIWindowScene?
 
@@ -49,22 +80,27 @@ private struct AppStoreOverlayModifier: ViewModifier {
                     scene = found
                     // 씬 확보 전에 이미 탭된 경우 (버튼이 매우 빨리 눌린 프레임)
                     if isPresented {
-                        AppStoreOverlayPresenter.presentInstallSuggestion(in: found)
+                        AppStoreOverlayPresenter.presentInstallSuggestion(in: found, onDismiss: onDismiss)
                     }
                 }
             )
             .onChange(of: isPresented) { _, newValue in
                 if newValue {
-                    AppStoreOverlayPresenter.presentInstallSuggestion(in: scene)
+                    AppStoreOverlayPresenter.presentInstallSuggestion(in: scene, onDismiss: onDismiss)
                 }
             }
     }
 }
 
 extension View {
-    /// `isPresented`가 false→true로 바뀌는 프레임에 SKOverlay 설치 제안을 띄운다.
-    public func appClipInstallSuggestion(isPresented: Bool) -> some View {
-        modifier(AppStoreOverlayModifier(isPresented: isPresented))
+    /// `isPresented`가 false→true로 바뀌는 프레임에 SKOverlay 설치 제안을 띄우고,
+    /// 오버레이가 닫히면(App Store 상호작용 완료) `onDismiss`를 부른다 — `keep` → `done`
+    /// (navigation-map §1-8)은 이 콜백으로 성립한다.
+    public func appClipInstallSuggestion(
+        isPresented: Bool,
+        onDismiss: @escaping () -> Void = {}
+    ) -> some View {
+        modifier(AppStoreOverlayModifier(isPresented: isPresented, onDismiss: onDismiss))
     }
 }
 #else
@@ -72,7 +108,10 @@ import SwiftUI
 
 extension View {
     /// StoreKit/UIKit이 없는 플랫폼(예: `swift test`의 macOS 호스트) 빌드용 무동작 폴백.
-    public func appClipInstallSuggestion(isPresented: Bool) -> some View {
+    public func appClipInstallSuggestion(
+        isPresented: Bool,
+        onDismiss: @escaping () -> Void = {}
+    ) -> some View {
         self
     }
 }

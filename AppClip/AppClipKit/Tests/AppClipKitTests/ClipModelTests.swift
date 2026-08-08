@@ -110,6 +110,49 @@ struct ClipModelTests {
         #expect(recorded.withLock { $0?.counterpartCard.ownerID } == counterpart.ownerID)
     }
 
+    @Test("interests 뒤로 스와이프 → clip 복귀는 온보딩 단계에서만 동작한다 (§1-2)")
+    func backToReceptionOnlyDuringOnboarding() async {
+        let model = makeModel()
+
+        // reception에서는 no-op
+        model.backToReception()
+        #expect(model.stage == .reception)
+
+        // onboarding → reception 복귀
+        model.beginOnboarding()
+        #expect(model.stage == .onboarding)
+        model.backToReception()
+        #expect(model.stage == .reception)
+
+        // 카드가 만들어진 뒤에는 되돌아가지 않는다
+        await advanceToCard(model)
+        model.backToReception()
+        guard case .card = model.stage else {
+            Issue.record("card 단계에서 backToReception은 무시돼야 하는데 \(model.stage)")
+            return
+        }
+    }
+
+    @Test("SKOverlay 완료(닫힘) → done은 keep 단계에서만 동작한다 (§1-8)")
+    func installSuggestionFinishTransitionsFromKeepOnly() async {
+        let model = makeModel()
+
+        // keep 이전에는 무시
+        model.finishInstallSuggestion()
+        #expect(model.stage == .reception)
+
+        await advanceToCard(model)
+        await model.startBump()
+        model.acceptCard()
+        guard case .keep(let record) = model.stage else {
+            Issue.record("acceptCard 후 keep 단계여야 하는데 \(model.stage)")
+            return
+        }
+
+        model.finishInstallSuggestion()
+        #expect(model.stage == .done(record))
+    }
+
     @Test("잘못된 초대 URL이어도 레인은 계속된다 (초대 정보만 비어있다)")
     func invalidInvocationStillProceeds() {
         let model = makeModel()

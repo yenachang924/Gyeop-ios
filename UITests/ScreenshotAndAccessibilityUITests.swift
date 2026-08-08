@@ -44,14 +44,16 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-1-onboarding-interests")
         firstInterest.tap()
-        app.buttons["onboarding.interest.보드게임"].tap()
+        // AX5에서는 LazyVGrid가 화면 밖 칩을 아직 안 만들었을 수 있다 — 스크롤해서 탭
+        tapEvenIfOffscreen(app, app.buttons["onboarding.interest.보드게임"])
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
 
-        // 2/3 성향
+        // 2/3 성향 — 4택1 선택 후 「다음」
         let style = app.buttons["onboarding.style.active-indoor"]
         XCTAssertTrue(style.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-2-onboarding-style")
         tapEvenIfOffscreen(app, style)
+        tapEvenIfOffscreen(app, app.buttons["onboarding.style.next"])
 
         // 3/3 프로필
         let nickname = app.textFields["onboarding.nickname"]

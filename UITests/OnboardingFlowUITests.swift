@@ -17,10 +17,13 @@ final class OnboardingFlowUITests: XCTestCase {
         app.buttons["onboarding.interest.보드게임"].tap()
         app.buttons["onboarding.interests.next"].tap()
 
-        // 2/3 성향 — 원탭 즉시 다음 단계
+        // 2/3 성향 — 4택1 선택 후 「다음」 (미선택이면 다음 비활성 — navigation-map §1-3)
         let style = app.buttons["onboarding.style.active-indoor"]
         XCTAssertTrue(style.waitForExistence(timeout: 5))
+        let styleNext = app.buttons["onboarding.style.next"]
+        XCTAssertFalse(styleNext.isEnabled, "성향 미선택인데 다음이 활성화됨")
         style.tap()
+        styleNext.tap()
 
         // 3/3 닉네임·한 줄·이모지
         let nickname = app.textFields["onboarding.nickname"]
@@ -82,10 +85,11 @@ final class OnboardingFlowUITests: XCTestCase {
         XCTAssertTrue(filledPreview.waitForExistence(timeout: 5))
         app.buttons["onboarding.interests.next"].tap()
 
-        // 2/3 성향
+        // 2/3 성향 — 선택 후 「다음」
         let style = app.buttons["onboarding.style.active-indoor"]
         XCTAssertTrue(style.waitForExistence(timeout: 5))
         style.tap()
+        app.buttons["onboarding.style.next"].tap()
 
         // 3/3 — 1차 16개 밖(카탈로그 17번째 행)인 "낚시"는 기본 그리드엔 없다가 검색하면 나타난다
         let searchField = app.textFields["onboarding.emoji.search"]
