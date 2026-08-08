@@ -1,0 +1,76 @@
+# xcodegen 프로젝트 정의. pbxproj 직접 수정 금지 — 여기 고치고 `xcodegen generate`.
+# 이 파일과 App/ 디렉토리는 S1/S6 세션만 수정한다 (CLAUDE.md 소유권 규칙).
+name: Gyeop
+options:
+  bundleIdPrefix: com.gyeop
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    INFOPLIST_KEY_UILaunchScreen_Generation: YES
+    CODE_SIGN_STYLE: Automatic
+
+packages:
+  GyeopPackages:
+    path: Packages/GyeopPackages
+
+targets:
+  Gyeop:
+    type: application
+    platform: iOS
+    sources:
+      - App
+    dependencies:
+      - package: GyeopPackages
+        products: [Core, DesignSystem, CardKit, GyeopKit, DataKit]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.gyeop.app
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: 겹
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        SUPPORTED_INTERFACE_ORIENTATIONS_IPHONE: UIInterfaceOrientationPortrait
+        TARGETED_DEVICE_FAMILY: "1"
+
+  GyeopUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - UITests
+    dependencies:
+      - target: Gyeop
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.gyeop.app.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Gyeop
+
+  # --- AppClip (자리) ---
+  # Developer Program 세팅 후 S6이 활성화한다. AppClip/README.md 참조.
+  # GyeopClip:
+  #   type: application.on-demand-install-capable
+  #   platform: iOS
+  #   sources: [AppClip]
+  #   dependencies:
+  #     - package: GyeopPackages
+  #       products: [Core, DesignSystem, CardKit]
+  #   settings:
+  #     base:
+  #       PRODUCT_BUNDLE_IDENTIFIER: com.gyeop.app.Clip
+
+schemes:
+  Gyeop:
+    build:
+      targets:
+        Gyeop: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - GyeopUITests
