@@ -18,6 +18,15 @@ public enum ExchangeConstants {
     public static let uwbTriggerDistance: Double = 0.3
     /// 맞댐 → 교환 완료 목표 시간 (수용 기준: 3초 이내)
     public static let exchangeTimeBudget: Duration = .seconds(3)
-    /// 동일 상대 재맞댐 집계 제한 (24시간 1회)
+    /// 동일 상대 재맞댐 집계 제한 (24시간 1회) — 실제 판정은 DataKit 소관, GyeopKit은 이벤트만 발행
     public static let recountInterval: TimeInterval = 86_400
+
+    /// 피어 탐색 단계 하드 타임아웃 (목표 3초보다 넉넉히 — 혼잡한 공간 대비)
+    public static let discoveryTimeout: Duration = .seconds(20)
+    /// 초대 → 세션 connected 단계 타임아웃
+    public static let connectionTimeout: Duration = .seconds(10)
+    /// connected → 카드 수신 단계 타임아웃
+    public static let transferTimeout: Duration = .seconds(5)
+    /// 연결 실패 시 같은 판에서 재시도할 최대 횟수 (초과하면 peerLost로 실패)
+    public static let maxConnectionRetries = 2
 }

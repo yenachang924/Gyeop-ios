@@ -26,6 +26,7 @@ let package = Package(
         .target(name: "DataKit", dependencies: ["Core"]),
         .testTarget(name: "CoreTests", dependencies: ["Core"]),
         .testTarget(name: "CardKitTests", dependencies: ["CardKit"]),
+        .testTarget(name: "GyeopKitTests", dependencies: ["GyeopKit"]),
         .testTarget(name: "DataKitTests", dependencies: ["DataKit"]),
     ],
     swiftLanguageModes: [.v6]
