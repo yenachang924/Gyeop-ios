@@ -43,7 +43,7 @@ targets:
         CFBundleDisplayName: 겹
         UILaunchScreen: {}
         # MPC 로컬 네트워크 권한 (실기기 맞대기) — 서비스명은 GyeopKit ExchangeConstants.serviceType
-        NSLocalNetworkUsageDescription: 근처 러너와 아이폰을 맞대 카드를 교환하려면 로컬 네트워크 접근이 필요합니다.
+        NSLocalNetworkUsageDescription: 근처 상대와 아이폰을 맞대 카드를 교환하려면 로컬 네트워크 접근이 필요합니다.
         NSBonjourServices: [_gyeop-exchange._tcp, _gyeop-exchange._udp]
         ITSAppUsesNonExemptEncryption: false
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]

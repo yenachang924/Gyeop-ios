@@ -46,7 +46,7 @@ public struct ClipOnboardingView: View {
             }
 
             Section("닉네임") {
-                TextField("러너들이 부를 이름", text: $nickname)
+                TextField("상대가 부를 이름", text: $nickname)
                     .accessibilityIdentifier("clip.onboarding.nickname")
             }
 

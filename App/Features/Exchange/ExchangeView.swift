@@ -57,7 +57,7 @@ struct ExchangeView: View {
         switch phase {
         case .searching:
             progress(
-                title: "주변 러너를 찾는 중",
+                title: "주변 상대를 찾는 중",
                 caption: "상대도 맞대기 화면을 열고, 아이폰을 가까이 맞대 주세요"
             )
 
@@ -164,7 +164,7 @@ struct ExchangeView: View {
     private func failureTitle(_ failure: ExchangeFailure) -> String {
         switch failure {
         case .peerLost: "상대와 연결이 끊겼어요"
-        case .timedOut: "주변에서 러너를 찾지 못했어요"
+        case .timedOut: "주변에서 상대를 찾지 못했어요"
         case .transferCorrupted: "카드가 제대로 오지 않았어요"
         case .cancelled: "맞대기를 중단했어요"
         }

@@ -79,7 +79,7 @@ struct CollectionView: View {
                 ContentUnavailableView(
                     "아직 겹이 없어요",
                     systemImage: "person.2",
-                    description: Text("옆 러너와 아이폰을 맞대보세요 — 그게 전부입니다")
+                    description: Text("옆 사람과 아이폰을 맞대보세요 — 그게 전부입니다")
                 )
             } else {
                 LazyVGrid(

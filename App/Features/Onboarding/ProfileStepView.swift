@@ -16,7 +16,7 @@ struct ProfileStepView: View {
     var body: some View {
         Form {
             Section("닉네임") {
-                TextField("러너들이 부를 이름", text: $draft.nickname)
+                TextField("상대가 부를 이름", text: $draft.nickname)
                     .accessibilityIdentifier("onboarding.nickname")
             }
 
