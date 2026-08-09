@@ -147,6 +147,27 @@ D2 세션이 한다 — 이 세션은 앱 코드를 직접 수정하지 않는�
 | F42 | 폰트 = Apple 시스템 서체 명시 | 모든 `Typo` 토큰을 `Font.system(..., design: .default)`로 명시(= SF Pro, 한글은 Apple SD Gothic Neo). **굵기 상한을 `.bold`로 내렸다** — Apple SD Gothic Neo에는 Heavy·Black 굵기가 없어 `.black`/`.heavy`를 주면 한글만 폴백·합성되어 SF 계열이 아닌 인상을 준다(웰컴 워드마크·"이게 나예요"가 그랬다). 숫자 전용 `counter`만 rounded·heavy 유지. 뷰의 폰트 리터럴 0건 |
 | F43 | 로그인 버튼 명암 | 다크(검은 무대) = **흰 캡슐 + 검은 글씨**, 라이트 = 검은 캡슐 + 흰 글씨. `signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)` |
 
+### F44 — 로그인 게이트가 건너뛰어지던 버그 (2026-08-09)
+
+**증상:** 앱을 삭제하고 다시 설치해도 웰컴("겹") 화면이 뜨지 않고 바로 앱 안으로 들어갔다.
+
+**원인 두 가지**
+
+1. **Keychain은 앱 삭제로 지워지지 않는다** (iOS 설계). SwiftData·UserDefaults는 앱과 함께
+   사라지지만 Keychain의 SIWA 토큰은 기기에 남는다 → `signedIn`이 계속 참이라 게이트를 건너뛴다.
+2. `AppModel.live()`의 **SwiftData 실패 폴백 경로에 `requiresSignIn`이 빠져 있었다** —
+   기본값 `false`라 그 경로에서는 로그인 게이트 자체가 사라진다.
+
+**해결**
+
+- `bootstrap()` 시작에서 `clearTokenIfFreshInstall()` — UserDefaults 플래그가 없으면
+  "재설치 후 첫 실행"이므로 토큰을 비운다. 앱을 지웠다 깔면 새로 로그인하는 게 사용자에게도
+  자연스러운 동작이다.
+- 폴백 경로에도 `requiresSignIn: true` 명시.
+
+**테스트 시 참고:** 앱 삭제만으로 초기화가 되지 않던 이유가 이것이다. 이제는 삭제 후 재설치로
+웰컴 화면부터 확인할 수 있다.
+
 ### 햅틱 튜닝 기록 (실기기)
 
 **1차 (2026-08-09)** — 소유자 체감: "약해". 조정 근거:

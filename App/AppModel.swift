@@ -87,9 +87,12 @@ final class AppModel {
             )
         } catch {
             Log.sync.error("SwiftData 컨테이너 생성 실패, 인메모리로 강등: \(error)")
+            // 저장소가 강등돼도 로그인 게이트는 유지한다 (F44) — 기본값(false)에 기대면
+            // 이 경로에서만 웰컴 화면이 통째로 사라진다.
             return AppModel(
                 cardGenerator: CardGenerator(),
-                repository: MockGyeopRepository()
+                repository: MockGyeopRepository(),
+                requiresSignIn: true
             )
         }
     }
@@ -103,6 +106,7 @@ final class AppModel {
 
     func bootstrap() async {
         guard stage == .loading else { return }
+        clearTokenIfFreshInstall()
         do {
             try await migratePendingClipGyeops()
             if let card = try await repository.myCard() {
@@ -124,6 +128,26 @@ final class AppModel {
         guard requiresSignIn else { return true }
         return (try? tokenStore.loadToken()) != nil
     }
+
+    /// **Keychain은 앱을 삭제해도 기기에 남는다** (iOS 설계). 그래서 앱을 지우고 다시 깔아도
+    /// 이전 토큰이 살아 있어 로그인 게이트를 건너뛰고 바로 들어가 버렸다 (F44).
+    ///
+    /// UserDefaults는 앱과 함께 지워지므로, 이 플래그가 없다는 것은 곧 "재설치 후 첫 실행"이다.
+    /// 그때 토큰을 비워 웰컴 화면부터 시작하게 한다 — 사용자에게도 맞는 동작이다(기기에서
+    /// 앱을 지운 뒤 다시 깔면 새로 로그인하는 게 자연스럽다).
+    private func clearTokenIfFreshInstall() {
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: Self.installedFlagKey) else { return }
+        do {
+            try tokenStore.deleteToken()
+        } catch {
+            Log.sync.error("재설치 첫 실행 토큰 정리 실패: \(error)")
+        }
+        defaults.set(true, forKey: Self.installedFlagKey)
+    }
+
+    /// 재설치 감지 플래그 — 앱 삭제 시 UserDefaults와 함께 사라진다.
+    private static let installedFlagKey = "gyeop.hasLaunchedSinceInstall"
 
     /// WelcomeView가 SIWA 성공 후 호출. 토큰은 Keychain에만 저장한다.
     func completeSignIn(identityToken: String) {
