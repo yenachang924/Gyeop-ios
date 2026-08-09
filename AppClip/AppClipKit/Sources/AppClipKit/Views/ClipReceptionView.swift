@@ -37,14 +37,14 @@ public struct ClipReceptionView: View {
                                 .font(DS.Typo.headline)
                             Spacer()
                             Text("카드는 맞댄 뒤에 열려요")
-                                .font(DS.Typo.caption)
+                                .font(DS.Typo.footnote)
                                 .foregroundStyle(DS.Palette.secondaryText)
                         }
                         VStack(alignment: .leading, spacing: DS.Spacing.xs) {
                             Text(inviterNickname)
                                 .font(DS.Typo.headline)
                             Text("카드는 맞댄 뒤에 열려요")
-                                .font(DS.Typo.caption)
+                                .font(DS.Typo.footnote)
                                 .foregroundStyle(DS.Palette.secondaryText)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)

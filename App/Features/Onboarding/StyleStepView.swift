@@ -5,8 +5,11 @@ import SwiftUI
 
 /// 온보딩 2/3 — 여가 성향을 2축 슬라이더로 잡는다 (F17, 레퍼런스: 건강 앱 마음챙김
 /// "심리 상태"). 잔잔↔활발 · 실내↔실외 두 축이 카드 프리뷰 색에 연속적으로 기여하고
-/// (`CardPreview.blendedColors` 이중선형 보간), 저장값은 4분면으로 양자화된
-/// `LeisureStyle`이다 — 미양자화 상태(슬라이더 미조작)면 다음 비활성 (navigation-map §1-3).
+/// (`CardPreview.blendedColors` 이중선형 보간), 저장값은 4분면으로 양자화된 `LeisureStyle`이다.
+/// 미양자화 상태(슬라이더 미조작)면 다음 비활성 (navigation-map §1-3).
+///
+/// F35: 결과 라벨을 **제목 아래로 올렸다** — 하단에 두니 「다음」 버튼과 겹쳤다.
+/// 슬라이더도 폭을 묶고, 카드 프리뷰는 화면을 덜 잡아먹게 줄였다.
 struct StyleStepView: View {
     @Binding var selected: LeisureStyle?
     /// 1/3에서 고른 관심사 — 유동 프리뷰의 색 계산에 들어간다 (F17)
@@ -53,14 +56,14 @@ struct StyleStepView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: DS.Spacing.l) {
+            VStack(spacing: DS.Spacing.l) {
                 VStack(alignment: .leading, spacing: DS.Spacing.s) {
                     Text("쉬는 날의 나는")
                         .font(DS.Typo.largeTitle)
-                    Text("결을 따라 움직여 보세요. 카드가 함께 물들어요.")
-                        .font(DS.Typo.body)
-                        .foregroundStyle(DS.Palette.secondaryText)
+                    // 결과 라벨을 제목 바로 아래로 (F35) — 하단은 「다음」 버튼 자리다
+                    result
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .entrance(appeared, index: 0, reduceMotion: reduceMotion)
 
                 CardView(
@@ -70,7 +73,8 @@ struct StyleStepView: View {
                         energy: energy, venue: venue
                     )
                 )
-                .padding(.horizontal, DS.Spacing.xl)
+                // 카드를 줄여 슬라이더·버튼이 한 화면에 편히 들어오게 (F35)
+                .frame(maxWidth: Layout.previewMaxWidth)
                 .entrance(appeared, index: 1, reduceMotion: reduceMotion)
                 .accessibilityLabel("카드 미리보기, 성향을 움직이면 색이 흐르며 바뀌어요")
 
@@ -89,23 +93,6 @@ struct StyleStepView: View {
                     )
                 }
                 .entrance(appeared, index: 2, reduceMotion: reduceMotion)
-
-                // 양자화 결과 — 조작 전에는 안내만 (다음도 그때까지 비활성)
-                Group {
-                    if selected != nil {
-                        Text("\(quantized.label) · \(Self.examples[quantized] ?? "")")
-                            .font(DS.Typo.headline)
-                    } else {
-                        Text("두 축을 움직이면 성향이 잡혀요")
-                            .font(DS.Typo.subheadline)
-                            .foregroundStyle(DS.Palette.secondaryText)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .multilineTextAlignment(.center)
-                .animation(reduceMotion ? nil : DS.Motion.quick, value: quantized)
-                .entrance(appeared, index: 3, reduceMotion: reduceMotion)
-                .accessibilityIdentifier("onboarding.style.result")
             }
             .padding(DS.Spacing.m)
         }
@@ -135,6 +122,23 @@ struct StyleStepView: View {
         }
     }
 
+    /// 조작 전에는 안내, 조작 후에는 잡힌 성향 — 자리를 옮겨도 역할은 같다.
+    @ViewBuilder
+    private var result: some View {
+        Group {
+            if selected != nil {
+                Text("\(quantized.label) · \(Self.examples[quantized] ?? "")")
+                    .font(DS.Typo.headline)
+            } else {
+                Text("두 축을 움직이면 성향이 잡혀요")
+                    .font(DS.Typo.subheadline)
+                    .foregroundStyle(DS.Palette.secondaryText)
+            }
+        }
+        .animation(reduceMotion ? nil : DS.Motion.quick, value: quantized)
+        .accessibilityIdentifier("onboarding.style.result")
+    }
+
     private func axisSlider(
         value: Binding<Double>,
         leading: String, trailing: String,
@@ -152,6 +156,15 @@ struct StyleStepView: View {
                 .font(DS.Typo.subheadline)
                 .foregroundStyle(DS.Palette.secondaryText)
         }
+        // 화면 끝까지 늘어난 바는 조작감이 둔하다 (F35)
+        .frame(maxWidth: DS.Layout.sliderMaxWidth + Layout.sliderLabelAllowance)
+    }
+
+    private enum Layout {
+        /// 프리뷰 카드 최대 폭 — 이보다 크면 슬라이더가 화면 밖으로 밀린다.
+        static let previewMaxWidth: CGFloat = 200
+        /// 슬라이더 양옆 라벨("잔잔"·"활발")이 차지하는 폭 여유
+        static let sliderLabelAllowance: CGFloat = 96
     }
 }
 

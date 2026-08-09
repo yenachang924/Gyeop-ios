@@ -40,10 +40,16 @@ struct ProfileStepView: View {
 
     var body: some View {
         Form {
+            // 강요 문구 대신 제목으로 (F37) — 무엇을 하면 되는지만 담백하게
             Section {
-                Text("셋 다 채워야 카드가 완성돼요. 처음 만난 사람에게 건넬 얼굴이니까요.")
-                    .font(DS.Typo.subheadline)
-                    .foregroundStyle(DS.Palette.secondaryText)
+                Text("칸을 모두 채우면\n카드가 완성돼요")
+                    .font(DS.Typo.largeTitle)
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.vertical, DS.Spacing.s)
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                    .accessibilityAddTraits(.isHeader)
             }
 
             Section("닉네임") {
@@ -93,16 +99,11 @@ struct ProfileStepView: View {
                 // 글라스 CTA (F20) — 다른 화면의 프라이머리 버튼과 같은 결
                 .dsProminentButton()
                 .disabled(isCreating || incomplete)
+                // 비활성 이유는 제목이 이미 말한다 — 버튼 아래 보조 문구는 제거 (F37)
+                .accessibilityHint(incomplete ? missingHint : "")
                 .accessibilityIdentifier("onboarding.createCard")
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
-            } footer: {
-                if incomplete {
-                    Text(missingHint)
-                        .font(DS.Typo.footnote)
-                        .foregroundStyle(DS.Palette.secondaryText)
-                        .accessibilityIdentifier("onboarding.createCard.hint")
-                }
             }
         }
         .animation(reduceMotion ? nil : DS.Motion.quick, value: incomplete)

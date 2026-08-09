@@ -3,43 +3,38 @@ import Core
 import DesignSystem
 import SwiftUI
 
-/// 온보딩 1/3 — 관심사 선택 (최대 5개). 고를 때마다 카드 프리뷰가 물든다.
+/// 온보딩 1/3 — 관심사 선택 (최대 5개).
+///
+/// F36: 카드 프리뷰를 **화면에서 뺐다**. 카드는 크고 위치가 고정돼 칩이 들어설 자리를
+/// 잡아먹었고, 첫 선택에서 레이아웃이 튀는 원인이기도 했다. 대신 **배경이 고른 관심사의
+/// 색으로 은은하게 물들고 천천히 흐른다** — "고를수록 물든다"는 경험은 그대로 두면서
+/// 칩에 여유를 준다. 배경은 저채도·고블러라 텍스트 가독성을 해치지 않는다.
 struct InterestsStepView: View {
     @Binding var selected: [String]
     let onNext: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    /// 선택이 바뀔 때마다 +1 — 카드 프리뷰의 stir(F11 "섞는 맛")를 깨운다.
-    @State private var stirCount = 0
 
-    /// 아직 성향·닉네임·이모지를 고르기 전이라 중립값으로 시드를 낸다 — 이후 단계에서
-    /// 실제 값이 채워지면 같은 규칙(`CardSeed`)으로 다시 계산되어 최종 카드와 이어진다.
-    private var previewCard: CardSnapshot {
-        CardSnapshot(
-            ownerID: "preview",
-            seed: CardSeed.hash(
-                nickname: "", emoji: "", interests: selected,
-                leisureStyle: LeisureStyle(energy: .calm, venue: .indoor)
-            ),
-            nickname: "",
-            tagline: "",
-            emoji: "",
-            interests: selected,
-            leisureStyle: LeisureStyle(energy: .calm, venue: .indoor),
-            version: 1,
-            createdAt: .now
-        )
+    /// 선택으로 만든 카드 색 — 배경 물듦의 원천. 선택이 없으면 배경도 중립이다.
+    private var backdropColors: [Color] {
+        guard !selected.isEmpty else { return [] }
+        return CardPreview.visual(
+            nickname: "", emoji: "", interests: selected,
+            leisureStyle: LeisureStyle(energy: .calm, venue: .indoor)
+        ).colors
     }
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: DS.Spacing.m) {
-                preview
+            VStack(alignment: .leading, spacing: DS.Spacing.l) {
                 header
                 interestGrid
             }
             .padding(DS.Spacing.m)
+        }
+        .background {
+            InterestBackdrop(colors: backdropColors)
+                .animation(reduceMotion ? nil : DS.Motion.dye, value: selected)
         }
         .background(DS.Palette.background)
         .navigationTitle("1 / 3")
@@ -55,62 +50,25 @@ struct InterestsStepView: View {
         }
     }
 
-    /// 프리뷰가 "물드는" 0.5s 전환. 빈 슬롯과 카드가 **같은 비율(0.7)** 이라 자리가 미리
-    /// 잡혀 있다 — 첫 선택에서 카드가 튀어나오며 아래 컨텐츠를 밀어내던 문제를 없앤다(F27).
-    /// 전환도 스케일 없이 크로스페이드만 — 자리는 그대로 두고 내용만 바뀐다.
-    private var preview: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: DS.Radius.card)
-                .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6, 5]))
-                .foregroundStyle(DS.Palette.secondaryText.opacity(DS.Opacity.disabled))
-                .overlay {
-                    Text("고르는 순간, 카드가 물들어요")
-                        .font(DS.Typo.body)
-                        .foregroundStyle(DS.Palette.secondaryText)
-                        .multilineTextAlignment(.center)
-                        .padding(DS.Spacing.m)
-                }
-                .frame(minHeight: Self.placeholderMinHeight)
-                .opacity(selected.isEmpty ? 1 : 0)
-                .accessibilityHidden(!selected.isEmpty)
-                .accessibilityLabel("카드 미리보기, 관심사를 고르면 색이 채워져요")
-                .accessibilityIdentifier("onboarding.interests.preview.empty")
-
-            CardView(card: previewCard, stirToken: stirCount)
-                .opacity(selected.isEmpty ? 0 : 1)
-                .accessibilityHidden(selected.isEmpty)
-                .accessibilityLabel("카드 미리보기, 선택한 관심사로 물든 카드")
-                .accessibilityIdentifier("onboarding.interests.preview.filled")
-        }
-        // 두 상태 공통 비율 — 이 한 줄이 레이아웃 점프를 막는다.
-        // 접근성 폰트 크기에서는 CardView가 비율을 풀고 세로로 자라므로 여기서도 푼다
-        // (그대로 두면 자란 카드가 잘린다).
-        .aspectRatio(
-            dynamicTypeSize.isAccessibilitySize ? nil : Self.previewAspectRatio,
-            contentMode: .fit
-        )
-        .animation(reduceMotion ? nil : DS.Motion.dye, value: selected)
-        .onChange(of: selected) { stirCount += 1 }
-    }
-
-    /// CardView의 고정 비율과 같은 값 — 빈 슬롯이 카드의 자리를 정확히 예약한다.
-    private static let previewAspectRatio: CGFloat = 0.7
-    /// 접근성 폰트 크기에서 비율이 풀렸을 때 빈 슬롯이 납작해지지 않도록.
-    private static let placeholderMinHeight: CGFloat = 220
-
     private var header: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
             Text("요즘 나를 이루는 것")
                 .font(DS.Typo.largeTitle)
-            Text("최대 \(UserProfile.maxInterests)개, 이 선택이 곧 카드의 색이 됩니다")
+            Text("최대 \(UserProfile.maxInterests)개, 고를수록 화면이 나의 색으로 물들어요")
                 .font(DS.Typo.body)
                 .foregroundStyle(DS.Palette.secondaryText)
         }
+        .accessibilityIdentifier(
+            selected.isEmpty
+                ? "onboarding.interests.preview.empty"
+                : "onboarding.interests.preview.filled"
+        )
     }
 
+    /// 칩에 여유를 준다 (F36) — 폭을 넓혀 이름이 줄바꿈·축소되지 않게.
     private var interestGrid: some View {
         LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: 104), spacing: DS.Spacing.s)],
+            columns: [GridItem(.adaptive(minimum: 124), spacing: DS.Spacing.s)],
             spacing: DS.Spacing.s
         ) {
             ForEach(EmojiCatalog.all) { icon in
@@ -158,12 +116,69 @@ struct InterestsStepView: View {
                 Text(icon.emoji)
                 Text(icon.name)
                     .font(DS.Typo.body)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.8)
+                    .lineLimit(1)
+                    // 12pt 밑으로는 줄이지 않는다 (F36) — body 17pt 기준 하한
+                    .minimumScaleFactor(0.75)
             }
             .foregroundStyle(isSelected ? DS.Palette.onSelection : Color.secondary)
             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
         }
+    }
+}
+
+/// 관심사 색으로 물드는 배경 (F36). 큰 색 덩어리를 깊게 블러해 천천히 흐르게 한다 —
+/// 저채도·저불투명이라 그 위의 텍스트 대비를 해치지 않고, 다크에서는 같은 색이 어두운
+/// 바탕 위에서 은은하게 빛나도록 불투명도만 올린다. Reduce Motion에서는 흐르지 않는다.
+private struct InterestBackdrop: View {
+    let colors: [Color]
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var drifting = false
+
+    /// 네 귀퉁이에서 출발하는 색 덩어리 — 인덱스로 방향이 갈린다.
+    private static let anchors: [(x: CGFloat, y: CGFloat)] = [
+        (0.15, 0.18), (0.85, 0.28), (0.25, 0.78), (0.80, 0.85),
+    ]
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack {
+                ForEach(Array(Self.anchors.enumerated()), id: \.offset) { index, anchor in
+                    if index < colors.count {
+                        Circle()
+                            .fill(colors[index])
+                            .frame(width: geo.size.width * Layout.blobWidthRatio)
+                            .position(
+                                x: geo.size.width * anchor.x + (drifting ? Layout.drift : -Layout.drift),
+                                y: geo.size.height * anchor.y + (drifting ? -Layout.drift : Layout.drift)
+                            )
+                    }
+                }
+            }
+            .blur(radius: Layout.blur)
+            .opacity(colorScheme == .dark ? Layout.darkOpacity : Layout.lightOpacity)
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: Layout.driftDuration).repeatForever(autoreverses: true)) {
+                drifting = true
+            }
+        }
+    }
+
+    /// 배경 물듦 튜닝 — 값 조정은 여기서만 (실기기 체감 대상).
+    private enum Layout {
+        static let blobWidthRatio: CGFloat = 0.95
+        static let blur: CGFloat = 70
+        /// 텍스트 대비를 지키는 상한. 이보다 올리면 본문이 읽히기 어려워진다.
+        static let lightOpacity: Double = 0.20
+        static let darkOpacity: Double = 0.28
+        static let drift: CGFloat = 26
+        static let driftDuration: TimeInterval = 9
     }
 }
 

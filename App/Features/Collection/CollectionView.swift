@@ -4,6 +4,11 @@ import DesignSystem
 import SwiftUI
 
 /// 컬렉션 — 내 카드 + 겹에서 받은 카드들.
+///
+/// F40: 배치를 애플 순정 앱 관습에 맞췄다. 큰 내비게이션 타이틀, 섹션 헤더는 시스템
+/// 위계(`title3`)로, **주요 액션(맞대기)은 하단 고정 캡슐**로 — 미리 알림의
+/// "새로운 미리 알림", 메모의 작성 버튼이 하단에 사는 것과 같은 자리다. 툴바 아이콘
+/// 하나로는 이 앱의 유일한 주인공 액션이 눈에 띄지 않았다.
 struct CollectionView: View {
     @Environment(AppModel.self) private var model
     @State private var selectedCard: CardSnapshot?
@@ -15,7 +20,7 @@ struct CollectionView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: DS.Spacing.l) {
+                VStack(alignment: .leading, spacing: DS.Spacing.xl) {
                     if let myCard = model.myCard {
                         myCardSection(myCard)
                     }
@@ -27,7 +32,7 @@ struct CollectionView: View {
             .background(DS.Palette.background)
             .navigationTitle("컬렉션")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingSettings = true
                     } label: {
@@ -37,14 +42,10 @@ struct CollectionView: View {
                     .tint(.primary)
                     .accessibilityIdentifier("collection.settings")
                 }
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showingExchange = true
-                    } label: {
-                        Label("맞대기", systemImage: "person.line.dotted.person.fill")
-                    }
-                    .accessibilityIdentifier("collection.exchange")
-                }
+            }
+            // 주요 액션은 하단 고정 (F40) — 아이콘도 크게
+            .safeAreaInset(edge: .bottom) {
+                exchangeButton
             }
             .sheet(item: $selectedCard) { card in
                 CardDetailView(card: card, myCard: model.myCard)
@@ -61,10 +62,31 @@ struct CollectionView: View {
         }
     }
 
+    private var exchangeButton: some View {
+        Button {
+            showingExchange = true
+        } label: {
+            Label {
+                Text("맞대기")
+                    .font(DS.Typo.headline)
+            } icon: {
+                Image(systemName: "person.line.dotted.person.fill")
+                    // 아이콘을 라벨보다 한 급 크게 (F40)
+                    .font(.system(.title2, weight: .semibold))
+            }
+            .frame(maxWidth: .infinity, minHeight: DS.Layout.primaryActionHeight)
+        }
+        .dsProminentButton()
+        .controlSize(.large)
+        .padding(.horizontal, DS.Spacing.m)
+        .padding(.bottom, DS.Spacing.s)
+        .accessibilityIdentifier("collection.exchange")
+    }
+
     private func myCardSection(_ card: CardSnapshot) -> some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
             Text("내 카드")
-                .font(DS.Typo.title)
+                .font(DS.Typo.section)
             Button {
                 selectedCard = card
             } label: {
@@ -80,8 +102,16 @@ struct CollectionView: View {
 
     private var collectedSection: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
-            Text("받은 카드")
-                .font(DS.Typo.title)
+            HStack(alignment: .firstTextBaseline) {
+                Text("받은 카드")
+                    .font(DS.Typo.section)
+                if !model.gyeops.isEmpty {
+                    // 개수 표기는 애플 순정 목록 관습 (연락처·앨범)
+                    Text("\(model.gyeops.count)")
+                        .font(DS.Typo.section)
+                        .foregroundStyle(DS.Palette.secondaryText)
+                }
+            }
 
             if model.gyeops.isEmpty {
                 ContentUnavailableView(

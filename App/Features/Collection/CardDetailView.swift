@@ -55,7 +55,7 @@ struct CardDetailView: View {
                 .font(DS.Typo.title)
             InterestPills(items: card.interests + [card.leisureStyle.label])
             Text("이 선택들이 카드의 색이 됐어요")
-                .font(DS.Typo.caption)
+                .font(DS.Typo.footnote)
                 .foregroundStyle(DS.Palette.secondaryText)
         }
         .accessibilityElement(children: .combine)
@@ -75,7 +75,7 @@ struct CardDetailView: View {
                     .foregroundStyle(DS.Palette.overlapInk)
             }
             Text("다음에 만나면 여기서 시작하세요")
-                .font(DS.Typo.caption)
+                .font(DS.Typo.footnote)
                 .foregroundStyle(DS.Palette.secondaryText)
         }
         .accessibilityElement(children: .combine)

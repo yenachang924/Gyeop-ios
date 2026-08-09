@@ -20,8 +20,9 @@ struct CardRevealView: View {
         ScrollView {
             VStack(spacing: DS.Spacing.l) {
                 VStack(spacing: DS.Spacing.s) {
+                    // F38: 리빌의 주인공 문구라 largeTitle보다 한 급 크게
                     Text("이게 나예요")
-                        .font(DS.Typo.largeTitle)
+                        .font(DS.Typo.reveal)
                         .multilineTextAlignment(.center)
                     // 서브 텍스트는 headline — body는 "상당히 작다"는 피드백 (1차 시연)
                     Text("고른 것들이 그대로 물들어, 하나뿐인 카드가 됐어요.")
@@ -45,8 +46,9 @@ struct CardRevealView: View {
             }
             .padding(DS.Spacing.m)
         }
-        // 제목과 카드가 한 덩어리로 화면 중앙에 앉는다 (F30 — 상단 쏠림 해소)
+        // 제목과 카드가 한 덩어리로 화면 중앙에 앉되, 중앙보다 살짝 위로 (F38)
         .defaultScrollAnchor(.center)
+        .safeAreaPadding(.bottom, Layout.raise)
         .onAppear {
             withAnimation(reduceMotion ? nil : DS.Motion.cardDeal) { appeared = true }
         }
@@ -81,8 +83,14 @@ struct CardRevealView: View {
     }
 
     private enum Depart {
-        /// 퇴장 연출이 보일 만큼만 기다린다 — 길면 답답해진다.
-        static let hold: TimeInterval = 0.26
+        /// 퇴장 애니메이션(DS.Motion.depart 0.3s)이 **끝까지 재생된 뒤** 화면을 넘긴다 (F39).
+        /// 이전에는 중간에 잘려 툭 끊기는 인상이었다.
+        static let hold: TimeInterval = 0.34
+    }
+
+    private enum Layout {
+        /// 시각적 중앙은 기하학적 중앙보다 살짝 위다 (F38).
+        static let raise: CGFloat = 56
     }
 }
 

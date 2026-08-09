@@ -24,7 +24,11 @@ public enum DS {
         /// 로그인(SIWA) 버튼 최대 폭 — 화면 폭 전체로 퍼지는 문제(1차 시연 지적) 방지.
         public static let signInMaxWidth: CGFloat = 280
         /// 로그인 버튼 높이 (Figma 캡슐 비례)
-        public static let signInHeight: CGFloat = 54
+        public static let signInHeight: CGFloat = 50
+        /// 온보딩 슬라이더 최대 폭 (F35) — 화면 끝까지 늘어나면 조작감이 둔해진다.
+        public static let sliderMaxWidth: CGFloat = 260
+        /// 하단 고정 주요 액션 버튼 높이 (F40 — 애플 순정 하단 액션 관습)
+        public static let primaryActionHeight: CGFloat = 50
     }
 
     public enum Palette {
@@ -129,8 +133,12 @@ public enum DS {
         /// 웰컴의 "겹" 로고 타입 (F26 Figma). 로고이므로 Dynamic Type 대상이 아니다 —
         /// 접근성 레이블이 의미를 전달한다.
         public static let wordmark = Font.system(size: 64, weight: .black)
+        /// 카드 리빌("이게 나예요") 전용 — largeTitle 한 급 위 (F38). Dynamic Type 대응.
+        public static let reveal = Font.system(.largeTitle, weight: .heavy)
         public static let largeTitle = Font.largeTitle.weight(.bold)
         public static let title = Font.title2.weight(.semibold)
+        /// 목록 섹션 제목 (컬렉션의 "내 카드"·"받은 카드") — 애플 순정 섹션 위계 (F40)
+        public static let section = Font.title3.weight(.semibold)
         public static let headline = Font.headline
         public static let body = Font.body
         /// 제목 아래 보조 설명 한 줄 (예: 시간·정원 요약)
@@ -157,8 +165,8 @@ public enum DS {
         /// 카드 등장(리빌·첫 표시) — 스케일 인과 함께 쓴다. standard보다 한 호흡 길고 여유 있게.
         public static let cardAppear = Animation.spring(response: 0.4, dampingFraction: 0.75)
         /// 카드 딜 인 (F6 — 토스 카드 발급 모티브): 아래에서 떠오르며 틸트가 풀린다.
-        /// cardAppear보다 길고, 유동 무드에 맞춰 거의 안 튕긴다.
-        public static let cardDeal = Animation.spring(response: 0.55, dampingFraction: 0.85)
+        /// F34에서 스프링을 버리고 단조 감속으로 — 실기기에서 미세하게 튕기는 게 보였다.
+        public static let cardDeal = Animation.smooth(duration: 0.62)
         /// 화면 요소가 제자리에 내려앉는 등장 (F9 상대 찾는 중 · F12 성향 셀) — 무바운스.
         public static let settle = Animation.smooth(duration: 0.45)
         /// 웰컴 워드마크가 흐릿함에서 또렷해지며 피어오르는 등장 (F26) — 길고 여유 있게.

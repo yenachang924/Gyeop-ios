@@ -52,14 +52,14 @@ public struct ClipKeepView: View {
                                 .font(DS.Typo.headline)
                             Spacer()
                             Text("오늘 · 겹친 관심사 \(sharedCount)개")
-                                .font(DS.Typo.caption)
+                                .font(DS.Typo.footnote)
                                 .foregroundStyle(DS.Palette.secondaryText)
                         }
                         VStack(alignment: .leading, spacing: DS.Spacing.xs) {
                             Text(record.counterpartCard.nickname)
                                 .font(DS.Typo.headline)
                             Text("오늘 · 겹친 관심사 \(sharedCount)개")
-                                .font(DS.Typo.caption)
+                                .font(DS.Typo.footnote)
                                 .foregroundStyle(DS.Palette.secondaryText)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -74,7 +74,7 @@ public struct ClipKeepView: View {
                     Text("이 카드, 계속 간직할까요?")
                         .font(DS.Typo.headline)
                     Text(ClipRetentionPolicy.noticeText())
-                        .font(DS.Typo.caption)
+                        .font(DS.Typo.footnote)
                         .foregroundStyle(DS.Palette.secondaryText)
                         .accessibilityIdentifier("clip.keep.retentionNotice")
                 }

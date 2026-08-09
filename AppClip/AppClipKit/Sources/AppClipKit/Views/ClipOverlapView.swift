@@ -40,7 +40,7 @@ public struct ClipOverlapView: View {
                         .font(DS.Typo.headline)
                     interestChips
                     Text(talkLine)
-                        .font(DS.Typo.caption)
+                        .font(DS.Typo.footnote)
                         .foregroundStyle(DS.Palette.secondaryText)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -90,7 +90,7 @@ public struct ClipOverlapView: View {
         let counterpartOnly = record.counterpartCard.interests.filter { !shared.contains($0) }
         if shared.isEmpty, counterpartOnly.isEmpty {
             Text("이번엔 등록된 관심사가 없었어요")
-                .font(DS.Typo.caption)
+                .font(DS.Typo.footnote)
                 .foregroundStyle(DS.Palette.secondaryText)
         } else {
             FlowChips(highlighted: shared, dimmed: counterpartOnly)
@@ -134,7 +134,7 @@ private struct FlowChips: View {
     private func chip(_ text: String, emphasized: Bool) -> some View {
         if emphasized {
             Text(text)
-                .font(DS.Typo.caption)
+                .font(DS.Typo.footnote)
                 .foregroundStyle(DS.Palette.overlapInk)
                 .padding(.horizontal, DS.Spacing.s)
                 .padding(.vertical, DS.Spacing.xs)
@@ -146,7 +146,7 @@ private struct FlowChips: View {
                 )
         } else {
             Text(text)
-                .font(DS.Typo.caption)
+                .font(DS.Typo.footnote)
                 .foregroundStyle(DS.Palette.secondaryText)
                 .padding(.horizontal, DS.Spacing.s)
                 .padding(.vertical, DS.Spacing.xs)

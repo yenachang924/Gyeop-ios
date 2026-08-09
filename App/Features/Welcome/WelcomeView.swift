@@ -46,16 +46,18 @@ struct WelcomeView: View {
                         .transition(.opacity)
                 }
 
-                SignInWithAppleButton(.signIn) { request in
+                // `.continue` = "Continue with Apple". `.signIn`은 로고가 크게 뜨는
+                // 레이아웃이라 F33에서 교체했다. 프레임을 **고정**해야 버튼이 남는 공간만큼
+                // 부풀지 않는다 (SignInWithAppleButton은 고유 크기가 없다).
+                SignInWithAppleButton(.continue) { request in
                     request.requestedScopes = [.fullName, .email]
                 } onCompletion: { result in
                     handle(result)
                 }
                 // 흰 무대에는 검정 캡슐, 검은 무대에는 흰 캡슐 (Figma 확정 + 다크 대조)
                 .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
-                .frame(maxWidth: DS.Layout.signInMaxWidth, minHeight: DS.Layout.signInHeight)
+                .frame(width: DS.Layout.signInMaxWidth, height: DS.Layout.signInHeight)
                 .clipShape(Capsule())
-                .frame(maxWidth: .infinity)
                 .opacity(stage >= 3 ? 1 : 0)
                 .offset(y: stage >= 3 ? 0 : 18)
                 .accessibilityIdentifier("welcome.signInWithApple")

@@ -146,7 +146,8 @@ private struct OverlapPillRow: View {
         FlowingPillsLayout(spacing: DS.Spacing.xs) {
             ForEach(Array(items.enumerated()), id: \.element) { index, item in
                 Text(item)
-                    .font(DS.Typo.caption)
+                    // 12pt 하한 (F36 접근성) — caption(12)에서 footnote(13)로
+                    .font(DS.Typo.footnote)
                     .foregroundStyle(DS.Palette.overlapInk)
                     .padding(.horizontal, DS.Spacing.s)
                     .padding(.vertical, DS.Spacing.xs)
