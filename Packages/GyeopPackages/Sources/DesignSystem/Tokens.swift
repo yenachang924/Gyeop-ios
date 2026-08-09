@@ -154,8 +154,6 @@ public enum DS {
         /// 타임스탬프 등 가장 낮은 위계의 부가 정보
         public static let footnote = Font.system(.footnote, design: .default)
         public static let caption = Font.system(.caption, design: .default)
-        /// 숫자 전용 카운터 — 한글이 섞이지 않는 자리라 rounded·heavy를 그대로 쓴다.
-        public static let counter = Font.system(.title, design: .rounded).weight(.heavy).monospacedDigit()
         /// 하단 주요 액션 아이콘 (F40 컬렉션 맞대기) — 라벨보다 한 급 크게.
         public static let actionIcon = Font.system(.title2, design: .default).weight(.semibold)
         /// 카드 대표 이모지 (F5 — 카드에서 더 크게). 이모지는 글자가 아니라 픽토그램이라

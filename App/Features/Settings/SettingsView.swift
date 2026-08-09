@@ -49,17 +49,15 @@ struct SettingsView: View {
                         .tint(.primary)
                 }
             }
-            .confirmationDialog(
-                "정말 삭제할까요?",
-                isPresented: $confirmingDeletion,
-                titleVisibility: .visible
-            ) {
+            // F47: 확인 시트(confirmationDialog)는 하단에서 올라와 위치가 어색했다.
+            // 되돌릴 수 없는 파괴적 액션이라 화면 중앙 alert로 확실히 붙잡는다.
+            .alert("정말 삭제할까요?", isPresented: $confirmingDeletion) {
                 Button("계정 삭제", role: .destructive) {
                     Task { await deleteAccount() }
                 }
                 Button("취소", role: .cancel) {}
             } message: {
-                Text("카드와 쌓인 겹이 모두 사라집니다.")
+                Text("카드와 쌓인 겹이 모두 사라집니다. 되돌릴 수 없어요.")
             }
             .alert("삭제하지 못했어요", isPresented: $deletionFailed) {
                 Button("확인", role: .cancel) {}

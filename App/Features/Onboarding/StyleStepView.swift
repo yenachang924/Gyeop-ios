@@ -149,8 +149,7 @@ struct StyleStepView: View {
             Text(leading)
                 .font(DS.Typo.subheadline)
                 .foregroundStyle(DS.Palette.secondaryText)
-            Slider(value: value)
-                .accessibilityLabel(label)
+            AxisSlider(value: value, label: label)
                 .accessibilityIdentifier(identifier)
             Text(trailing)
                 .font(DS.Typo.subheadline)
@@ -165,6 +164,78 @@ struct StyleStepView: View {
         static let previewMaxWidth: CGFloat = 200
         /// 슬라이더 양옆 라벨("잔잔"·"활발")이 차지하는 폭 여유
         static let sliderLabelAllowance: CGFloat = 96
+    }
+}
+
+/// 성향 2축용 슬라이더 (F48).
+///
+/// 시스템 `Slider`는 트랙 아무 데나 톡 치면 손잡이가 **그 자리로 순간이동**한다. 값이 툭
+/// 튀어 유동적 무드와 어긋나고, 스크롤하려다 잘못 건드리면 성향이 바뀌어 버린다.
+/// 그래서 **손잡이를 눌러 끌 때만** 값이 변하도록 직접 만들었다 — 트랙 탭은 무시한다.
+///
+/// 드래그는 시작 지점 기준 **상대 이동**이라 손가락과 손잡이가 어긋나지 않는다.
+/// 접근성·UI 테스트에는 `accessibilityRepresentation`으로 표준 슬라이더처럼 보인다.
+private struct AxisSlider: View {
+    @Binding var value: Double
+    let label: String
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var dragging = false
+    /// 드래그를 시작한 순간의 값 — 여기서부터의 이동량만 더한다.
+    @State private var startValue: Double = 0
+
+    private var clamped: Double { min(max(value, 0), 1) }
+
+    var body: some View {
+        GeometryReader { geo in
+            // 손잡이 지름만큼 뺀 이동 가능 거리
+            let span = max(geo.size.width - Layout.thumb, 1)
+            let thumbX = CGFloat(clamped) * span
+
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(.quaternary)
+                    .frame(height: Layout.track)
+                Capsule()
+                    .fill(.tertiary)
+                    .frame(width: thumbX + Layout.thumb / 2, height: Layout.track)
+
+                Circle()
+                    .fill(.background)
+                    .shadow(color: .black.opacity(Layout.shadowOpacity), radius: dragging ? 5 : 2, y: 1)
+                    .frame(width: Layout.thumb, height: Layout.thumb)
+                    .scaleEffect(dragging ? Layout.grabScale : 1)
+                    .offset(x: thumbX)
+                    // 제스처가 **손잡이에만** 붙는다 — 트랙을 눌러도 아무 일이 없다
+                    .gesture(drag(span: span))
+                    .animation(reduceMotion ? nil : DS.Motion.quick, value: dragging)
+            }
+            .frame(height: Layout.thumb)
+        }
+        .frame(height: Layout.thumb)
+        .accessibilityRepresentation {
+            Slider(value: $value, in: 0...1) { Text(label) }
+        }
+    }
+
+    private func drag(span: CGFloat) -> some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { gesture in
+                if !dragging {
+                    dragging = true
+                    startValue = clamped
+                }
+                let delta = Double(gesture.translation.width / span)
+                value = min(max(startValue + delta, 0), 1)
+            }
+            .onEnded { _ in dragging = false }
+    }
+
+    private enum Layout {
+        static let track: CGFloat = 6
+        static let thumb: CGFloat = 28
+        static let grabScale: CGFloat = 1.12
+        static let shadowOpacity: Double = 0.18
     }
 }
 
