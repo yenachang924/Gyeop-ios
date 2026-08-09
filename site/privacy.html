@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>겹(Gyeop) 개인정보 처리방침</title>
+<meta name="description" content="겹은 자체 서버를 운영하지 않으며, 모든 데이터는 사용자의 기기 안에만 저장됩니다.">
+<style>
+  :root {
+    --bg: #FAF8F6; --surface: #FFFFFF; --ink: #1A1416; --ink2: #6E6266;
+    --line: #E8E0DC; --accent: #A61955; --accent-bg: #F7E1E8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #171315; --surface: #201B1E; --ink: #F2EFED; --ink2: #A8A0A3;
+      --line: #332B2F; --accent: #E0517F; --accent-bg: #38121F; }
+  }
+  * { margin: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+      "Noto Sans KR", "Segoe UI", sans-serif;
+    line-height: 1.75; padding: 48px 20px 96px;
+  }
+  main { max-width: 720px; margin: 0 auto; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 28px; margin-bottom: 36px; }
+  .mark { width: 56px; height: 56px; border-radius: 14px; background: #FAFAF8;
+    border: 1px solid var(--line); position: relative; overflow: hidden; margin-bottom: 18px; }
+  .mark i { position: absolute; width: 32px; height: 32px; border-radius: 50%;
+    top: 12px; mix-blend-mode: multiply; }
+  .mark i.me { left: 6px; background: linear-gradient(140deg, rgba(166,25,85,0.78), rgba(224,81,127,0.62)); }
+  .mark i.you { right: 6px; background: linear-gradient(230deg, rgba(228,196,88,0.88), rgba(168,164,62,0.74)); }
+  h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+  .eff { font-size: 14px; color: var(--ink2); margin-top: 8px; }
+  .lede { margin-top: 20px; font-size: 17px; }
+  .lede b { color: var(--accent); }
+  h2 { font-size: 19px; font-weight: 800; margin: 40px 0 12px; letter-spacing: -0.01em; }
+  p, li { font-size: 16px; color: var(--ink2); }
+  p + p { margin-top: 12px; }
+  ul { margin: 12px 0 0 20px; display: grid; gap: 8px; }
+  strong { color: var(--ink); }
+  .table-wrap { overflow-x: auto; margin-top: 14px; }
+  table { border-collapse: collapse; width: 100%; min-width: 480px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  th, td { text-align: left; padding: 12px 16px; font-size: 15px; border-bottom: 1px solid var(--line); }
+  th { background: var(--accent-bg); color: var(--ink); font-weight: 700; font-size: 13px;
+    letter-spacing: 0.02em; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line);
+    font-size: 14px; color: var(--ink2); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="mark" aria-hidden="true"><i class="me"></i><i class="you"></i></div>
+    <h1>겹(Gyeop) 개인정보 처리방침</h1>
+    <p class="eff">시행일: 2026년 8월 9일</p>
+    <p class="lede">겹은 처음 만난 사람끼리 아이폰을 맞대어 정체성 카드를 교환하고 만남을
+      쌓는 앱입니다. <b>겹은 자체 서버를 운영하지 않으며, 모든 데이터는 사용자의 기기
+      안에만 저장됩니다.</b></p>
+  </header>
+
+  <h2>1. 수집·저장하는 정보</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>항목</th><th>내용</th><th>저장 위치</th></tr></thead>
+      <tbody>
+        <tr><td>프로필</td><td>닉네임, 한 줄 소개, 이모지, 관심사(최대 5), 여가 성향</td><td>기기 내 (SwiftData)</td></tr>
+        <tr><td>정체성 카드</td><td>프로필에서 생성된 카드(결정적 시드 해시 포함)</td><td>기기 내 (SwiftData)</td></tr>
+        <tr><td>겹 기록</td><td>교환 시각, 상대에게서 받은 카드</td><td>기기 내 (SwiftData)</td></tr>
+        <tr><td>로그인</td><td>Sign in with Apple 자격 토큰</td><td>기기 내 (Keychain)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>실명·이메일·전화번호·위치 정보를 요구하지 않습니다. Sign in with Apple에서 이메일
+      공유를 선택하더라도 서버로 전송되지 않습니다(서버가 없습니다).</li>
+    <li>광고 식별자·추적 기술을 사용하지 않습니다. 제3자 분석·광고 SDK가 없습니다.</li>
+  </ul>
+
+  <h2>2. 기기 간 교환 (카드 맞대기)</h2>
+  <ul>
+    <li>카드 교환은 Apple <strong>MultipeerConnectivity</strong>(로컬 네트워크·P2P)로 두 기기
+      사이에서만 직접 이뤄지며, 전송은 암호화됩니다.</li>
+    <li>교환 시 상대 기기에 전달되는 것은 <strong>내 카드에 담긴 정보뿐</strong>입니다(닉네임,
+      한 줄 소개, 이모지, 관심사, 성향). 그 외 어떤 데이터도 전송되지 않습니다.</li>
+    <li>이를 위해 iOS의 로컬 네트워크 권한을 사용합니다. 권한은 교환 기능에만 쓰입니다.</li>
+  </ul>
+
+  <h2>3. App Clip</h2>
+  <ul>
+    <li>App Clip은 계정 없이 동작하며, 데이터는 기기를 벗어나지 않습니다.</li>
+    <li>App Clip에서 성립한 겹 기록은 App Group 공유 저장소를 통해 <strong>같은 기기의</strong>
+      본앱으로만 이전됩니다.</li>
+    <li>App Clip 데이터는 iOS 정책에 따라 일정 기간 후 시스템이 자동 삭제하며, 앱 자체적으로도
+      30일 보존 정책을 적용합니다.</li>
+  </ul>
+
+  <h2>4. 데이터 삭제</h2>
+  <ul>
+    <li>앱 내 <strong>설정 &gt; 계정 삭제</strong>로 프로필, 카드, 겹 기록, 로그인 토큰이 즉시
+      전부 삭제됩니다.</li>
+    <li>앱을 삭제하면 기기 내 모든 데이터가 함께 삭제됩니다.</li>
+    <li>다만 <strong>이미 상대에게 전달된 내 카드</strong>는 상대 기기에 남습니다. 종이 명함과
+      같은 성격으로, 전달된 카드의 삭제는 상대방이 자신의 기기에서 수행합니다.</li>
+  </ul>
+
+  <h2>5. 아동 개인정보</h2>
+  <p>겹은 만 17세 이상을 대상으로 하며, 아동을 대상으로 하지 않습니다.</p>
+
+  <h2>6. 변경 고지</h2>
+  <p>본 방침이 변경되면 이 페이지에 갱신된 내용과 시행일을 게시합니다.</p>
+
+  <h2>7. 문의</h2>
+  <p>이메일: <a href="mailto:oycshare@gmail.com">oycshare@gmail.com</a></p>
+
+  <footer>겹(Gyeop) · 이 페이지가 App Store Connect에 등록하는 개인정보 처리방침 URL입니다.</footer>
+</main>
+</body>
+</html>

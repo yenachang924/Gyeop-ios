@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["M63YMWAA5V.com.gyeop.app"],
+        "components": [
+          { "/": "/clip*", "comment": "겹 카드 교환 초대 링크" }
+        ]
+      }
+    ]
+  },
+  "appclips": {
+    "apps": ["M63YMWAA5V.com.gyeop.app.Clip"]
+  }
+}

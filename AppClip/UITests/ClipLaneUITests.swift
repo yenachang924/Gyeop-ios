@@ -88,11 +88,14 @@ final class ClipLaneUITests: XCTestCase {
         app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.8)
         app.buttons["onboarding.style.next"].tap()
 
-        // 4 intro — 닉네임·이모지 입력 (전부 선택사항)
+        // 4 intro — 닉네임·한 줄·이모지 입력 (F28: 셋 다 필수)
         let nickname = app.textFields["onboarding.nickname"]
         XCTAssertTrue(nickname.waitForExistence(timeout: 5), "온보딩 3/3(입력) 진입 실패")
         nickname.tap()
         nickname.typeText("예나")
+        let tagline = app.textFields["onboarding.tagline"]
+        tagline.tap()
+        tagline.typeText("새벽 러닝에 빠졌어요")
         button(withPrefix: "onboarding.emoji.", boundBy: 0).tap()
         assertNoInstallSuggestion(stage: "intro")
         snap("clip-4-intro")
@@ -149,6 +152,9 @@ final class ClipLaneUITests: XCTestCase {
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))
         nickname.tap()
         nickname.typeText("예나")
+        let tagline = app.textFields["onboarding.tagline"]
+        tagline.tap()
+        tagline.typeText("산책을 좋아해요")
         button(withPrefix: "onboarding.emoji.", boundBy: 0).tap()
         app.buttons["onboarding.createCard"].tap()
 

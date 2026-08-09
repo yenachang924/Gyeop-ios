@@ -71,10 +71,10 @@ final class OnboardingFlowUITests: XCTestCase {
         close.tap()
     }
 
-    /// 완료 기준 검증: 닉네임은 필수(F4 — 비어 있으면 카드 완성 비활성), 한 줄·이모지는
-    /// 선택사항. 이모지 그리드는 검색으로 1차 16개 밖의 항목도 찾을 수 있다.
+    /// 완료 기준 검증: 닉네임·한 줄·이모지가 **전부 필수**(F28)라 하나라도 비면 카드 완성이
+    /// 비활성이다. 이모지 그리드는 검색으로 1차 16개 밖의 항목도 찾을 수 있다.
     @MainActor
-    func testNicknameIsRequiredAndEmojiSearchFindsBeyondFirst16() throws {
+    func testProfileFieldsAreAllRequiredAndEmojiSearchFindsBeyondFirst16() throws {
         let app = XCUIApplication()
         app.launchArguments = ["-uitest-reset"]
         app.launch()
@@ -102,14 +102,24 @@ final class OnboardingFlowUITests: XCTestCase {
         searchField.typeText("낚시")
         XCTAssertTrue(app.buttons["onboarding.emoji.낚시"].waitForExistence(timeout: 5))
 
-        // 닉네임이 비어 있으면 카드 완성은 비활성 (F4 — 이름 필수)
+        // 아무것도 안 채우면 카드 완성은 비활성 (F28 — 셋 다 필수)
         let create = app.buttons["onboarding.createCard"]
         XCTAssertFalse(create.isEnabled)
 
-        // 닉네임을 채우면 활성 — 한 줄·이모지는 계속 비운 채 진행된다
+        // 닉네임만 채워도 아직 비활성
         let nickname = app.textFields["onboarding.nickname"]
         nickname.tap()
         nickname.typeText("yena")
+        XCTAssertFalse(create.isEnabled, "한 줄·이모지가 비었는데 카드 완성이 활성화됨")
+
+        // 한 줄까지 채워도 이모지가 없으면 비활성
+        let tagline = app.textFields["onboarding.tagline"]
+        tagline.tap()
+        tagline.typeText("test user")
+        XCTAssertFalse(create.isEnabled, "이모지가 비었는데 카드 완성이 활성화됨")
+
+        // 이모지까지 고르면 활성
+        app.buttons["onboarding.emoji.클라이밍"].tap()
         XCTAssertTrue(create.isEnabled)
         create.tap()
 
@@ -154,6 +164,10 @@ final class U2DemoRecordingUITests: XCTestCase {
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))
         nickname.tap()
         nickname.typeText("yena")
+        let tagline = app.textFields["onboarding.tagline"]
+        tagline.tap()
+        tagline.typeText("새벽 러닝에 빠졌어요")
+        app.buttons["onboarding.emoji.클라이밍"].tap()
 
         let create = app.buttons["onboarding.createCard"]
         XCTAssertTrue(create.waitForExistence(timeout: 5))
@@ -234,6 +248,14 @@ final class U2DemoRecordingUITests: XCTestCase {
         app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
         hold(1.0)
         app.buttons["onboarding.style.next"].tap()
+
+        let nickname = app.textFields["onboarding.nickname"]
+        XCTAssertTrue(nickname.waitForExistence(timeout: 5))
+        nickname.tap()
+        nickname.typeText("yena")
+        let tagline = app.textFields["onboarding.tagline"]
+        tagline.tap()
+        tagline.typeText("새벽 러닝에 빠졌어요")
 
         let emoji = app.buttons["onboarding.emoji.클라이밍"]
         XCTAssertTrue(emoji.waitForExistence(timeout: 5))

@@ -2,7 +2,9 @@ import Core
 import DesignSystem
 import SwiftUI
 
-/// 온보딩 3/3 — 닉네임 · 한 줄 · 이모지 원탭. 닉네임은 필수(F4), 나머지는 선택.
+/// 온보딩 3/3 — 닉네임 · 한 줄 · 이모지. **셋 다 필수**다 (F28).
+/// 처음 만나는 자리에서 카드가 비어 있으면 대화가 시작되지 않는다 — 강제성은
+/// 주저함을 덜어주는 장치로 받아들인다 (F4를 한 줄·이모지까지 확대).
 struct ProfileStepView: View {
     @Binding var draft: OnboardingDraft
     let onCreate: () async -> Void
@@ -11,10 +13,17 @@ struct ProfileStepView: View {
     @State private var isCreating = false
     @State private var emojiQuery = ""
 
-    /// 이름 없는 카드는 텅 빈다 — 만남 앞의 주저함을 버리게 하는 장치로 필수 (F4).
     private var nicknameMissing: Bool {
         draft.nickname.trimmingCharacters(in: .whitespaces).isEmpty
     }
+
+    private var taglineMissing: Bool {
+        draft.tagline.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private var emojiMissing: Bool { draft.emoji.isEmpty }
+
+    private var incomplete: Bool { nicknameMissing || taglineMissing || emojiMissing }
 
     private var visibleEmojis: [EmojiIcon] {
         let query = emojiQuery.trimmingCharacters(in: .whitespaces)
@@ -32,12 +41,12 @@ struct ProfileStepView: View {
     var body: some View {
         Form {
             Section {
-                Text("이름은 꼭 필요해요. 나머지는 비워도 괜찮아요.")
+                Text("셋 다 채워야 카드가 완성돼요. 처음 만난 사람에게 건넬 얼굴이니까요.")
                     .font(DS.Typo.subheadline)
                     .foregroundStyle(DS.Palette.secondaryText)
             }
 
-            Section("닉네임 · 필수") {
+            Section("닉네임") {
                 TextField("예나", text: $draft.nickname)
                     .accessibilityIdentifier("onboarding.nickname")
             }
@@ -59,9 +68,9 @@ struct ProfileStepView: View {
                     emojiGrid
                 }
             } header: {
-                Text("나를 나타내는 이모지 · 선택")
+                Text("나를 나타내는 이모지")
             } footer: {
-                Text("안 골라도 진행돼요. 검색하면 전체 이모지를 볼 수 있어요.")
+                Text("하나만 골라 주세요. 검색하면 전체 이모지를 볼 수 있어요.")
             }
 
             Section {
@@ -81,12 +90,33 @@ struct ProfileStepView: View {
                             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
                     }
                 }
-                .disabled(isCreating || nicknameMissing)
+                // 글라스 CTA (F20) — 다른 화면의 프라이머리 버튼과 같은 결
+                .dsProminentButton()
+                .disabled(isCreating || incomplete)
                 .accessibilityIdentifier("onboarding.createCard")
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            } footer: {
+                if incomplete {
+                    Text(missingHint)
+                        .font(DS.Typo.footnote)
+                        .foregroundStyle(DS.Palette.secondaryText)
+                        .accessibilityIdentifier("onboarding.createCard.hint")
+                }
             }
         }
+        .animation(reduceMotion ? nil : DS.Motion.quick, value: incomplete)
         .navigationTitle("3 / 3")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// 무엇이 비었는지 알려준다 — 비활성 버튼만 두면 이유를 알 수 없다.
+    private var missingHint: String {
+        var missing: [String] = []
+        if nicknameMissing { missing.append("닉네임") }
+        if taglineMissing { missing.append("한 줄") }
+        if emojiMissing { missing.append("이모지") }
+        return "\(missing.joined(separator: " · "))를 채우면 카드가 완성돼요"
     }
 
     private var emojiGrid: some View {
@@ -96,7 +126,8 @@ struct ProfileStepView: View {
         ) {
             ForEach(visibleEmojis) { icon in
                 Button {
-                    draft.emoji = (draft.emoji == icon.emoji) ? "" : icon.emoji
+                    // 필수 항목이므로 같은 이모지를 다시 눌러도 해제되지 않는다 (F28)
+                    draft.emoji = icon.emoji
                 } label: {
                     Text(icon.emoji)
                         .font(DS.Typo.title)
