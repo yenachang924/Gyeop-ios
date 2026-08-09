@@ -96,7 +96,8 @@ final class ClipLaneUITests: XCTestCase {
         let tagline = app.textFields["onboarding.tagline"]
         tagline.tap()
         tagline.typeText("새벽 러닝에 빠졌어요")
-        button(withPrefix: "onboarding.emoji.", boundBy: 0).tap()
+        // 카테고리 칩도 "onboarding.emoji." 접두사를 쓰므로 접두사 매칭 대신 명시 선택 (F45)
+        app.buttons["onboarding.emoji.클라이밍"].tap()
         assertNoInstallSuggestion(stage: "intro")
         snap("clip-4-intro")
         app.buttons["onboarding.createCard"].tap()
@@ -155,7 +156,8 @@ final class ClipLaneUITests: XCTestCase {
         let tagline = app.textFields["onboarding.tagline"]
         tagline.tap()
         tagline.typeText("산책을 좋아해요")
-        button(withPrefix: "onboarding.emoji.", boundBy: 0).tap()
+        // 카테고리 칩도 "onboarding.emoji." 접두사를 쓰므로 접두사 매칭 대신 명시 선택 (F45)
+        app.buttons["onboarding.emoji.클라이밍"].tap()
         app.buttons["onboarding.createCard"].tap()
 
         let bump = app.buttons["clip.card.bump"]

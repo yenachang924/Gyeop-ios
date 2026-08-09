@@ -5,13 +5,28 @@ import SwiftUI
 /// 온보딩 3/3 — 닉네임 · 한 줄 · 이모지. **셋 다 필수**다 (F28).
 /// 처음 만나는 자리에서 카드가 비어 있으면 대화가 시작되지 않는다 — 강제성은
 /// 주저함을 덜어주는 장치로 받아들인다 (F4를 한 줄·이모지까지 확대).
+///
+/// F45 — 이모지 칸 전면 재구성: **검색창을 없앴다.** 텍스트 필드가 있으면 키보드가 뜬 채
+/// 그리드를 가리고, 내리기도 어려웠다. 대신 **카테고리 피커 + 그리드**로 137개 전부에
+/// 동등하게 닿을 수 있게 했다 — 이모지 선택 경로에 키보드가 아예 등장하지 않는다.
+/// 닉네임·한 줄의 키보드는 스크롤로 내려가고, 키보드 위 「완료」로도 닫힌다.
 struct ProfileStepView: View {
     @Binding var draft: OnboardingDraft
     let onCreate: () async -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isCreating = false
-    @State private var emojiQuery = ""
+    /// 선택된 이모지 카테고리. 첫 진입은 관심사 기반 "추천".
+    @State private var category: String = Self.recommendedCategory
+    @FocusState private var focusedField: Field?
+
+    private enum Field: Hashable {
+        case nickname
+        case tagline
+    }
+
+    /// 관심사에서 뽑아 주는 맞춤 묶음 (F5) — 실제 CSV 카테고리가 아닌 가상 카테고리다.
+    private static let recommendedCategory = "추천"
 
     private var nicknameMissing: Bool {
         draft.nickname.trimmingCharacters(in: .whitespaces).isEmpty
@@ -25,17 +40,19 @@ struct ProfileStepView: View {
 
     private var incomplete: Bool { nicknameMissing || taglineMissing || emojiMissing }
 
+    private var categories: [String] {
+        [Self.recommendedCategory] + EmojiCatalog.categories
+    }
+
+    /// "추천"은 내가 고른 관심사와 이름이 같은 이모지를 앞에 두고, 나머지는 카탈로그 순서.
     private var visibleEmojis: [EmojiIcon] {
-        let query = emojiQuery.trimmingCharacters(in: .whitespaces)
-        guard !query.isEmpty else {
-            // 초반 선택(관심사)과 같은 이름의 이모지를 앞으로 — 사용자 맞춤 정렬 (F5).
-            // 이름 일치만 승격한다: 카테고리 승격은 1차 노출 16개의 결정성을 깨뜨린다.
-            let picked = Set(draft.interests)
-            let mine = EmojiCatalog.all.filter { picked.contains($0.name) }
-            let rest = EmojiCatalog.all.filter { !picked.contains($0.name) }
-            return Array((mine + rest).prefix(EmojiCatalog.initialDisplayCount))
+        guard category == Self.recommendedCategory else {
+            return EmojiCatalog.icons(in: category)
         }
-        return EmojiCatalog.all.filter { $0.matches(query) }
+        let picked = Set(draft.interests)
+        let mine = EmojiCatalog.all.filter { picked.contains($0.name) }
+        let rest = EmojiCatalog.all.filter { !picked.contains($0.name) }
+        return Array((mine + rest).prefix(EmojiCatalog.initialDisplayCount))
     }
 
     var body: some View {
@@ -54,33 +71,33 @@ struct ProfileStepView: View {
 
             Section("닉네임") {
                 TextField("예나", text: $draft.nickname)
+                    .focused($focusedField, equals: .nickname)
+                    .submitLabel(.next)
+                    .onSubmit { focusedField = .tagline }
                     .accessibilityIdentifier("onboarding.nickname")
             }
 
             Section("요즘의 나, 한 줄") {
                 TextField("새벽 러닝에 빠졌어요", text: $draft.tagline)
+                    .focused($focusedField, equals: .tagline)
+                    .submitLabel(.done)
+                    .onSubmit { focusedField = nil }
                     .accessibilityIdentifier("onboarding.tagline")
             }
 
             Section {
-                TextField("이모지 검색", text: $emojiQuery)
-                    .accessibilityIdentifier("onboarding.emoji.search")
-                if visibleEmojis.isEmpty {
-                    Text("일치하는 이모지가 없어요")
-                        .font(DS.Typo.subheadline)
-                        .foregroundStyle(DS.Palette.secondaryText)
-                        .accessibilityIdentifier("onboarding.emoji.empty")
-                } else {
-                    emojiGrid
-                }
+                categoryPicker
+                emojiGrid
             } header: {
                 Text("나를 나타내는 이모지")
             } footer: {
-                Text("하나만 골라 주세요. 검색하면 전체 이모지를 볼 수 있어요.")
+                Text("하나만 골라 주세요. 묶음을 넘기면 전부 볼 수 있어요.")
             }
 
             Section {
                 Button {
+                    // 키보드가 떠 있으면 먼저 내리고 진행한다 (F45)
+                    focusedField = nil
                     isCreating = true
                     Task {
                         await onCreate()
@@ -106,6 +123,16 @@ struct ProfileStepView: View {
                 .listRowBackground(Color.clear)
             }
         }
+        // 스크롤만 해도 키보드가 내려간다 (F45)
+        .scrollDismissesKeyboard(.interactively)
+        .toolbar {
+            // 키보드 위 「완료」 — 스크롤을 모르는 사용자도 확실히 닫을 수 있다 (F45)
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("완료") { focusedField = nil }
+                    .accessibilityIdentifier("onboarding.keyboard.done")
+            }
+        }
         .animation(reduceMotion ? nil : DS.Motion.quick, value: incomplete)
         .navigationTitle("3 / 3")
         .navigationBarTitleDisplayMode(.inline)
@@ -120,6 +147,35 @@ struct ProfileStepView: View {
         return "\(missing.joined(separator: " · "))를 채우면 카드가 완성돼요"
     }
 
+    /// 카테고리 피커 — 가로 스크롤 칩. 모든 묶음이 같은 깊이에 있어 동등하게 닿는다 (F45).
+    private var categoryPicker: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: DS.Spacing.xs) {
+                ForEach(categories, id: \.self) { name in
+                    Button(name) {
+                        // 이모지를 고르러 왔으면 키보드는 필요 없다
+                        focusedField = nil
+                        category = name
+                    }
+                    .font(DS.Typo.footnote)
+                    .buttonStyle(.plain)
+                    .foregroundStyle(category == name ? DS.Palette.onSelection : .secondary)
+                    .padding(.horizontal, DS.Spacing.s)
+                    .frame(minHeight: DS.minTapTarget)
+                    .background(
+                        category == name ? DS.Palette.selection : .clear,
+                        in: Capsule()
+                    )
+                    .accessibilityAddTraits(category == name ? .isSelected : [])
+                    .accessibilityIdentifier("onboarding.emoji.category.\(name)")
+                }
+            }
+            .padding(.vertical, DS.Spacing.xs)
+        }
+        .scrollIndicators(.hidden)
+        .listRowInsets(EdgeInsets(top: 0, leading: DS.Spacing.m, bottom: 0, trailing: 0))
+    }
+
     private var emojiGrid: some View {
         LazyVGrid(
             columns: [GridItem(.adaptive(minimum: DS.minTapTarget), spacing: DS.Spacing.xs)],
@@ -127,6 +183,7 @@ struct ProfileStepView: View {
         ) {
             ForEach(visibleEmojis) { icon in
                 Button {
+                    focusedField = nil
                     // 필수 항목이므로 같은 이모지를 다시 눌러도 해제되지 않는다 (F28)
                     draft.emoji = icon.emoji
                 } label: {
@@ -148,6 +205,7 @@ struct ProfileStepView: View {
                 .accessibilityIdentifier("onboarding.emoji.\(icon.name)")
             }
         }
+        .animation(reduceMotion ? nil : DS.Motion.quick, value: category)
     }
 }
 

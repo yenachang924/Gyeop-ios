@@ -25,6 +25,18 @@ enum EmojiCatalog {
 
     static let all: [EmojiIcon] = load()
 
+    /// 카탈로그에 등장하는 순서대로의 카테고리 목록 (F45 카테고리 피커).
+    /// CSV 순서를 그대로 따르므로 결정적이다 — 정렬하지 않는다.
+    static let categories: [String] = {
+        var seen = Set<String>()
+        return all.compactMap { seen.insert($0.category).inserted ? $0.category : nil }
+    }()
+
+    /// 해당 카테고리의 이모지 (카탈로그 순서 유지).
+    static func icons(in category: String) -> [EmojiIcon] {
+        all.filter { $0.category == category }
+    }
+
     private static func load() -> [EmojiIcon] {
         guard let url = Bundle.main.url(forResource: "emoji-icons", withExtension: "csv"),
               let text = try? String(contentsOf: url, encoding: .utf8)

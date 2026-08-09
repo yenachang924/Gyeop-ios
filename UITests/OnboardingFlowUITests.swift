@@ -72,9 +72,9 @@ final class OnboardingFlowUITests: XCTestCase {
     }
 
     /// 완료 기준 검증: 닉네임·한 줄·이모지가 **전부 필수**(F28)라 하나라도 비면 카드 완성이
-    /// 비활성이다. 이모지 그리드는 검색으로 1차 16개 밖의 항목도 찾을 수 있다.
+    /// 비활성이다. 이모지는 카테고리 피커로 "추천" 묶음 밖 항목에도 닿을 수 있다 (F45).
     @MainActor
-    func testProfileFieldsAreAllRequiredAndEmojiSearchFindsBeyondFirst16() throws {
+    func testProfileFieldsAreAllRequiredAndCategoryPickerReachesAllEmoji() throws {
         let app = XCUIApplication()
         app.launchArguments = ["-uitest-reset"]
         app.launch()
@@ -94,12 +94,13 @@ final class OnboardingFlowUITests: XCTestCase {
         app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
         app.buttons["onboarding.style.next"].tap()
 
-        // 3/3 — 1차 16개 밖(카탈로그 17번째 행)인 "낚시"는 기본 그리드엔 없다가 검색하면 나타난다
-        let searchField = app.textFields["onboarding.emoji.search"]
-        XCTAssertTrue(searchField.waitForExistence(timeout: 5))
+        // 3/3 — "추천" 묶음(1차 16개) 밖인 "낚시"는 카테고리를 바꾸면 나타난다 (F45).
+        // 검색 텍스트 필드는 없앴다 — 키보드가 그리드를 가리던 문제 때문 (F45).
+        let recommended = app.buttons["onboarding.emoji.category.추천"]
+        XCTAssertTrue(recommended.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.textFields["onboarding.emoji.search"].exists, "검색 필드가 남아 있음")
         XCTAssertFalse(app.buttons["onboarding.emoji.낚시"].exists)
-        searchField.tap()
-        searchField.typeText("낚시")
+        app.buttons["onboarding.emoji.category.활동"].tap()
         XCTAssertTrue(app.buttons["onboarding.emoji.낚시"].waitForExistence(timeout: 5))
 
         // 아무것도 안 채우면 카드 완성은 비활성 (F28 — 셋 다 필수)
