@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>겹(Gyeop)</title>
+<meta name="description" content="처음 만난 사람끼리 아이폰을 맞대어 카드를 교환하는 앱.">
+<style>
+  :root { --bg:#FAF8F6; --ink:#1A1416; --ink2:#6E6266; --line:#E8E0DC; --accent:#A61955; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#171315; --ink:#F2EFED; --ink2:#A8A0A3; --line:#332B2F; --accent:#E0517F; }
+  }
+  * { margin:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--ink); min-height:100vh;
+    font-family:-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    display:grid; place-items:center; padding:32px; text-align:center; line-height:1.7; }
+  .mark { width:104px; height:104px; border-radius:24px; background:#FAFAF8;
+    border:1px solid var(--line); position:relative; overflow:hidden; margin:0 auto 28px; }
+  .mark i { position:absolute; width:60px; height:60px; border-radius:50%; top:22px; mix-blend-mode:multiply; }
+  .mark i.me { left:11px; background:linear-gradient(140deg, rgba(166,25,85,0.78), rgba(224,81,127,0.62)); }
+  .mark i.you { right:11px; background:linear-gradient(230deg, rgba(228,196,88,0.88), rgba(168,164,62,0.74)); }
+  h1 { font-size:42px; font-weight:900; letter-spacing:-0.03em; }
+  p { color:var(--ink2); margin-top:12px; font-size:17px; }
+  a { color:var(--accent); font-size:15px; display:inline-block; margin-top:32px; }
+</style>
+</head>
+<body>
+  <main>
+    <div class="mark" aria-hidden="true"><i class="me"></i><i class="you"></i></div>
+    <h1>겹</h1>
+    <p>아이폰을 맞대면, 만남이 쌓입니다.</p>
+    <a href="/privacy.html">개인정보 처리방침</a>
+  </main>
+</body>
+</html>
