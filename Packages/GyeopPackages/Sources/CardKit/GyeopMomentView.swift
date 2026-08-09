@@ -28,10 +28,8 @@ public struct GyeopMomentView: View {
         counterpartCard: CardSnapshot,
         onFinished: @escaping @MainActor () -> Void
     ) {
-        myColor = CardVisual(seed: myCard.seed, style: myCard.leisureStyle).dominantColor
-        counterpartColor = CardVisual(
-            seed: counterpartCard.seed, style: counterpartCard.leisureStyle
-        ).dominantColor
+        myColor = CardVisual(seed: myCard.seed).dominantColor
+        counterpartColor = CardVisual(seed: counterpartCard.seed).dominantColor
         counterpartName = counterpartCard.nickname
         self.onFinished = onFinished
     }

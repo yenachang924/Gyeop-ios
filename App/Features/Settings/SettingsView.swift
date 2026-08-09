@@ -84,38 +84,19 @@ struct SettingsView: View {
 /// 애플 건강 앱의 교육 화면처럼, 앱이 정한 룰을 그대로 알려준다.
 /// 원문·단일 진실 원천: docs/card-color-guide.md (같은 파일에 두어 pbxproj 재생성 불필요).
 struct CardColorGuideView: View {
-    private struct Rule: Identifiable {
-        let signal: String
-        let reading: String
-        var id: String { signal }
-    }
-
-    private static let rules: [Rule] = [
-        Rule(signal: "활발", reading: "색이 넓게 퍼져요. 다채로운 결"),
-        Rule(signal: "잔잔", reading: "색이 좁게 모여요. 차분한 결"),
-        Rule(signal: "실외", reading: "밝은 결. 볕이 든 듯 맑아요"),
-        Rule(signal: "실내", reading: "깊은 결. 조명이 낮은 듯 아늑해요"),
-    ]
-
     var body: some View {
         List {
             Section {
-                Text("카드의 색은 한 사람의 취미와 성향을 종합적으로 담아낸 것입니다. 고른 관심사, 이름, 한 줄, 이모지가 모두 섞여 세상에 하나뿐인 일곱 빛깔이 되고, 같은 입력이면 언제나 같은 카드가 됩니다.")
+                Text("카드의 색은 한 사람의 취미와 성향을 종합적으로 담아낸 것입니다. 고른 관심사, 성향, 이름, 한 줄, 이모지가 모두 섞여 세상에 하나뿐인 일곱 빛깔이 되고, 같은 입력이면 언제나 같은 카드가 됩니다.")
                     .font(DS.Typo.body)
-            }
-
-            Section("색의 결이 말하는 것") {
-                ForEach(Self.rules) { rule in
-                    LabeledContent(rule.signal, value: rule.reading)
-                }
             }
 
             Section {
-                Text("색이 다채롭게 일렁이면 활발한 사람, 한 톤으로 고요하면 잔잔한 사람일 거예요. 밝으면 바깥의 결, 깊으면 실내의 결. 다음 겹에서 색부터 읽어보세요.")
+                Text("특정 색이 특정 취미를 뜻하지는 않아요. 색은 그 사람 전체의 인상입니다. 무엇 하나를 바꾸면 카드 전체가 다르게 물들어요. 다음 겹에서, 상대의 일곱 빛깔이 어떤 사람일지 상상하며 대화를 시작해 보세요.")
                     .font(DS.Typo.body)
                     .foregroundStyle(DS.Palette.secondaryText)
             } header: {
-                Text("읽는 예")
+                Text("읽는 법")
             }
         }
         .navigationTitle("카드 색 읽는 법")
