@@ -23,6 +23,8 @@ public enum DS {
     public enum Layout {
         /// 로그인(SIWA) 버튼 최대 폭 — 화면 폭 전체로 퍼지는 문제(1차 시연 지적) 방지.
         public static let signInMaxWidth: CGFloat = 280
+        /// 로그인 버튼 높이 (Figma 캡슐 비례)
+        public static let signInHeight: CGFloat = 54
     }
 
     public enum Palette {
@@ -31,11 +33,20 @@ public enum DS {
         // 타는 .borderedProminent)뿐. 선택 상태·크롬은 무채, 겹침 하이라이트는 overlap 3값.
         // 한 화면에 액센트 빨강이 3곳 이상 보이면 실패로 간주하고 덜어낸다.
 
-        /// 브랜드 액센트 — POSTECH Red. 원색이 아닌 저채도 딥 레드라 글라스 위에서도 가라앉는다.
-        /// 라이트 #A61955: 흰 배경 대비 7.3:1 (텍스트로 써도 AA 통과).
-        /// 다크 #E0517F: 시스템 레드가 다크에서 명도를 올리듯(#FF3B30→#FF453A) 들어올린 값 —
-        /// 다크 표면 #1C1C1E 대비 4.6:1.
-        public static let accent = dynamic(light: 0xA61955, dark: 0xE0517F)
+        /// 브랜드 액센트 — POSTECH Red. F26(2026-08-09)에서 채도를 올렸다: 웰컴 화면이
+        /// 흰 바탕에 로고 타입 하나로 서는 구성이 되면서 이전 값이 탁하게 읽혔다.
+        /// 라이트 #A80C4E: hue 유지(≈334°), 채도 0.85→0.93. 흰 배경 대비 7.4:1.
+        /// 다크 #ED4279: 채도 0.64→0.72·명도 상향. 다크 표면 #1C1C1E 대비 4.6:1 (AA 유지).
+        public static let accent = dynamic(light: 0xA80C4E, dark: 0xED4279)
+
+        /// POSTECH 라운지 골드 — 웰컴 소제 등 액센트를 보조하는 온기.
+        /// 라이트는 원색 #DABA65를 그대로 쓰면 흰 배경 대비 1.9:1로 읽히지 않아,
+        /// 같은 hue를 어둡게 눌러 4.9:1을 확보했다. 다크는 원색 그대로(대비 10:1).
+        public static let brandGold = dynamic(light: 0x8A6E20, dark: 0xDABA65)
+
+        /// 웰컴(로그인 게이트) 전용 배경 — 로고 타입이 서는 무대라 순백/순흑에 가깝게 둔다.
+        /// 나머지 화면의 `background`(시스템 그룹 배경)와 의도적으로 다르다.
+        public static let welcomeBackground = dynamic(light: 0xFFFFFF, dark: 0x0E0B0D)
 
         /// 선택 상태(관심사 칩·성향 셀·이모지) 채움 — 무채 잉크. 프로토타입 칩의 눌린 상태
         /// (`--ios-btn` 솔리드)와 같은 관습. 선택을 액센트로 칠하면 칩 5개 선택 시 화면이
@@ -58,8 +69,8 @@ public enum DS {
         public static let overlapBg = dynamic(light: 0xF7E1E8, dark: 0x38121F)
         /// 겹침 하이라이트 — 칩 테두리
         public static let overlapLine = dynamic(light: 0xE3B9C7, dark: 0x5C2438)
-        /// 겹침 하이라이트 — 텍스트·아이콘
-        public static let overlapInk = dynamic(light: 0x731441, dark: 0xF2AFC6)
+        /// 겹침 하이라이트 — 텍스트·아이콘 (F26에서 액센트와 함께 채도 상향)
+        public static let overlapInk = dynamic(light: 0x7A0A44, dark: 0xF5A9C4)
 
         /// 보조 텍스트
         public static let secondaryText = Color.secondary
@@ -115,6 +126,9 @@ public enum DS {
 
     /// 전부 시스템 텍스트 스타일 매핑 — Dynamic Type 자동 대응
     public enum Typo {
+        /// 웰컴의 "겹" 로고 타입 (F26 Figma). 로고이므로 Dynamic Type 대상이 아니다 —
+        /// 접근성 레이블이 의미를 전달한다.
+        public static let wordmark = Font.system(size: 64, weight: .black)
         public static let largeTitle = Font.largeTitle.weight(.bold)
         public static let title = Font.title2.weight(.semibold)
         public static let headline = Font.headline
@@ -147,6 +161,10 @@ public enum DS {
         public static let cardDeal = Animation.spring(response: 0.55, dampingFraction: 0.85)
         /// 화면 요소가 제자리에 내려앉는 등장 (F9 상대 찾는 중 · F12 성향 셀) — 무바운스.
         public static let settle = Animation.smooth(duration: 0.45)
+        /// 웰컴 워드마크가 흐릿함에서 또렷해지며 피어오르는 등장 (F26) — 길고 여유 있게.
+        public static let wordmark = Animation.smooth(duration: 0.7)
+        /// 화면을 떠나며 정리되는 퇴장 (컬렉션으로 전환 등) — 등장보다 짧게.
+        public static let depart = Animation.smooth(duration: 0.3)
         /// 관심사를 고를 때 카드가 "물드는" 색 보간 — 축하가 아니라 반영이므로 무바운스.
         public static let dye = Animation.smooth(duration: 0.5)
         /// "겹!" 융합 — 결정 R7: `.smooth` 스프링, response 0.5, 거의 무바운스(단조 감속).

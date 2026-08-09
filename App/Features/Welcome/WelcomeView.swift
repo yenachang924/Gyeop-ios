@@ -5,23 +5,36 @@ import SwiftUI
 
 /// 로그인 게이트 — Sign in with Apple 하나뿐이다 (심사 4.8: 유일한 로그인 수단이 SIWA면 충족).
 /// 자격 증명 해석·토큰 저장은 AppModel(조립부)로 넘긴다.
+///
+/// 시각은 소유자 Figma 확정본 (F26): 순백/순흑 무대에 "겹" 워드마크(POSTECH Red)와
+/// 골드 소제가 정중앙, 로그인은 하단 캡슐. 등장은 워드마크 → 소제 → 버튼 순으로 흐른다.
 struct WelcomeView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var failed = false
+    /// 등장 단계 — 0: 없음, 1: 워드마크, 2: 소제, 3: 로그인
+    @State private var stage = 0
 
     var body: some View {
-        // 타이틀·소제는 화면 정중앙(1차 시연 지시), 로그인은 하단 — 흑백 상태 유지.
         ZStack {
             VStack(spacing: DS.Spacing.s) {
                 Text("겹")
-                    .font(DS.Typo.largeTitle)
-                Text("아이폰을 맞대면, 만남이 쌓입니다")
-                    .font(DS.Typo.body)
-                    .foregroundStyle(DS.Palette.secondaryText)
+                    .font(DS.Typo.wordmark)
+                    .foregroundStyle(DS.Palette.accent)
+                    .scaleEffect(stage >= 1 ? 1 : 0.82)
+                    .opacity(stage >= 1 ? 1 : 0)
+                    .blur(radius: stage >= 1 ? 0 : 6)
+
+                Text("아이폰을 맞대면 쌓이는 만남")
+                    .font(DS.Typo.headline)
+                    .foregroundStyle(DS.Palette.brandGold)
                     .multilineTextAlignment(.center)
+                    .opacity(stage >= 2 ? 1 : 0)
+                    .offset(y: stage >= 2 ? 0 : 10)
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("겹. 아이폰을 맞대면, 만남이 쌓입니다")
+            .accessibilityLabel("겹. 아이폰을 맞대면 쌓이는 만남")
 
             VStack(spacing: DS.Spacing.s) {
                 Spacer()
@@ -30,6 +43,7 @@ struct WelcomeView: View {
                     Text("로그인하지 못했어요. 다시 시도해 주세요.")
                         .font(DS.Typo.footnote)
                         .foregroundStyle(DS.Palette.secondaryText)
+                        .transition(.opacity)
                 }
 
                 SignInWithAppleButton(.signIn) { request in
@@ -37,14 +51,41 @@ struct WelcomeView: View {
                 } onCompletion: { result in
                     handle(result)
                 }
-                // 풀블리드로 퍼지지 않게 폭을 묶는다 (1차 시연: "칸이 넓다")
-                .frame(maxWidth: DS.Layout.signInMaxWidth, minHeight: DS.minTapTarget)
+                // 흰 무대에는 검정 캡슐, 검은 무대에는 흰 캡슐 (Figma 확정 + 다크 대조)
+                .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                .frame(maxWidth: DS.Layout.signInMaxWidth, minHeight: DS.Layout.signInHeight)
+                .clipShape(Capsule())
                 .frame(maxWidth: .infinity)
+                .opacity(stage >= 3 ? 1 : 0)
+                .offset(y: stage >= 3 ? 0 : 18)
                 .accessibilityIdentifier("welcome.signInWithApple")
             }
         }
-        .padding(DS.Spacing.m)
-        .background(DS.Palette.background)
+        .padding(DS.Spacing.l)
+        .background(DS.Palette.welcomeBackground)
+        .animation(reduceMotion ? nil : DS.Motion.quick, value: failed)
+        .task { await runEntrance() }
+    }
+
+    /// 워드마크가 먼저 피어오르고, 소제와 로그인이 뒤따른다 (F26 애니메이션 개선).
+    /// Reduce Motion에서는 전부 즉시 표시.
+    private func runEntrance() async {
+        guard !reduceMotion else {
+            stage = 3
+            return
+        }
+        withAnimation(DS.Motion.wordmark) { stage = 1 }
+        try? await Task.sleep(for: .seconds(Entrance.subtitleDelay))
+        withAnimation(DS.Motion.settle) { stage = 2 }
+        try? await Task.sleep(for: .seconds(Entrance.signInDelay))
+        withAnimation(DS.Motion.settle) { stage = 3 }
+    }
+
+    private enum Entrance {
+        /// 워드마크가 자리 잡은 뒤 소제가 붙는 간격
+        static let subtitleDelay: TimeInterval = 0.32
+        /// 소제 뒤 로그인 버튼이 올라오는 간격
+        static let signInDelay: TimeInterval = 0.22
     }
 
     private func handle(_ result: Result<ASAuthorization, any Error>) {

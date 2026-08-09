@@ -12,6 +12,8 @@ struct CardRevealView: View {
 
     /// 카드 딜 인 (F6 — 토스 카드 발급 모티브): 아래에서 떠오르며 틸트가 풀린다.
     @State private var appeared = false
+    /// 컬렉션으로 떠나는 전환 (F29) — 카드가 위로 실려 나가고 화면이 비워진다.
+    @State private var leaving = false
 
     var body: some View {
         // Dynamic Type 극단에서도 깨지지 않게 — 내용은 스크롤, 버튼은 하단 고정
@@ -27,37 +29,60 @@ struct CardRevealView: View {
                         .foregroundStyle(DS.Palette.secondaryText)
                         .multilineTextAlignment(.center)
                 }
+                .opacity(leaving ? 0 : 1)
+                .offset(y: leaving ? -24 : 0)
 
                 CardView(card: card)
                     .padding(.horizontal, DS.Spacing.xl)
-                    .scaleEffect(appeared ? 1 : 0.92)
+                    .scaleEffect(appeared ? (leaving ? 0.92 : 1) : 0.92)
                     .rotation3DEffect(
                         .degrees(appeared ? 0 : 22),
                         axis: (x: 1, y: 0, z: 0),
                         perspective: 0.55
                     )
-                    .offset(y: appeared ? 0 : 240)
-                    .opacity(appeared ? 1 : 0)
+                    .offset(y: leaving ? -140 : (appeared ? 0 : 240))
+                    .opacity(appeared ? (leaving ? 0 : 1) : 0)
             }
             .padding(DS.Spacing.m)
         }
+        // 제목과 카드가 한 덩어리로 화면 중앙에 앉는다 (F30 — 상단 쏠림 해소)
+        .defaultScrollAnchor(.center)
         .onAppear {
             withAnimation(reduceMotion ? nil : DS.Motion.cardDeal) { appeared = true }
         }
         .safeAreaInset(edge: .bottom) {
             Button {
-                Task { await model.enterCollection() }
+                Task { await goToCollection() }
             } label: {
                 Text("컬렉션으로")
                     .font(DS.Typo.headline)
                     .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
             }
             .dsProminentButton()
+            .disabled(leaving)
+            .opacity(leaving ? 0 : 1)
             .accessibilityIdentifier("reveal.toCollection")
             .padding(.horizontal, DS.Spacing.m)
         }
         .background(DS.Palette.background)
         .navigationBarBackButtonHidden()
+    }
+
+    /// 카드가 위로 실려 나간 뒤 컬렉션으로 넘어간다 (F29) — 화면이 뚝 끊기지 않게.
+    /// Reduce Motion에서는 연출 없이 즉시 이동.
+    private func goToCollection() async {
+        guard !reduceMotion else {
+            await model.enterCollection()
+            return
+        }
+        withAnimation(DS.Motion.depart) { leaving = true }
+        try? await Task.sleep(for: .seconds(Depart.hold))
+        await model.enterCollection()
+    }
+
+    private enum Depart {
+        /// 퇴장 연출이 보일 만큼만 기다린다 — 길면 답답해진다.
+        static let hold: TimeInterval = 0.26
     }
 }
 
