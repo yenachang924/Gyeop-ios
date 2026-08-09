@@ -1,0 +1,286 @@
+<!doctype html>
+<!-- 겹 디자인 결정 이력 · 포트폴리오 슬라이드 4장 (스크린샷 원본)
+     생성: 2026-08-09 · 기준 커밋 8d080b3 · 스크린샷: review/portfolio/*.png -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>겹, 디자인 결정의 기록</title>
+<style>
+  :root {
+    --bg: #FAF8F6;
+    --surface: #FFFFFF;
+    --ink: #1A1416;
+    --ink2: #6E6266;
+    --line: #E8E0DC;
+    --red: #A61955;
+    --red-soft: #E0517F;
+    --wine: #731441;
+    --wine-bg: #F7E1E8;
+    --gold: #DABA65;
+    --olive: #A8A43E;
+  }
+  * { margin: 0; box-sizing: border-box; }
+  body {
+    background: #2A2226; color: var(--ink);
+    font-family: "Noto Sans CJK KR", "Noto Sans KR", -apple-system, sans-serif;
+    display: grid; gap: 40px; padding: 40px; justify-content: center;
+  }
+  .slide {
+    width: 1600px; height: 1000px; background: var(--bg);
+    padding: 72px 88px; position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .slide footer {
+    position: absolute; left: 88px; right: 88px; bottom: 40px;
+    display: flex; justify-content: space-between;
+    font-size: 15px; color: var(--ink2);
+  }
+  .eyebrow {
+    font-size: 16px; font-weight: 700; letter-spacing: 0.18em;
+    color: var(--red); text-transform: uppercase;
+  }
+  h1 { font-size: 76px; font-weight: 900; letter-spacing: -0.02em; line-height: 1.15; }
+  h2 { font-size: 44px; font-weight: 900; letter-spacing: -0.01em; margin-top: 10px; }
+  .sub { font-size: 22px; color: var(--ink2); line-height: 1.7; }
+
+  /* 아이콘 마크 */
+  .mark { position: relative; width: 132px; height: 132px; border-radius: 30px;
+    background: #FAFAF8; border: 1px solid var(--line); overflow: hidden; }
+  .mark i { position: absolute; width: 76px; height: 76px; border-radius: 50%;
+    top: 28px; mix-blend-mode: multiply; }
+  .mark i.me { left: 14px; background: linear-gradient(140deg, rgba(166,25,85,0.78), rgba(224,81,127,0.62)); }
+  .mark i.you { right: 14px; background: linear-gradient(230deg, rgba(228,196,88,0.88), rgba(168,164,62,0.74)); }
+
+  /* 슬라이드 1 · 커버 */
+  .cover-top { display: flex; align-items: center; gap: 44px; margin-top: 130px; }
+  .agents { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: stretch;
+    gap: 18px; margin-top: auto; margin-bottom: 40px; }
+  .agent { background: var(--surface); border: 1px solid var(--line); border-radius: 22px;
+    padding: 30px 32px; display: grid; gap: 12px; align-content: start; }
+  .agent .no { font-size: 15px; font-weight: 800; letter-spacing: 0.14em; color: var(--red); }
+  .agent h3 { font-size: 26px; font-weight: 800; }
+  .agent p { font-size: 17px; color: var(--ink2); line-height: 1.65; }
+  .arrow { display: grid; place-items: center; font-size: 30px; color: var(--red-soft); }
+
+  /* 슬라이드 2 · 원칙·타임라인 */
+  .principle { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
+  .principle div { background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+    padding: 26px 28px; font-size: 18px; line-height: 1.65; }
+  .principle b { display: block; font-size: 20px; margin-bottom: 8px; }
+  .timeline { margin-top: 52px; display: grid; gap: 0; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 148px; top: 8px; bottom: 8px;
+    width: 3px; background: var(--wine-bg); border-radius: 2px; }
+  .t-row { display: grid; grid-template-columns: 120px 60px 1fr; align-items: start;
+    padding: 17px 0; }
+  .t-row .when { font-size: 17px; font-weight: 700; color: var(--ink2); text-align: right; padding-top: 2px; }
+  .t-row .dot { position: relative; }
+  .t-row .dot::after { content: ""; position: absolute; left: 22px; top: 6px; width: 15px; height: 15px;
+    border-radius: 50%; background: var(--red); border: 4px solid var(--wine-bg); }
+  .t-row .what { font-size: 20px; line-height: 1.55; }
+  .t-row .what b { color: var(--red); }
+  .t-row .what span { color: var(--ink2); font-size: 18px; }
+
+  /* 슬라이드 3 · 결정 하이라이트 */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 40px; }
+  .decision { background: var(--surface); border: 1px solid var(--line); border-radius: 22px;
+    padding: 32px 36px; display: grid; gap: 12px; align-content: start; }
+  .decision .tag { font-size: 14px; font-weight: 800; letter-spacing: 0.1em; color: var(--wine);
+    background: var(--wine-bg); border-radius: 999px; padding: 4px 14px; justify-self: start; }
+  .decision h3 { font-size: 27px; font-weight: 800; }
+  .decision p { font-size: 18px; color: var(--ink2); line-height: 1.7; }
+  .decision p b { color: var(--ink); }
+
+  /* 슬라이드 4 · 비주얼 진화 */
+  .evo { display: grid; grid-template-columns: 1.15fr 1fr; gap: 48px; margin-top: 40px; flex: 1; }
+  .cards-demo { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-content: start; }
+  .mini-card { aspect-ratio: 0.72; border-radius: 22px; position: relative; overflow: hidden;
+    color: #fff; padding: 22px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .mini-card .nm { font-weight: 700; font-size: 21px; position: relative; }
+  .mini-card .tg { font-size: 15px; opacity: 0.94; position: relative; }
+  .mini-card .cap { position: absolute; top: 16px; left: 20px; font-size: 15px; font-weight: 700;
+    background: rgba(0,0,0,0.34); border-radius: 999px; padding: 4px 13px; }
+  .old-mesh { background:
+    radial-gradient(45% 40% at 15% 15%, #2E7E3E 0%, transparent 65%),
+    radial-gradient(50% 45% at 80% 20%, #C8B22C 0%, transparent 65%),
+    radial-gradient(55% 50% at 25% 65%, #B2372C 0%, transparent 60%),
+    radial-gradient(50% 45% at 85% 75%, #7E4EC0 0%, transparent 62%),
+    #2E5E9E; }
+  .new-mesh { background:
+    radial-gradient(60% 55% at 20% 20%, #8E1D4E 0%, transparent 70%),
+    radial-gradient(65% 60% at 85% 30%, #B2503A 0%, transparent 70%),
+    radial-gradient(70% 60% at 35% 85%, #A6742E 0%, transparent 68%),
+    radial-gradient(55% 50% at 85% 85%, #96422E 0%, transparent 70%),
+    #7E2A42; }
+  .new-mesh2 { background:
+    radial-gradient(60% 55% at 25% 20%, #1D6E7E 0%, transparent 70%),
+    radial-gradient(65% 60% at 85% 35%, #2A4E9E 0%, transparent 70%),
+    radial-gradient(70% 60% at 30% 85%, #38348E 0%, transparent 68%),
+    #235E76; }
+  .evo-note { font-size: 18px; color: var(--ink2); line-height: 1.7; margin-top: 18px; }
+  .icon-journey { display: grid; gap: 22px; align-content: start; }
+  .icon-step { display: flex; gap: 26px; align-items: center; }
+  .icon-step .chip { width: 92px; height: 92px; border-radius: 22px; flex: none; position: relative;
+    background: #FAFAF8; border: 1px solid var(--line); overflow: hidden; }
+  .icon-step .chip i { position: absolute; width: 54px; height: 54px; border-radius: 50%; top: 19px; }
+  .icon-step p { font-size: 18px; line-height: 1.6; color: var(--ink2); }
+  .icon-step p b { color: var(--ink); display: block; font-size: 19px; }
+  .rule-table { margin-top: 20px; border-collapse: collapse; width: 100%; }
+  .rule-table td { padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 18px; }
+  .rule-table td:first-child { font-weight: 800; width: 150px; white-space: nowrap; }
+  .sw { display: inline-block; width: 40px; height: 20px; border-radius: 6px; vertical-align: -4px; }
+</style>
+</head>
+<body>
+
+<!-- 슬라이드 1 · 커버 + 에이전트 구조 -->
+<section class="slide" id="s1">
+  <div class="eyebrow">Gyeop · Design Process 2026</div>
+  <div class="cover-top">
+    <div class="mark"><i class="me"></i><i class="you"></i></div>
+    <div>
+      <h1>겹, 디자인 결정의 기록</h1>
+      <p class="sub" style="margin-top:14px; max-width: 62ch;">
+        처음 만난 사람끼리 아이폰을 맞대어 아이덴티티 카드를 교환하는 iOS 앱.
+        기획부터 실기기 검증까지, 세 개의 AI 에이전트가 하나의 문서 체계 위에서
+        36건의 디자인 결정을 쌓았다.</p>
+    </div>
+  </div>
+  <div class="agents">
+    <div class="agent">
+      <div class="no">AGENT 1 · FIGMA</div>
+      <h3>리디자인 에이전트</h3>
+      <p>디자인 토큰 체계와 22개 화면 스켈레톤을 Figma에 구축.
+        결정 라운드 <b>R1~R10</b> · 액센트, 카드 질감(5×5 메시), 타이포,
+        "겹!" 연출 방향, 아이콘 컨셉.</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="agent">
+      <div class="no">AGENT 2 · XCODE</div>
+      <h3>개발 에이전트</h3>
+      <p>토큰을 SwiftUI DesignSystem으로 코드화.
+        <b>U1</b> POSTECH Red 아트 디렉션, <b>U2</b> 시그니처 모션·햅틱,
+        <b>U3</b> 다크모드·Dynamic Type·VoiceOver 전면 패스.</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="agent">
+      <div class="no">AGENT 3 · DEVICE</div>
+      <h3>실기기 검증·출시 에이전트</h3>
+      <p>서명·프로비저닝 복구, 1차 실기기 시연 피드백 <b>F1~F23</b> 반영:
+        유동 무드 전환, 카드 7색 절제, Liquid Glass 전면 적용, 아이콘 확정.</p>
+    </div>
+  </div>
+  <footer><span>겹(Gyeop) · POSTECH 파운데이션</span><span>3 AI 에이전트 협업 · 2026-08</span></footer>
+</section>
+
+<!-- 슬라이드 2 · 운영 원칙 + 타임라인 -->
+<section class="slide" id="s2">
+  <div class="eyebrow">Process</div>
+  <h2>문서가 단일 진실 원천. 결정은 번호로 쌓인다</h2>
+  <div class="principle">
+    <div><b>docs → CLAUDE.md → 코드</b>기준 변경은 반드시 문서 먼저. 에이전트가 바뀌어도
+      결정의 근거와 이력이 유실되지 않는다.</div>
+    <div><b>결정 번호 체계 R · U · F</b>라운드마다 번호를 붙여 기각 이력까지 남긴다.
+      "왜 이 색인가"에 항상 문서로 답할 수 있다.</div>
+    <div><b>취향 결정은 소유자에게</b>에이전트는 2~3안 + 기본값을 제시하고,
+      선택은 소유자가 한다. 시각 제안은 HTML 리뷰 팩으로.</div>
+  </div>
+  <div class="timeline">
+    <div class="t-row"><div class="when">기획</div><div class="dot"></div>
+      <div class="what"><b>피벗</b> · 멘토 피드백으로 아카데미 전용 → 범용 "첫 만남" 앱으로.
+        <span>App Clip으로 받는 쪽 비용 0, 설치 제안은 교환이 끝난 뒤에만.</span></div></div>
+    <div class="t-row"><div class="when">Figma</div><div class="dot"></div>
+      <div class="what"><b>R1~R10</b> · 토큰·질감·타이포·연출·아이콘 10개 결정.
+        <span>카드 질감 5×5 메시(결정론 생성), "겹!"은 버티컬 goo 융합으로.</span></div></div>
+    <div class="t-row"><div class="when">개발</div><div class="dot"></div>
+      <div class="what"><b>U1~U3</b> · 올리브 액센트를 뒤집고 POSTECH Red로 재결정(소유자 승인),
+        모션·햅틱 시그니처, 접근성 전면 재검. <span>시뮬레이터 통과.</span></div></div>
+    <div class="t-row"><div class="when">실기기</div><div class="dot"></div>
+      <div class="what"><b>서명 복구</b> · SIWA capability가 클립 타깃에 잘못 붙어 프로비저닝 실패.
+        <span>entitlements 재배선으로 로그인 게이트 복구. 시뮬레이터가 못 잡는 부류의 결함.</span></div></div>
+    <div class="t-row"><div class="when">1차 시연</div><div class="dot"></div>
+      <div class="what"><b>F1~F23</b> · "유동적으로, bold·strict는 적대적" 무드 전환 지시.
+        <span>이틀간 23건: 카드 면 재구성, 2축 유동 슬라이더, 7색 절제, Liquid Glass, 아이콘 확정.</span></div></div>
+  </div>
+  <footer><span>겹(Gyeop) · 디자인 결정의 기록</span><span>2 / 4</span></footer>
+</section>
+
+<!-- 슬라이드 3 · 결정 하이라이트 -->
+<section class="slide" id="s3">
+  <div class="eyebrow">Key Decisions</div>
+  <h2>기각과 재결정이 남긴 네 가지</h2>
+  <div class="grid2">
+    <div class="decision">
+      <span class="tag">R1 → U1 재결정</span>
+      <h3>액센트 · 올리브를 뒤집고 POSTECH Red</h3>
+      <p>Figma 라운드는 올리브(#66783A)를 골랐지만, 소유자 재결정으로
+        <b>POSTECH Red(#A61955/#E0517F 동적)</b>로 교체. 빨강은 "겹 성립" 순간과
+        프라이머리 CTA에만 · 한 화면 3곳 이상이면 실패로 간주하는 희소성 원칙.</p>
+    </div>
+    <div class="decision">
+      <span class="tag">R7 + U2</span>
+      <h3>"겹!" · 0.5초의 브랜드</h3>
+      <p>두 카드의 대표색 원이 위아래에서 다가와 <b>액체처럼 융합</b>(goo 메타볼).
+        좌우 배치는 "내 카드=왼쪽"이 대등하지 않아 기각. 성립 순간
+        <b>더블탭 햅틱</b>(예비 탭 → 도장 탭)이 손에 닿는다.</p>
+    </div>
+    <div class="decision">
+      <span class="tag">F17 재설계</span>
+      <h3>성향 입력 · 격자를 버리고 2축 유동</h3>
+      <p>2×2 4택1은 "딱딱하다"로 기각. 건강 앱 마음챙김(심리 상태)을 레퍼런스로
+        <b>슬라이더 2축이 카드 색에 연속 기여</b> · 4분면 시드 색의 이중선형 보간.
+        저장값은 양자화되어 "같은 입력=같은 카드" 결정성은 유지.</p>
+    </div>
+    <div class="decision">
+      <span class="tag">F21 절제</span>
+      <h3>카드 색 · 무지개를 7색으로</h3>
+      <p>25개 제어점이 제각각이던 색은 실기기에서 무지개 노이즈였다.
+        <b>7색 유사색 팔레트</b>로 절제하고 성향이 색의 방향을 정하는 공식 규칙을
+        문서화 · 색을 보면 상대의 결이 읽힌다 (인앱 "카드 색 읽는 법").</p>
+    </div>
+  </div>
+  <footer><span>겹(Gyeop) · 디자인 결정의 기록</span><span>3 / 4</span></footer>
+</section>
+
+<!-- 슬라이드 4 · 비주얼 진화 -->
+<section class="slide" id="s4">
+  <div class="eyebrow">Evolution</div>
+  <h2>비주얼이 결정을 따라 진화한 흔적</h2>
+  <div class="evo">
+    <div>
+      <div class="cards-demo">
+        <div class="mini-card old-mesh"><span class="cap">이전 · 무작위 25색</span>
+          <div class="nm">Pola</div><div class="tg">배고파요</div></div>
+        <div class="mini-card new-mesh"><span class="cap">F21 · 웜 7색 (활발)</span>
+          <div class="nm">Pola</div><div class="tg">배고파요</div></div>
+      </div>
+      <table class="rule-table">
+        <tr><td>활발</td><td><span class="sw" style="background:linear-gradient(90deg,#A61955,#DABA65)"></span>&nbsp; 웜 톤 · 레드에서 골드 사이의 온기</td></tr>
+        <tr><td>잔잔</td><td><span class="sw" style="background:linear-gradient(90deg,#2F6F74,#3A3A8E)"></span>&nbsp; 쿨 톤 · 틸에서 인디고 사이의 고요</td></tr>
+        <tr><td>실외 · 실내</td><td>밝은 명도대 · 깊은 명도대 · 볕과 조명의 결</td></tr>
+      </table>
+      <p class="evo-note">색이 곧 성향의 언어가 되도록, 규칙을 앱의 공식 문서로 공개
+        (건강 앱 교육 화면 모티브).</p>
+    </div>
+    <div class="icon-journey">
+      <div class="icon-step">
+        <div class="chip"><i style="left:11px;background:#8E4EC0;mix-blend-mode:multiply;"></i><i style="right:11px;background:#C05C2E;mix-blend-mode:multiply;"></i></div>
+        <p><b>멀티플라이 · 기각</b>겹침부가 탁해지고 타사 로고와 형태 충돌.</p>
+      </div>
+      <div class="icon-step">
+        <div class="chip"><i style="left:11px;background:linear-gradient(135deg,#2E4E9E,#7FC98F)"></i><i style="right:11px;background:linear-gradient(225deg,#E8A54B,#8F5AB0)"></i></div>
+        <p><b>불투명 노멀 · R10 확정, 이후 폐기</b>선명하지만 "겹"이 형태로 드러나지 않음.</p>
+      </div>
+      <div class="icon-step">
+        <div class="chip"><i style="left:11px;top:19px;background:linear-gradient(140deg,rgba(166,25,85,0.78),rgba(224,81,127,0.62));mix-blend-mode:multiply;"></i><i style="right:11px;background:linear-gradient(230deg,rgba(228,196,88,0.88),rgba(168,164,62,0.74));mix-blend-mode:multiply;"></i></div>
+        <p><b>유리 레이어 · F19 최종</b>Apple 일기 앱의 반투명 레이어 해석.
+          겹치는 부분에 아래 원이 비쳐 "겹"이 곧 형태가 된다. POSTECH Red + 올리브 힌트.</p>
+      </div>
+      <p class="evo-note">인터페이스 전체는 iOS 26 <b>Liquid Glass</b>로.
+        CTA·칩·카드 알약이 유리로 렌더되고, 이전 OS는 자동 폴백된다 (F20).</p>
+    </div>
+  </div>
+  <footer><span>겹(Gyeop) · 디자인 결정의 기록</span><span>4 / 4</span></footer>
+</section>
+
+</body>
+</html>
