@@ -830,7 +830,7 @@
 				9B9954347CFA4FA6F89DE563 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		47847C08AE8B431FF3C62624 /* Build configuration list for PBXNativeTarget "GyeopClip" */ = {
 			isa = XCConfigurationList;
@@ -839,7 +839,7 @@
 				737B18CF55963740E05B92D0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		5155717B36DDC33D6C74F796 /* Build configuration list for PBXProject "Gyeop" */ = {
 			isa = XCConfigurationList;
@@ -848,7 +848,7 @@
 				36A18D70856F1BC10230FFF8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		A1E94A896D4783C78CA95132 /* Build configuration list for PBXNativeTarget "Gyeop" */ = {
 			isa = XCConfigurationList;
@@ -857,7 +857,7 @@
 				6F849D85FEF0B535926AA4F3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		CAA7B08A5A07B848238003B0 /* Build configuration list for PBXNativeTarget "GyeopClipUITests" */ = {
 			isa = XCConfigurationList;
@@ -866,7 +866,7 @@
 				2F7FA441C4FF55AFA9D881A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
