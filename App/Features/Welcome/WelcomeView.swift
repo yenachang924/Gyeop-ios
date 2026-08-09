@@ -39,12 +39,14 @@ struct WelcomeView: View {
             VStack(spacing: DS.Spacing.s) {
                 Spacer()
 
-                if failed {
-                    Text("로그인하지 못했어요. 다시 시도해 주세요.")
-                        .font(DS.Typo.footnote)
-                        .foregroundStyle(DS.Palette.secondaryText)
-                        .transition(.opacity)
-                }
+                // 실패 문구만 페이드로 나타난다 — 애니메이션을 화면 전체에 걸면 워드마크·
+                // 버튼까지 함께 움직인다 (F46과 같은 부류의 실수).
+                Text("로그인하지 못했어요. 다시 시도해 주세요.")
+                    .font(DS.Typo.footnote)
+                    .foregroundStyle(DS.Palette.secondaryText)
+                    .opacity(failed ? 1 : 0)
+                    .animation(reduceMotion ? nil : DS.Motion.quick, value: failed)
+                    .accessibilityHidden(!failed)
 
                 // `.continue` = "Continue with Apple". `.signIn`은 로고가 크게 뜨는
                 // 레이아웃이라 F33에서 교체했다. 프레임을 **고정**해야 버튼이 남는 공간만큼
@@ -68,7 +70,6 @@ struct WelcomeView: View {
         // 인디케이터 구간에 시스템 배경이 그대로 드러난다 — 화면이 위아래로 갈라져 보이던
         // 원인 (F41). 무대는 화면 전체여야 한다.
         .background(DS.Palette.welcomeBackground.ignoresSafeArea())
-        .animation(reduceMotion ? nil : DS.Motion.quick, value: failed)
         .task { await runEntrance() }
     }
 

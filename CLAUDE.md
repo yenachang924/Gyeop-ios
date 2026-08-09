@@ -36,6 +36,9 @@
 - **HIG + 시스템 컴포넌트만.** List, Form, NavigationStack, TabView 등 시스템 것을 먼저. **커스텀 비주얼이 허용되는 곳은 정체성 카드뿐이다** (CardKit 내부).
 - **모든 색·폰트·간격은 DesignSystem 토큰 참조.** 뷰 코드에 리터럴(`Color(red:...)`, `.padding(13)`, `.font(.system(size: 17))`) 직접 쓰기 금지. 필요한 토큰이 없으면 DesignSystem에 토큰을 추가하고 참조한다.
 - **Dynamic Type 대응** — 고정 폰트 크기 금지, 레이아웃은 텍스트 확대에도 깨지지 않아야 한다.
+- **애니메이션은 실제로 변하는 뷰에만** (F46). `Form`·`List`·`ScrollView`·`VStack` 같은
+  컨테이너에 `.animation(_:value:)`를 걸면 하위 전체가 위치 애니메이션을 타 요소가
+  날아다닌다. 트리거 값도 가능한 한 좁게 잡는다(전역 상태 대신 그 뷰의 상태).
 - **터치 타깃 최소 44pt.**
 - **접근성 레이블** — 이모지·아이콘·카드 등 비텍스트 요소에는 `accessibilityLabel` 필수.
 

@@ -133,7 +133,9 @@ struct ProfileStepView: View {
                     .accessibilityIdentifier("onboarding.keyboard.done")
             }
         }
-        .animation(reduceMotion ? nil : DS.Motion.quick, value: incomplete)
+        // F46: Form 전체에 `.animation(value:)`를 걸면 안 된다. `incomplete`가 뒤집히는
+        // 순간 **폼 안의 모든 행**(이모지 셀 137개 포함)이 위치 애니메이션을 타서 이모지가
+        // 칸 밖으로 날아다녔다. 애니메이션은 실제로 변하는 뷰에만 국소적으로 붙인다.
         .navigationTitle("3 / 3")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -176,36 +178,47 @@ struct ProfileStepView: View {
         .listRowInsets(EdgeInsets(top: 0, leading: DS.Spacing.m, bottom: 0, trailing: 0))
     }
 
+    /// 이모지 그리드. **격자는 절대 애니메이션하지 않는다** (F46) — 이모지는 사전에 이미
+    /// 꽂혀 있던 것처럼 제자리에 있어야 한다. 움직이는 건 눌린 칸의 배경·크기뿐이고,
+    /// 그 변화도 자기 칸에만 국한된다.
     private var emojiGrid: some View {
         LazyVGrid(
             columns: [GridItem(.adaptive(minimum: DS.minTapTarget), spacing: DS.Spacing.xs)],
             spacing: DS.Spacing.xs
         ) {
             ForEach(visibleEmojis) { icon in
-                Button {
-                    focusedField = nil
-                    // 필수 항목이므로 같은 이모지를 다시 눌러도 해제되지 않는다 (F28)
-                    draft.emoji = icon.emoji
-                } label: {
-                    Text(icon.emoji)
-                        .font(DS.Typo.title)
-                        .frame(minWidth: DS.minTapTarget, minHeight: DS.minTapTarget)
-                        .background(
-                            // 선택 표시는 무채 — 이모지 자체가 색을 갖고 있다 (U1 원칙 1)
-                            draft.emoji == icon.emoji ? DS.Palette.selection.opacity(0.25) : .clear,
-                            in: RoundedRectangle(cornerRadius: DS.Radius.chip)
-                        )
-                        // 이모지 원탭 선택 스프링 — 다른 선택 컨트롤과 같은 결 (quick)
-                        .scaleEffect(draft.emoji == icon.emoji ? 1.08 : 1)
-                        .animation(reduceMotion ? nil : DS.Motion.quick, value: draft.emoji)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("이모지 \(icon.name)")
-                .accessibilityAddTraits(draft.emoji == icon.emoji ? .isSelected : [])
-                .accessibilityIdentifier("onboarding.emoji.\(icon.name)")
+                emojiCell(icon)
             }
         }
-        .animation(reduceMotion ? nil : DS.Motion.quick, value: category)
+        // 카테고리를 바꾸면 내용이 통째로 갈린다 — 위치를 보간하면 이전 묶음의 이모지가
+        // 새 자리로 날아가는 것처럼 보이므로 전환은 즉시 (F46).
+        .animation(nil, value: category)
+    }
+
+    private func emojiCell(_ icon: EmojiIcon) -> some View {
+        let isSelected = draft.emoji == icon.emoji
+        return Button {
+            focusedField = nil
+            // 필수 항목이므로 같은 이모지를 다시 눌러도 해제되지 않는다 (F28)
+            draft.emoji = icon.emoji
+        } label: {
+            Text(icon.emoji)
+                .font(DS.Typo.title)
+                .frame(minWidth: DS.minTapTarget, minHeight: DS.minTapTarget)
+                .background(
+                    // 선택 표시는 무채 — 이모지 자체가 색을 갖고 있다 (U1 원칙 1)
+                    isSelected ? DS.Palette.selection.opacity(0.25) : .clear,
+                    in: RoundedRectangle(cornerRadius: DS.Radius.chip)
+                )
+                // 눌린 칸만 살짝 커진다. 값이 `draft.emoji`가 아니라 **이 칸의 선택 여부**라
+                // 다른 칸은 아무 반응도 하지 않는다 (F46).
+                .scaleEffect(isSelected ? 1.06 : 1)
+                .animation(reduceMotion ? nil : DS.Motion.quick, value: isSelected)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("이모지 \(icon.name)")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier("onboarding.emoji.\(icon.name)")
     }
 }
 
