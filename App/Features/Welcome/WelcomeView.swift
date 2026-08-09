@@ -64,7 +64,10 @@ struct WelcomeView: View {
             }
         }
         .padding(DS.Spacing.l)
-        .background(DS.Palette.welcomeBackground)
+        // `.ignoresSafeArea()`가 없으면 배경이 콘텐츠 영역까지만 칠해져 상태 표시줄·홈
+        // 인디케이터 구간에 시스템 배경이 그대로 드러난다 — 화면이 위아래로 갈라져 보이던
+        // 원인 (F41). 무대는 화면 전체여야 한다.
+        .background(DS.Palette.welcomeBackground.ignoresSafeArea())
         .animation(reduceMotion ? nil : DS.Motion.quick, value: failed)
         .task { await runEntrance() }
     }

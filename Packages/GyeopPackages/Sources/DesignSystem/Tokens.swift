@@ -48,9 +48,10 @@ public enum DS {
         /// 같은 hue를 어둡게 눌러 4.9:1을 확보했다. 다크는 원색 그대로(대비 10:1).
         public static let brandGold = dynamic(light: 0x8A6E20, dark: 0xDABA65)
 
-        /// 웰컴(로그인 게이트) 전용 배경 — 로고 타입이 서는 무대라 순백/순흑에 가깝게 둔다.
-        /// 나머지 화면의 `background`(시스템 그룹 배경)와 의도적으로 다르다.
-        public static let welcomeBackground = dynamic(light: 0xFFFFFF, dark: 0x0E0B0D)
+        /// 웰컴(로그인 게이트) 전용 배경 — 로고 타입이 서는 무대라 **순백/순흑**이다.
+        /// F41: 다크를 #0E0B0D에서 순흑으로 내렸다. 시스템 기본 배경(순흑)과 미세하게 달라
+        /// 안전 영역 경계에 띠가 보였다 — 값이 같으면 어긋날 여지 자체가 없다.
+        public static let welcomeBackground = dynamic(light: 0xFFFFFF, dark: 0x000000)
 
         /// 선택 상태(관심사 칩·성향 셀·이모지) 채움 — 무채 잉크. 프로토타입 칩의 눌린 상태
         /// (`--ios-btn` 솔리드)와 같은 관습. 선택을 액센트로 칠하면 칩 5개 선택 시 화면이
@@ -128,27 +129,35 @@ public enum DS {
         #endif
     }
 
-    /// 전부 시스템 텍스트 스타일 매핑 — Dynamic Type 자동 대응
+    /// 전부 시스템 텍스트 스타일 매핑 — Dynamic Type 자동 대응.
+    ///
+    /// **폰트는 전부 Apple 시스템 서체다** (`Font.system` = SF Pro, 한글은 Apple SD Gothic
+    /// Neo 폴백). 커스텀 폰트는 쓰지 않는다 — 결정 R3.
+    ///
+    /// F42 — 굵기 상한: Apple SD Gothic Neo에는 **Bold 위 굵기(Heavy·Black)가 없다.**
+    /// `.black`/`.heavy`를 주면 한글만 다른 서체로 폴백되거나 합성돼 SF 계열이 아닌 인상을
+    /// 준다. 그래서 한글이 들어가는 스타일의 굵기는 `.bold`를 넘기지 않는다.
     public enum Typo {
         /// 웰컴의 "겹" 로고 타입 (F26 Figma). 로고이므로 Dynamic Type 대상이 아니다 —
         /// 접근성 레이블이 의미를 전달한다.
-        public static let wordmark = Font.system(size: 64, weight: .black)
+        public static let wordmark = Font.system(size: 64, weight: .bold, design: .default)
         /// 카드 리빌("이게 나예요") 전용 — largeTitle 한 급 위 (F38). Dynamic Type 대응.
-        public static let reveal = Font.system(.largeTitle, weight: .heavy)
-        public static let largeTitle = Font.largeTitle.weight(.bold)
-        public static let title = Font.title2.weight(.semibold)
+        public static let reveal = Font.system(.largeTitle, design: .default).weight(.bold)
+        public static let largeTitle = Font.system(.largeTitle, design: .default).weight(.bold)
+        public static let title = Font.system(.title2, design: .default).weight(.semibold)
         /// 목록 섹션 제목 (컬렉션의 "내 카드"·"받은 카드") — 애플 순정 섹션 위계 (F40)
-        public static let section = Font.title3.weight(.semibold)
-        public static let headline = Font.headline
-        public static let body = Font.body
+        public static let section = Font.system(.title3, design: .default).weight(.semibold)
+        public static let headline = Font.system(.headline, design: .default)
+        public static let body = Font.system(.body, design: .default)
         /// 제목 아래 보조 설명 한 줄 (예: 시간·정원 요약)
-        public static let subheadline = Font.subheadline
+        public static let subheadline = Font.system(.subheadline, design: .default)
         /// 타임스탬프 등 가장 낮은 위계의 부가 정보
-        public static let footnote = Font.footnote
-        public static let caption = Font.caption
-        /// D-day 등 상시 노출되는 카운터 숫자 — Weather/Fitness/Screen Time처럼 Rounded 디자인,
-        /// monospacedDigit으로 자릿수 변화에도 레이아웃이 흔들리지 않는다.
+        public static let footnote = Font.system(.footnote, design: .default)
+        public static let caption = Font.system(.caption, design: .default)
+        /// 숫자 전용 카운터 — 한글이 섞이지 않는 자리라 rounded·heavy를 그대로 쓴다.
         public static let counter = Font.system(.title, design: .rounded).weight(.heavy).monospacedDigit()
+        /// 하단 주요 액션 아이콘 (F40 컬렉션 맞대기) — 라벨보다 한 급 크게.
+        public static let actionIcon = Font.system(.title2, design: .default).weight(.semibold)
         /// 카드 대표 이모지 (F5 — 카드에서 더 크게). 이모지는 글자가 아니라 픽토그램이라
         /// Dynamic Type 대상에서 제외한다 — 카드 정보는 접근성 레이블이 전달한다.
         public static let cardEmoji = Font.system(size: 56)

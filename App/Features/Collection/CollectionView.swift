@@ -72,7 +72,7 @@ struct CollectionView: View {
             } icon: {
                 Image(systemName: "person.line.dotted.person.fill")
                     // 아이콘을 라벨보다 한 급 크게 (F40)
-                    .font(.system(.title2, weight: .semibold))
+                    .font(DS.Typo.actionIcon)
             }
             .frame(maxWidth: .infinity, minHeight: DS.Layout.primaryActionHeight)
         }
