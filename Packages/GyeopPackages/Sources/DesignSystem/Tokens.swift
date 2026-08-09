@@ -188,7 +188,7 @@ public extension View {
     /// 프라이머리 CTA — Liquid Glass prominent, iOS 26 미만은 borderedProminent.
     @ViewBuilder
     func dsProminentButton() -> some View {
-        if #available(iOS 26.0, *) {
+        if #available(iOS 26.0, macOS 26.0, *) {
             buttonStyle(.glassProminent)
         } else {
             buttonStyle(.borderedProminent)
@@ -198,7 +198,7 @@ public extension View {
     /// 보조·미선택 컨트롤 — Liquid Glass, iOS 26 미만은 bordered.
     @ViewBuilder
     func dsGlassButton() -> some View {
-        if #available(iOS 26.0, *) {
+        if #available(iOS 26.0, macOS 26.0, *) {
             buttonStyle(.glass)
         } else {
             buttonStyle(.bordered)

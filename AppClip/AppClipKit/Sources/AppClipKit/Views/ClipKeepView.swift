@@ -68,7 +68,7 @@ public struct ClipKeepView: View {
                 }
                 .padding(.horizontal, DS.Spacing.m)
                 .accessibilityElement(children: .combine)
-                .accessibilityLabel("\(record.counterpartCard.nickname)님 카드 — 오늘, 겹친 관심사 \(sharedCount)개")
+                .accessibilityLabel("\(record.counterpartCard.nickname)님 카드. 오늘, 겹친 관심사 \(sharedCount)개")
 
                 VStack(alignment: .leading, spacing: DS.Spacing.s) {
                     Text("이 카드, 계속 간직할까요?")

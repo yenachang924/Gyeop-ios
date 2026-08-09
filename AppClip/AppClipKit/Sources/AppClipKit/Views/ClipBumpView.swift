@@ -30,7 +30,7 @@ public struct ClipBumpView: View {
         }
         .background(DS.Palette.background)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("아이폰을 서로 가까이 — 카드를 교환하는 중")
+        .accessibilityLabel("아이폰을 서로 가까이. 카드를 교환하는 중")
     }
 }
 

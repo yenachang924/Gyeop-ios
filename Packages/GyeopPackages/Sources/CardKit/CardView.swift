@@ -172,7 +172,7 @@ private struct OverlapPillRow: View {
 /// 이전 OS는 기존 솔리드 배경으로 폴백. 테두리는 두 경로 공통.
 private struct PillSurface: ViewModifier {
     func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
+        if #available(iOS 26.0, macOS 26.0, *) {
             content
                 .glassEffect(.regular.tint(DS.Palette.overlapBg), in: Capsule())
                 .overlay(Capsule().strokeBorder(DS.Palette.overlapLine))

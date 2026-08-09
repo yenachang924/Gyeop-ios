@@ -10,8 +10,8 @@ D2 세션이 한다 — 이 세션은 앱 코드를 직접 수정하지 않는�
 
 > **U1 개정 (2026-08-09, 소유자 승인):** R1(액센트)·R8(겹침 하이라이트)은 U1 아트 디렉션으로
 > 대체됐다 — 올리브 → **POSTECH Red**. 근거·대비 수치·전 화면 before/after는
-> `review/ui-review.html` 참고. 코드 반영 완료(`Tokens.swift`). Figma의 `accent`·`overlap/*`
-> 색상 스타일은 아직 올리브라 **재등록 필요**.
+> `review/ui-review.html` 참고. 코드 반영 완료(`Tokens.swift`). Figma 색상 스타일도 재등록 완료
+> (2026-08-09 — `accent`·`overlap/*` 값 갱신 + `dark/accent`·`dark/overlap/*` 신설).
 
 ## 결정 라운드 (10개 중 확정)
 
@@ -39,8 +39,8 @@ D2 세션이 한다 — 이 세션은 앱 코드를 직접 수정하지 않는�
 | `ink/tertiary` | `#B4B4BC` | 플레이스홀더 |
 | `line` | `#E3E3E8` | 테두리 |
 | `action` | `#17171A` @ 82% + 배경블러 20 | 프라이머리 버튼(글라스) |
-| `accent` | **[U1 개정]** 라이트 `#A61955` / 다크 `#E0517F` (Figma 재등록 필요) | "겹!" 성립 순간·프라이머리 CTA 전용 (결정 R1) |
-| `overlap/bg` · `overlap/line` · `overlap/ink` | **[U1 개정]** 라이트 `#F7E1E8` · `#E3B9C7` · `#731441` / 다크 `#38121F` · `#5C2438` · `#F2AFC6` (Figma 재등록 필요) | 겹침 하이라이트 |
+| `accent` | **[U1 개정]** 라이트 `#A61955` / 다크 `#E0517F` — 다크는 Figma `dark/accent` 스타일 | "겹!" 성립 순간·프라이머리 CTA 전용 (결정 R1) |
+| `overlap/bg` · `overlap/line` · `overlap/ink` | **[U1 개정]** 라이트 `#F7E1E8` · `#E3B9C7` · `#731441` / 다크 `#38121F` · `#5C2438` · `#F2AFC6` — 다크는 Figma `dark/overlap/*` 스타일 | 겹침 하이라이트 |
 | `selection` / `onSelection` | 시스템 `primary` / `systemBackground` (U1 신설, Figma 미등록) | 선택 상태(관심사 칩·성향 셀·이모지) — 선택과 겹침의 시맨틱 분리 |
 | `clip/bg` · `clip/ink` | `#E8EEFB` · `#3A6DD8` | App Clip 배지 |
 | `danger` | `#FF3B30` (iOS systemRed) | 파괴적 액션(계정 삭제) 전용 — 기존 토큰 표에 없어 이번에 추가 |

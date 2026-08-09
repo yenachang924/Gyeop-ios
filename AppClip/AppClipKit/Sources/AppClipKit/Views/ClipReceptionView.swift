@@ -52,7 +52,7 @@ public struct ClipReceptionView: View {
                     .frame(minHeight: DS.minTapTarget)
                 }
                 .accessibilityElement(children: .combine)
-                .accessibilityLabel("\(inviterNickname)님의 카드 — 맞댄 뒤에 열려요")
+                .accessibilityLabel("\(inviterNickname)님의 카드. 맞댄 뒤에 열려요")
             }
 
             Spacer()
