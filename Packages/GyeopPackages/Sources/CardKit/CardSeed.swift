@@ -54,29 +54,39 @@ public enum CardPreview {
     /// 4분면 시드 각각의 제어점 색을 이중선형 보간 — 축이 사분면 경계를 지나도 색이
     /// 끊기지 않고 흐른다. 저장되는 최종 카드는 양자화된 `LeisureStyle` 시드를 그대로
     /// 쓰므로 "같은 입력=같은 카드"의 결정성은 유지된다.
-    public static func blendedColors(
-        nickname: String,
-        emoji: String,
-        interests: [String],
-        energy: Double,
-        venue: Double
-    ) -> [Color] {
-        func quadrant(_ e: LeisureStyle.Energy, _ v: LeisureStyle.Venue) -> [Color] {
-            visual(
-                nickname: nickname, emoji: emoji, interests: interests,
-                leisureStyle: LeisureStyle(energy: e, venue: v)
-            ).colors
+    /// 4분면 팔레트를 **한 번만** 만들어 들고 있다가, 축 값이 바뀔 때는 보간만 한다 (F49).
+    ///
+    /// 이전에는 슬라이더를 끄는 **매 프레임** 4개의 `CardVisual`을 새로 만들었다 —
+    /// sha256 4회 + 색마다 대비 보정 루프까지 돌아 드래그가 뚝뚝 끊겼다.
+    /// 팔레트는 이름·이모지·관심사에만 의존하므로 그 값이 바뀔 때만 다시 만들면 된다.
+    public struct QuadrantPalette: Sendable {
+        private let calmIndoor: [Color]
+        private let calmOutdoor: [Color]
+        private let activeIndoor: [Color]
+        private let activeOutdoor: [Color]
+
+        public init(nickname: String, emoji: String, interests: [String]) {
+            func quadrant(_ e: LeisureStyle.Energy, _ v: LeisureStyle.Venue) -> [Color] {
+                CardPreview.visual(
+                    nickname: nickname, emoji: emoji, interests: interests,
+                    leisureStyle: LeisureStyle(energy: e, venue: v)
+                ).colors
+            }
+            calmIndoor = quadrant(.calm, .indoor)
+            calmOutdoor = quadrant(.calm, .outdoor)
+            activeIndoor = quadrant(.active, .indoor)
+            activeOutdoor = quadrant(.active, .outdoor)
         }
-        let calmIndoor = quadrant(.calm, .indoor)
-        let calmOutdoor = quadrant(.calm, .outdoor)
-        let activeIndoor = quadrant(.active, .indoor)
-        let activeOutdoor = quadrant(.active, .outdoor)
-        let e = min(max(energy, 0), 1)
-        let v = min(max(venue, 0), 1)
-        return calmIndoor.indices.map { index in
-            let calm = calmIndoor[index].mix(with: calmOutdoor[index], by: v)
-            let active = activeIndoor[index].mix(with: activeOutdoor[index], by: v)
-            return calm.mix(with: active, by: e)
+
+        /// 두 축(0~1)의 이중선형 보간 — 프레임마다 불려도 색 섞기뿐이라 가볍다.
+        public func colors(energy: Double, venue: Double) -> [Color] {
+            let e = min(max(energy, 0), 1)
+            let v = min(max(venue, 0), 1)
+            return calmIndoor.indices.map { index in
+                let calm = calmIndoor[index].mix(with: calmOutdoor[index], by: v)
+                let active = activeIndoor[index].mix(with: activeOutdoor[index], by: v)
+                return calm.mix(with: active, by: e)
+            }
         }
     }
 }

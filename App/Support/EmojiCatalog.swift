@@ -33,9 +33,14 @@ enum EmojiCatalog {
     }()
 
     /// 해당 카테고리의 이모지 (카탈로그 순서 유지).
+    /// 미리 묶어둔다 (F49) — 뷰가 다시 그려질 때마다 137개를 훑지 않도록.
     static func icons(in category: String) -> [EmojiIcon] {
-        all.filter { $0.category == category }
+        byCategory[category] ?? []
     }
+
+    private static let byCategory: [String: [EmojiIcon]] = Dictionary(
+        grouping: all, by: \.category
+    )
 
     private static func load() -> [EmojiIcon] {
         guard let url = Bundle.main.url(forResource: "emoji-icons", withExtension: "csv"),

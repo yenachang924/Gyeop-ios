@@ -66,6 +66,9 @@ struct WelcomeView: View {
             }
         }
         .padding(DS.Spacing.l)
+        // 앱 아이콘의 "겹친 두 원"을 세로로 세운 배경 (F51) — 겹! 순간 연출(R7)과 같은
+        // 버티컬 축이라 브랜드 언어가 이어진다. 워드마크는 두 원이 겹치는 자리에 선다.
+        .background { WelcomeBackdrop() }
         // `.ignoresSafeArea()`가 없으면 배경이 콘텐츠 영역까지만 칠해져 상태 표시줄·홈
         // 인디케이터 구간에 시스템 배경이 그대로 드러난다 — 화면이 위아래로 갈라져 보이던
         // 원인 (F41). 무대는 화면 전체여야 한다.
@@ -110,6 +113,58 @@ struct WelcomeView: View {
             // 사용자 취소 포함 — 조용히 게이트에 남는다
             failed = true
         }
+    }
+}
+
+/// 로그인 이전 화면의 배경 (F51) — 앱 아이콘의 겹친 두 원을 **세로로** 세워 깐다.
+/// 위 원은 브랜드 레드, 아래 원은 골드·올리브. 겹치는 띠에서 두 색이 유리처럼 물든다.
+/// 아이콘과 같은 모티브지만 화면에서는 훨씬 옅게 — 워드마크와 로그인 버튼이 주인공이다.
+private struct WelcomeBackdrop: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        GeometryReader { geo in
+            let diameter = geo.size.width * Layout.diameterRatio
+            let offset = diameter * Layout.overlapRatio
+
+            ZStack {
+                circle(
+                    colors: [DS.Palette.accent, DS.Palette.accent.opacity(0.55)],
+                    diameter: diameter
+                )
+                .offset(y: -offset)
+
+                circle(
+                    colors: [DS.Palette.brandGold, DS.Palette.brandGold.opacity(0.55)],
+                    diameter: diameter
+                )
+                .offset(y: offset)
+            }
+            .frame(width: geo.size.width, height: geo.size.height)
+            .blur(radius: Layout.blur)
+            .opacity(colorScheme == .dark ? Layout.darkOpacity : Layout.lightOpacity)
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func circle(colors: [Color], diameter: CGFloat) -> some View {
+        Circle()
+            .fill(
+                LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
+            )
+            .frame(width: diameter, height: diameter)
+    }
+
+    /// 배경 튜닝 — 값 조정은 여기서만. 텍스트 대비를 지키는 상한이 곧 불투명도다.
+    private enum Layout {
+        static let diameterRatio: CGFloat = 0.92
+        /// 두 원 중심이 화면 중앙에서 떨어진 거리 (지름 배수). 작을수록 많이 겹친다.
+        static let overlapRatio: CGFloat = 0.32
+        static let blur: CGFloat = 60
+        static let lightOpacity: Double = 0.16
+        static let darkOpacity: Double = 0.30
     }
 }
 

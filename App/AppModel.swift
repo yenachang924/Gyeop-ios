@@ -10,6 +10,7 @@ import Observation
 @MainActor
 @Observable
 final class AppModel {
+    /// 연관값이 없어 Equatable이 자동 합성된다 — `RootView`가 `animation(value:)`로 쓴다.
     enum Stage {
         case loading
         case signIn
@@ -160,18 +161,25 @@ final class AppModel {
         stage = .onboarding
     }
 
-    /// 계정 삭제 — 프로필·카드·겹·토큰 전부. 성공 시 로그인 게이트로 되돌아간다.
+    /// 계정 삭제 — 프로필·카드·겹·토큰 전부. **화면 단계는 바꾸지 않는다** (F50).
+    ///
+    /// 설정 시트가 닫히는 동안 루트까지 함께 갈아치우면 전환이 거칠어져서, 단계 이동은
+    /// 호출부가 시트를 닫은 뒤 `returnToEntry()`로 따로 시킨다.
     func deleteAccount() async -> Bool {
         do {
             try await deleteAccountAction()
             myCard = nil
             gyeops = []
-            stage = requiresSignIn ? .signIn : .onboarding
             return true
         } catch {
             Log.sync.error("계정 삭제 실패: \(error)")
             return false
         }
+    }
+
+    /// 삭제 후 처음 화면으로 — 로그인 게이트가 켜져 있으면 웰컴, 아니면 온보딩.
+    func returnToEntry() {
+        stage = requiresSignIn ? .signIn : .onboarding
     }
 
     // MARK: - 온보딩

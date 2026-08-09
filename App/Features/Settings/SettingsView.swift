@@ -49,32 +49,42 @@ struct SettingsView: View {
                         .tint(.primary)
                 }
             }
-            // F47: 확인 시트(confirmationDialog)는 하단에서 올라와 위치가 어색했다.
-            // 되돌릴 수 없는 파괴적 액션이라 화면 중앙 alert로 확실히 붙잡는다.
-            .alert("정말 삭제할까요?", isPresented: $confirmingDeletion) {
-                Button("계정 삭제", role: .destructive) {
-                    Task { await deleteAccount() }
-                }
-                Button("취소", role: .cancel) {}
-            } message: {
-                Text("카드와 쌓인 겹이 모두 사라집니다. 되돌릴 수 없어요.")
+        }
+        // F47: 확인 시트(confirmationDialog)는 하단에서 올라와 위치가 어색했다.
+        // 되돌릴 수 없는 파괴적 액션이라 **시스템 표준 alert**로 화면 한가운데서 붙잡는다.
+        // NavigationStack **바깥**에 붙여야 내비게이션 맥락에 딸려가지 않고 창 중앙에 뜬다.
+        .alert("계정을 삭제할까요?", isPresented: $confirmingDeletion) {
+            Button("취소", role: .cancel) {}
+            Button("삭제", role: .destructive) {
+                Task { await deleteAccount() }
             }
-            .alert("삭제하지 못했어요", isPresented: $deletionFailed) {
-                Button("확인", role: .cancel) {}
-            } message: {
-                Text("잠시 후 다시 시도해 주세요.")
-            }
+        } message: {
+            Text("카드와 쌓인 겹이 모두 사라집니다. 되돌릴 수 없어요.")
+        }
+        .alert("삭제하지 못했어요", isPresented: $deletionFailed) {
+            Button("확인", role: .cancel) {}
+        } message: {
+            Text("잠시 후 다시 시도해 주세요.")
         }
     }
 
+    /// 삭제 → **시트 닫힘 → 루트 전환** 순서로 나눈다 (F50). 둘이 겹치면 화면이 거칠게
+    /// 끊긴다. 실패는 시트가 살아 있는 동안 알려야 하므로 삭제를 먼저 시도한다.
     private func deleteAccount() async {
         deleting = true
         defer { deleting = false }
-        if await model.deleteAccount() {
-            dismiss()
-        } else {
+        guard await model.deleteAccount() else {
             deletionFailed = true
+            return
         }
+        dismiss()
+        try? await Task.sleep(for: .seconds(Timing.sheetDismiss))
+        model.returnToEntry()
+    }
+
+    private enum Timing {
+        /// 시스템 시트가 내려앉는 시간 — 그 뒤에 루트를 크로스페이드한다.
+        static let sheetDismiss: TimeInterval = 0.32
     }
 }
 

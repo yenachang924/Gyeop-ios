@@ -5,7 +5,7 @@ import SwiftUI
 
 /// 온보딩 2/3 — 여가 성향을 2축 슬라이더로 잡는다 (F17, 레퍼런스: 건강 앱 마음챙김
 /// "심리 상태"). 잔잔↔활발 · 실내↔실외 두 축이 카드 프리뷰 색에 연속적으로 기여하고
-/// (`CardPreview.blendedColors` 이중선형 보간), 저장값은 4분면으로 양자화된 `LeisureStyle`이다.
+/// (`CardPreview.QuadrantPalette` 이중선형 보간), 저장값은 4분면으로 양자화된 `LeisureStyle`이다.
 /// 미양자화 상태(슬라이더 미조작)면 다음 비활성 (navigation-map §1-3).
 ///
 /// F35: 결과 라벨을 **제목 아래로 올렸다** — 하단에 두니 「다음」 버튼과 겹쳤다.
@@ -22,6 +22,10 @@ struct StyleStepView: View {
     /// 축 값 (0~1). 중앙에서 시작하고, 조작해야 selected가 잡힌다.
     @State private var energy: Double = 0.5
     @State private var venue: Double = 0.5
+    /// 4분면 팔레트 — 관심사가 바뀔 때만 다시 만든다 (F49). 드래그 중에는 보간만.
+    @State private var palette = CardPreview.QuadrantPalette(
+        nickname: "", emoji: "", interests: []
+    )
 
     private static let examples: [LeisureStyle: String] = [
         LeisureStyle(energy: .calm, venue: .indoor): "보드게임 · 독서",
@@ -68,10 +72,7 @@ struct StyleStepView: View {
 
                 CardView(
                     card: previewCard,
-                    colorsOverride: CardPreview.blendedColors(
-                        nickname: "", emoji: "", interests: interests,
-                        energy: energy, venue: venue
-                    )
+                    colorsOverride: palette.colors(energy: energy, venue: venue)
                 )
                 // 카드를 줄여 슬라이더·버튼이 한 화면에 편히 들어오게 (F35)
                 .frame(maxWidth: Layout.previewMaxWidth)
@@ -100,11 +101,15 @@ struct StyleStepView: View {
         .defaultScrollAnchor(.center)
         .onAppear {
             appeared = true
+            palette = CardPreview.QuadrantPalette(nickname: "", emoji: "", interests: interests)
             // 뒤로 돌아온 경우 이전 선택을 축 위치로 복원
             if let selected {
                 energy = selected.energy == .calm ? 0.25 : 0.75
                 venue = selected.venue == .indoor ? 0.25 : 0.75
             }
+        }
+        .onChange(of: interests) {
+            palette = CardPreview.QuadrantPalette(nickname: "", emoji: "", interests: interests)
         }
         .onChange(of: energy) { selected = quantized }
         .onChange(of: venue) { selected = quantized }
