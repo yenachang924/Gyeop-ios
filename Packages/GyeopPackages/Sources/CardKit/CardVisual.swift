@@ -5,10 +5,11 @@ import SwiftUI
 /// 시드 → 카드 비주얼 파라미터의 결정적 변환.
 /// **계약: 같은 시드(+성향) = 같은 파라미터 = 픽셀 동일 렌더.**
 ///
-/// F21 (1차 시연 피드백): 한 카드의 색은 **7색 팔레트**로 절제한다 — 25개 제어점이
-/// 제각각이던 이전 방식은 무지개 노이즈가 됐다. 성향이 색의 큰 방향을 정하고
-/// (`docs/card-color-guide.md`의 공식 규칙), 시드가 그 안의 개별성을 정한다:
-/// · 활발 = 웜 톤(레드~골드) / 잔잔 = 쿨 톤(틸~인디고)
+/// F21→F24 (1차 시연 피드백): 한 카드의 색은 **7색 팔레트**로 절제하되(25점 무작위는
+/// 무지개 노이즈), 웜/쿨 이분법(F21)은 과해서 폐기 — 기준 색상은 색상환 전체에서
+/// 시드가 뽑아 카드마다 형형색색하고, 성향은 색의 "결"에만 은은하게 배어든다
+/// (`docs/card-color-guide.md`):
+/// · 활발 = 7색이 넓게 퍼진다(형형색색) / 잔잔 = 좁게 모인다(차분)
 /// · 실외 = 밝은 명도대 / 실내 = 깊은 명도대
 /// 채도·명도는 카드 위 흰 텍스트가 항상 WCAG AA 4.5:1 대비를 만족하도록 좁힌 범위
 /// (`saturationRange`·`brightnessRange`) 안에서 결정된다.
@@ -33,29 +34,28 @@ public struct CardVisual: Equatable, Sendable {
 
     /// 한 카드를 구성하는 색의 수 (F21 — "색상 다양성 7개 정도, 오묘한 분위기").
     public static let paletteCount = 7
-    /// 팔레트가 퍼지는 색상환 폭 — 유사색 범위 (≈50°). 좁을수록 오묘하고 단정하다.
-    public static let hueSpread: Double = 0.14
+    /// 7색이 퍼지는 색상환 폭 (F24 절충값). 활발은 넓게(형형색색), 잔잔은 좁게(차분).
+    public static let hueSpreadActive: Double = 0.36
+    public static let hueSpreadCalm: Double = 0.24
+    public static let hueSpreadNeutral: Double = 0.30
 
-    /// - Parameter style: 색의 큰 방향을 정한다 (card-color-guide.md 공식 규칙).
-    ///   nil이면(성향을 모르는 맥락) 시드가 색상환 전체에서 기준색을 뽑되 팔레트 절제는 동일.
+    /// - Parameter style: 색의 결을 정한다 (card-color-guide.md — 퍼짐과 밝기).
+    ///   기준 색상 자체는 항상 시드가 색상환 전체에서 뽑는다 (F24: 카드마다 형형색색).
     public init(seed: String, style: LeisureStyle? = nil) {
         var rng = SplitMix64(seed: Self.seedValue(from: seed))
 
-        // 1) 기준 색상: 성향의 에너지가 웜/쿨을 정하고, 시드가 그 안의 지점을 정한다.
-        let baseHue: Double
+        // 1) 기준 색상: 시드가 색상환 전체에서 — 취미·이름·이모지·성향이 종합된 결과.
+        let baseHue = Double.random(in: 0...1, using: &rng)
+
+        // 2) 퍼짐: 에너지가 7색이 얼마나 넓게 퍼질지를 정한다 (이분법 아닌 "결").
+        let spread: Double
         switch style?.energy {
-        case .active:
-            // 웜 — 레드(0.96)에서 골드(1.10=0.10)까지
-            baseHue = Double.random(in: 0.96...1.10, using: &rng)
-                .truncatingRemainder(dividingBy: 1)
-        case .calm:
-            // 쿨 — 틸(0.50)에서 인디고(0.68)까지
-            baseHue = Double.random(in: 0.50...0.68, using: &rng)
-        case nil:
-            baseHue = Double.random(in: 0...1, using: &rng)
+        case .active: spread = Self.hueSpreadActive
+        case .calm: spread = Self.hueSpreadCalm
+        case nil: spread = Self.hueSpreadNeutral
         }
 
-        // 2) 명도대: 장소가 밝기의 결을 정한다 (실외 = 밝음, 실내 = 깊음).
+        // 3) 명도대: 장소가 밝기의 결을 정한다 (실외 = 밝음, 실내 = 깊음).
         let brightnessBand: ClosedRange<Double>
         switch style?.venue {
         case .outdoor: brightnessBand = 0.53...0.62
@@ -63,11 +63,11 @@ public struct CardVisual: Equatable, Sendable {
         case nil: brightnessBand = Self.brightnessRange
         }
 
-        // 3) 7색 팔레트: 기준 색상 주변 유사색 범위에 고르게 + 시드 지터.
+        // 4) 7색 팔레트: 기준 색상 주변으로 고르게 퍼뜨리고 + 시드 지터.
         let palette: [ControlPoint] = (0..<Self.paletteCount).map { index in
             let position = Double(index) / Double(Self.paletteCount - 1) - 0.5
-            let jitter = Double.random(in: -0.012...0.012, using: &rng)
-            let hue = (baseHue + position * Self.hueSpread + jitter + 1)
+            let jitter = Double.random(in: -0.015...0.015, using: &rng)
+            let hue = (baseHue + position * spread + jitter + 1)
                 .truncatingRemainder(dividingBy: 1)
             let saturation = Double.random(in: Self.saturationRange, using: &rng)
             let rawBrightness = Double.random(in: brightnessBand, using: &rng)
@@ -77,7 +77,7 @@ public struct CardVisual: Equatable, Sendable {
             return ControlPoint(hue: hue, saturation: saturation, brightness: brightness)
         }
 
-        // 4) 25점 배치: 대각선 흐름으로 깔아 인접 점이 유사색이 되게 한다 — 색이 스며드는
+        // 5) 25점 배치: 대각선 흐름으로 깔아 인접 점이 유사색이 되게 한다 — 색이 스며드는
         //    결(오묘함)은 배치가 만든다. 시드 시프트로 카드마다 흐름의 시작점이 달라진다.
         let shift = Int.random(in: 0..<Self.paletteCount, using: &rng)
         controlPoints = (0..<Self.controlPointCount).map { index in
