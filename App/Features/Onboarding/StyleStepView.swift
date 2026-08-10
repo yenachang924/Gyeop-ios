@@ -135,7 +135,7 @@ struct StyleStepView: View {
                 Text("\(quantized.label) · \(Self.examples[quantized] ?? "")")
                     .font(DS.Typo.headline)
             } else {
-                Text("두 축을 움직이면 성향이 잡혀요")
+                Text("바를 움직여서 당신의 성향에 맞춰보세요")
                     .font(DS.Typo.subheadline)
                     .foregroundStyle(DS.Palette.secondaryText)
             }
@@ -203,7 +203,7 @@ private struct AxisSlider: View {
                 trackBackground
                     .frame(height: Layout.track)
 
-                Circle()
+                Capsule()
                     .fill(.background)
                     .shadow(color: .black.opacity(Layout.shadowOpacity), radius: dragging ? 5 : 2, y: 1)
                     .frame(width: Layout.thumb, height: Layout.thumb)
