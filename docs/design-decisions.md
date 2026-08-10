@@ -284,6 +284,37 @@ F51의 배경은 **정지 화면**이었다. 소유자 지시(2026-08-10): "겹 
 성능: 상시 반복 애니메이션이라 값이 아니라 **변환만** 움직인다(offset·scale). 색 계산은
 프레임마다 하지 않는다(F49 교훈). Reduce Motion에서는 정지 상태로 고정한다.
 
+### 9차 — 스타일 스텝 축 슬라이더 트랙: Liquid Glass + 전체 브랜드 색 (2026-08-10)
+
+#### F54 — StyleStepView `AxisSlider` 트랙
+
+소유자 지시(2026-08-10): "바에 리퀴드 글라스 적용, 바 색깔은 메인컬러로." 적용 범위는
+**StyleStepView 하나뿐** — 다른 화면의 스크롤·슬라이더는 대상이 아니다.
+
+F52는 트랙을 빈 구간(`.quaternary`)과 채워진 구간(`accent`)으로 나눠 "액센트가 화면에
+넘치지 않게" 절제했다. 이번 지시는 그 절제를 **이 화면에 한해** 뒤집는다 — 트랙 전체를
+하나의 액센트 틴트 Liquid Glass 캡슐로 바꾸고, 빈/채움 구분은 없앤다. 값 위치는 여전히
+손잡이(원)로만 읽는다 — 손잡이는 기존대로 시스템 배경색 유지(트랙과 대비되어야 보인다).
+
+```swift
+if #available(iOS 26.0, *) {
+    Capsule()
+        .fill(.clear)
+        .frame(height: Layout.track)
+        .glassEffect(.regular.tint(DS.Palette.accent), in: Capsule())
+} else {
+    Capsule()
+        .fill(DS.Palette.accent)
+        .frame(height: Layout.track)
+}
+```
+
+iOS 26 미만(배포 타깃 18)은 글라스 재질 자체가 없으므로 단색 액센트로 폴백한다 — F20의
+`dsProminentButton`/`dsGlassButton`과 같은 가용성 분기 관습을 그대로 따른다.
+
+이 화면 밖(컬렉션 스크롤 등 네이티브 스크롤 인디케이터)은 이번 지시 대상이 아니다 —
+착오로 번지지 않도록 여기 명시해 둔다.
+
 ### 햅틱 튜닝 기록 (실기기)
 
 **1차 (2026-08-09)** — 소유자 체감: "약해". 조정 근거:

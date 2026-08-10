@@ -12,7 +12,10 @@
 - [x] ✅ 계정 삭제 (설정 > 계정 삭제, 심사 5.1.1(v))
 - [x] ✅ 로컬 네트워크 권한 문구(NSLocalNetworkUsageDescription)·NSBonjourServices
 - [x] ✅ ITSAppUsesNonExemptEncryption = NO
-- [x] ✅ App Clip 타깃(GyeopClip) 활성화·본앱 임베드·App Group entitlements
+- [x] ✅ App Clip 타깃(GyeopClip) 구현 완료. **1차 제출에서는 본앱에서 제외**
+      (소유자 결정 2026-08-10, D#2) — `project.yml` Gyeop 타깃 dependencies에서
+      `GyeopClip` 임베드 한 줄만 제거. 타깃 자체·App Group entitlements는 유지,
+      도메인 확정 후 재포함
 
 ## B. 실기기 검증 (기기 2대, docs/device-required.md 통합 실행 계획)
 
@@ -29,8 +32,10 @@
 - [ ] 🔧 스크린샷 업로드 — 6.9" 10장 `docs/screenshots/` 준비됨, ASC 업로드만 남음 (review-kit.md §1)
 - [ ] 🔧 개인정보 처리방침 게시 (docs/privacy-policy.md → 공개 URL) + 라벨 "수집 안 함"
 - [ ] 🔧 리뷰 노트 + 시연 영상 URL (review-kit.md §3 초안)
-- [ ] ⏳ App Clip 경험 등록 — 헤더 이미지 ✅ 준비됨(`docs/assets/appclip-header.png`), **실도메인·AASA** 대기 (review-kit.md §4)
-- [ ] ⏳ entitlements PLACEHOLDER.gyeop.example → 실도메인 교체 후 재빌드
+- [x] ➖ App Clip 경험 등록 — **1차 제출 범위 밖** (소유자 결정 2026-08-10). 헤더 이미지는
+      준비됨(`docs/assets/appclip-header.png`), 도메인 확정 후 클립 재포함 시 진행 (review-kit.md §4)
+- [x] ➖ entitlements PLACEHOLDER.gyeop.example → 실도메인 교체 — 클립 제외로 1차 제출에서 불필요.
+      본앱 `applinks:` 항목도 미사용 상태로 자리 표시 유지(위험 없음, 본앱은 이 항목을 안 씀)
 - [ ] 🔲 Archive → TestFlight 업로드 → 제출
 
 ## D. 제출 전 리스크 (2026-08-08 기준)
@@ -38,10 +43,10 @@
 | # | 리스크 | 영향 | 완화 |
 |---|---|---|---|
 | 1 | ~~**MPC 실기기 미검증**~~ **해소 (2026-08-09)** — 2대 왕복·엣지 4종·24h 중복 전부 실기기 합격 | – | – |
-| 2 | **어소시에이티드 도메인 미확정** — entitlements가 자리 표시 | App Clip 경험 등록 불가, 자리 표시 도메인은 서명·검증 실패 | 도메인 확정까지 App Clip을 1차 제출에서 빼는 선택지 검토 (project.yml에서 GyeopClip 의존 제거는 1줄) |
+| 2 | ~~**어소시에이티드 도메인 미확정**~~ **해소 (2026-08-10)** — 소유자 결정: App Clip을 1차 제출에서 제외. `project.yml` Gyeop 타깃에서 `GyeopClip` 임베드 한 줄 제거. `mentor-deploy-brief.md` Q1/Q2에 대한 답으로 기록됨 | – | 도메인 확정 후 project.yml 그 줄 복원 + entitlements 실도메인 교체하면 재포함 |
 | 3 | 아카데미 이메일 검증 미구현 (스펙 ⑤ Lv2의 일부) | 폐쇄형 커뮤니티 보장 없음 — 제품 결정 필요 | 서버 없이는 불가. v1은 개방형으로 제출하고 리뷰 노트에 명시 |
 | 4 | SIWA 토큰을 로컬 검증 없이 저장 (서버 부재로 검증 불가) | 보안상 실해는 없음(로컬 전용), 심사 이슈 아님 | 서버 도입 시 검증 추가 |
 | 5 | 시즌(수료 D-day)이 MockData.season 고정 | 실제 기수 날짜와 불일치 | 제출 전 Core MockData.season 값을 실기수로 갱신 (1줄) |
 | 6 | 온보딩 카피·emoji CSV가 스펙 기반 임시본 | 원본 프로토타입과 차이 가능 | 원본 수급 시 교체 (memory: missing-prototype-assets) |
-| 7 | ~~앱 아이콘 리소스~~ **해소 (2026-08-09)** — AppIcon-1024.png 생성·에셋 연결 완료 (F19). **클립 타깃 아이콘은 별도 확인 필요** | 클립 아이콘 누락 시 업로드 경고 | 제출 전 GyeopClip 에셋 확인 |
+| 7 | ~~앱 아이콘 리소스~~ **해소 (2026-08-09)** — AppIcon-1024.png 생성·에셋 연결 완료 (F19). 클립 타깃 아이콘 확인은 클립이 1차 제출 범위 밖(D#2)이라 **불필요해짐** | – | – |
 | 8 | Dynamic Type 접근성 확대(AX1~5)를 앱 전체에서 제거 (이번 세션 제품 결정, `.dynamicTypeSize(...xxxLarge)`) | 저시력 등 접근성 확대 사용자는 큰 텍스트를 못 씀 — HIG 권고 위반이나 심사 거절 사유는 아님 | 의도된 제품 결정으로 기록. 재도입 원하면 `App/GyeopApp.swift`의 해당 modifier만 제거 |
