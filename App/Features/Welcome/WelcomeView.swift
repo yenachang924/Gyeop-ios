@@ -116,55 +116,134 @@ struct WelcomeView: View {
     }
 }
 
-/// 로그인 이전 화면의 배경 (F51) — 앱 아이콘의 겹친 두 원을 **세로로** 세워 깐다.
-/// 위 원은 브랜드 레드, 아래 원은 골드·올리브. 겹치는 띠에서 두 색이 유리처럼 물든다.
-/// 아이콘과 같은 모티브지만 화면에서는 훨씬 옅게 — 워드마크와 로그인 버튼이 주인공이다.
+/// 로그인 이전 화면의 배경 (F51 → F53) — 앱 아이콘의 겹친 두 원을 **세로로** 세운 뒤,
+/// 애플 유동 배경화면처럼 **천천히 일렁이는 구형 글라스**로 다시 만들었다.
+///
+/// 구는 방사 그라디언트다. 알파가 반지름 끝에서 0이 되므로 **테두리가 남지 않는다** —
+/// 소유자 요청("구형이 뚜렷하진 않아도")의 핵심이 여기다. 블러는 형태를 뭉개는 용도가
+/// 아니라 광택을 퍼뜨리는 용도라 F51(60)보다 얕다.
+///
+/// 위 = 브랜드 레드, 아래 = 골드·올리브, 만나는 띠 = 겹 칩과 같은 와인(`overlapInk`).
+/// 세 구가 **서로 어긋난 주기**로 오르내려 패턴이 반복으로 읽히지 않는다.
 private struct WelcomeBackdrop: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// 일렁임의 유일한 상태. false↔true 사이를 무한 왕복하고, 그 사이를
+    /// **변환(offset·scale)만** 보간한다 — 프레임마다 색을 다시 만들지 않는다 (F49).
+    @State private var drifting = false
 
     var body: some View {
         GeometryReader { geo in
             let diameter = geo.size.width * Layout.diameterRatio
-            let offset = diameter * Layout.overlapRatio
+            let gap = diameter * Layout.overlapRatio
 
             ZStack {
-                circle(
-                    colors: [DS.Palette.accent, DS.Palette.accent.opacity(0.55)],
-                    diameter: diameter
-                )
-                .offset(y: -offset)
+                orb(DS.Palette.accent, diameter: diameter)
+                    .offset(
+                        x: drifting ? Layout.sway : -Layout.sway,
+                        y: -gap - (drifting ? Layout.rise : -Layout.rise)
+                    )
+                    .scaleEffect(drifting ? Layout.swellHigh : Layout.swellLow)
+                    .animation(loop(Layout.upperPeriod), value: drifting)
 
-                circle(
-                    colors: [DS.Palette.brandGold, DS.Palette.brandGold.opacity(0.55)],
-                    diameter: diameter
-                )
-                .offset(y: offset)
+                orb(DS.Palette.brandGold, diameter: diameter)
+                    .offset(
+                        x: drifting ? -Layout.sway : Layout.sway,
+                        y: gap + (drifting ? Layout.rise : -Layout.rise)
+                    )
+                    .scaleEffect(drifting ? Layout.swellLow : Layout.swellHigh)
+                    .animation(loop(Layout.lowerPeriod), value: drifting)
+
+                // 두 구가 만나는 자리 — "겹" 그 자체의 색이 유리처럼 배어난다.
+                // 화면 중앙(워드마크 자리)이라 지름을 줄이고 불투명도를 더 낮춘다.
+                orb(DS.Palette.overlapInk, diameter: diameter * Layout.bandRatio)
+                    .scaleEffect(drifting ? Layout.bandHigh : Layout.bandLow)
+                    .opacity(Layout.bandOpacity)
+                    .animation(loop(Layout.bandPeriod), value: drifting)
             }
             .frame(width: geo.size.width, height: geo.size.height)
             .blur(radius: Layout.blur)
+            // 세 구를 먼저 합성한 뒤 한 번만 흐리고 한 번만 옅게 만든다.
+            .compositingGroup()
             .opacity(colorScheme == .dark ? Layout.darkOpacity : Layout.lightOpacity)
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+        .onAppear { drifting = true }
     }
 
-    private func circle(colors: [Color], diameter: CGFloat) -> some View {
+    /// 구 하나 — 중심이 위로 치우친 방사 그라디언트(광원)에 흰 반사 한 겹.
+    /// 끝 정지점은 `.clear`가 아니라 `color.opacity(0)`이다. `.clear`는 알파 0인
+    /// **검정**이라 보간 중간이 탁하게 죽는다 — 같은 색의 알파만 떨어뜨려야 맑게 사라진다.
+    private func orb(_ color: Color, diameter: CGFloat) -> some View {
         Circle()
             .fill(
-                LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
+                RadialGradient(
+                    colors: [color, color.opacity(Layout.midAlpha), color.opacity(0)],
+                    center: Layout.lightSource,
+                    startRadius: 0,
+                    endRadius: diameter * Layout.falloff
+                )
             )
+            .overlay {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                DS.Palette.glassSheen.opacity(Layout.sheenAlpha),
+                                DS.Palette.glassSheen.opacity(0),
+                            ],
+                            center: Layout.sheenCenter,
+                            startRadius: 0,
+                            endRadius: diameter * Layout.sheenRadius
+                        )
+                    )
+            }
             .frame(width: diameter, height: diameter)
     }
 
-    /// 배경 튜닝 — 값 조정은 여기서만. 텍스트 대비를 지키는 상한이 곧 불투명도다.
+    /// 무한 왕복. Reduce Motion이면 애니메이션이 없어 초기 위치에 고정된다.
+    private func loop(_ duration: TimeInterval) -> Animation? {
+        reduceMotion ? nil : .easeInOut(duration: duration).repeatForever(autoreverses: true)
+    }
+
+    /// 배경 튜닝 — 값 조정은 여기서만. 불투명도는 텍스트 대비가 정한 상한이다.
     private enum Layout {
         static let diameterRatio: CGFloat = 0.92
-        /// 두 원 중심이 화면 중앙에서 떨어진 거리 (지름 배수). 작을수록 많이 겹친다.
+        /// 두 구 중심이 화면 중앙에서 떨어진 거리 (지름 배수). 작을수록 많이 겹친다.
         static let overlapRatio: CGFloat = 0.32
-        static let blur: CGFloat = 60
-        static let lightOpacity: Double = 0.16
-        static let darkOpacity: Double = 0.30
+        /// 알파가 0이 되는 지점 = 원의 가장자리. 그래서 테두리가 보이지 않는다.
+        static let falloff: CGFloat = 0.5
+        /// 반지름 절반 지점의 알파 — 핵이 뭉치는 정도
+        static let midAlpha: Double = 0.55
+        /// 광원 위치 (구 좌표계). 중앙보다 위·왼쪽이라 아래가 그늘처럼 남는다.
+        static let lightSource = UnitPoint(x: 0.42, y: 0.36)
+
+        static let sheenCenter = UnitPoint(x: 0.34, y: 0.26)
+        static let sheenRadius: CGFloat = 0.34
+        static let sheenAlpha: Double = 0.32
+
+        /// 형태를 뭉개는 게 아니라 광택을 퍼뜨리는 용도 — F51(60)보다 얕다.
+        static let blur: CGFloat = 34
+        /// **대비 상한.** 소제(골드)가 골드 구의 꼬리 위에 앉으므로 더 올리면 4.5:1이 깨진다.
+        static let lightOpacity: Double = 0.20
+        static let darkOpacity: Double = 0.34
+
+        /// 일렁임 — 세로 진폭이 가로보다 크다 (버티컬 축이 브랜드 언어다)
+        static let rise: CGFloat = 22
+        static let sway: CGFloat = 12
+        static let swellLow: CGFloat = 0.94
+        static let swellHigh: CGFloat = 1.06
+        /// 서로 나누어떨어지지 않는 주기 — 겹쳐도 같은 그림이 되돌아오지 않는다
+        static let upperPeriod: TimeInterval = 13
+        static let lowerPeriod: TimeInterval = 17
+        static let bandPeriod: TimeInterval = 21
+
+        static let bandRatio: CGFloat = 0.66
+        static let bandLow: CGFloat = 0.88
+        static let bandHigh: CGFloat = 1.1
+        static let bandOpacity: Double = 0.5
     }
 }
 

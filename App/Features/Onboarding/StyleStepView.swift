@@ -201,8 +201,11 @@ private struct AxisSlider: View {
                 Capsule()
                     .fill(.quaternary)
                     .frame(height: Layout.track)
+                // 채워진 구간만 브랜드 색 (F52) — 무채(`.tertiary`)로는 "지금 어디를
+                // 잡고 있는지"가 약하게 읽혔다. 빈 트랙·손잡이는 무채 그대로라
+                // 액센트가 화면에 넘치지 않는다.
                 Capsule()
-                    .fill(.tertiary)
+                    .fill(DS.Palette.accent)
                     .frame(width: thumbX + Layout.thumb / 2, height: Layout.track)
 
                 Circle()

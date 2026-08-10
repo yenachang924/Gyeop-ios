@@ -31,8 +31,13 @@
 - **유동적 무드 (2026-08-08 소유자 지시, `docs/design-decisions.md` §1차 시연 피드백 라운드).**
   모든 전환·모션은 스무스하고 물 흐르듯 — bold·strict한 연출 금지. U2의 모션 타이밍
   동결은 해제됐다. 사용자 노출 카피에 em-dash(—) 금지.
-- **첫 화면(WelcomeView) 시각 디자인은 소유자가 Figma로 작업 중** — 확정 전까지 코드
-  세션은 웰컴 화면의 시각을 바꾸지 않는다.
+- **첫 화면(WelcomeView)의 레이아웃·타이포·색은 소유자 Figma 확정본이다** (F26 반영 완료).
+  워드마크·소제·로그인 버튼의 배치와 색은 소유자 지시 없이 바꾸지 않는다. 배경(`WelcomeBackdrop`)만
+  소유자 지시로 코드 세션이 관리한다 (F51 → F53).
+- **상시 반복 배경 애니메이션**(`WelcomeBackdrop`·`InterestBackdrop`)은 셋을 지킨다:
+  ① 매 프레임 바뀌는 것은 **변환(offset·scale)뿐** — 색 계산은 프레임 밖에서 (F49),
+  ② Reduce Motion이면 정지, ③ 불투명도는 그 화면 텍스트의 4.5:1을 지키는 상한을 넘지 않는다
+  (현재 값과 근거는 `docs/design-decisions.md` F53).
 - **HIG + 시스템 컴포넌트만.** List, Form, NavigationStack, TabView 등 시스템 것을 먼저. **커스텀 비주얼이 허용되는 곳은 정체성 카드뿐이다** (CardKit 내부).
 - **모든 색·폰트·간격은 DesignSystem 토큰 참조.** 뷰 코드에 리터럴(`Color(red:...)`, `.padding(13)`, `.font(.system(size: 17))`) 직접 쓰기 금지. 필요한 토큰이 없으면 DesignSystem에 토큰을 추가하고 참조한다.
 - **Dynamic Type 대응** — 고정 폰트 크기 금지, 레이아웃은 텍스트 확대에도 깨지지 않아야 한다.

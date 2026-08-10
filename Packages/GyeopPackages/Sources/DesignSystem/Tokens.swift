@@ -77,6 +77,11 @@ public enum DS {
         /// 겹침 하이라이트 — 텍스트·아이콘 (F26에서 액센트와 함께 채도 상향)
         public static let overlapInk = dynamic(light: 0x7A0A44, dark: 0xF5A9C4)
 
+        /// 유리 표면 반사(sheen) — 구형 배경(F53)이 유리처럼 읽히게 하는 하이라이트.
+        /// 광원은 모드와 무관하게 흰빛이라 다이내믹 값이 아니다. 항상 매우 낮은
+        /// 불투명도로만 쓴다 — 텍스트 대비 계산에 들어갈 만큼 진해지면 잘못 쓴 것이다.
+        public static let glassSheen = Color.white
+
         /// 보조 텍스트
         public static let secondaryText = Color.secondary
 
