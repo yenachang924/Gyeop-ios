@@ -193,8 +193,8 @@ private struct AxisSlider: View {
 
     var body: some View {
         GeometryReader { geo in
-            // 손잡이 지름만큼 뺀 이동 가능 거리
-            let span = max(geo.size.width - Layout.thumb, 1)
+            // 손잡이 너비만큼 뺀 이동 가능 거리 — 양 끝에서 손잡이가 트랙 밖으로 안 나간다
+            let span = max(geo.size.width - Layout.thumbWidth, 1)
             let thumbX = CGFloat(clamped) * span
 
             ZStack(alignment: .leading) {
@@ -206,16 +206,16 @@ private struct AxisSlider: View {
                 Capsule()
                     .fill(.background)
                     .shadow(color: .black.opacity(Layout.shadowOpacity), radius: dragging ? 5 : 2, y: 1)
-                    .frame(width: Layout.thumb, height: Layout.thumb)
+                    .frame(width: Layout.thumbWidth, height: Layout.thumbHeight)
                     .scaleEffect(dragging ? Layout.grabScale : 1)
                     .offset(x: thumbX)
                     // 제스처가 **손잡이에만** 붙는다 — 트랙을 눌러도 아무 일이 없다
                     .gesture(drag(span: span))
                     .animation(reduceMotion ? nil : DS.Motion.quick, value: dragging)
             }
-            .frame(height: Layout.thumb)
+            .frame(height: Layout.thumbHeight)
         }
-        .frame(height: Layout.thumb)
+        .frame(height: Layout.thumbHeight)
         .accessibilityRepresentation {
             Slider(value: $value, in: 0...1) { Text(label) }
         }
@@ -249,7 +249,10 @@ private struct AxisSlider: View {
 
     private enum Layout {
         static let track: CGFloat = 6
-        static let thumb: CGFloat = 28
+        /// 손잡이 너비 — 높이와 분리해야 `Capsule`이 알약으로 그려진다 (정사각이면 원과 같다).
+        /// 44pt는 HIG 최소 터치 타깃이기도 하다 (CLAUDE.md UI 원칙).
+        static let thumbWidth: CGFloat = 44
+        static let thumbHeight: CGFloat = 28
         static let grabScale: CGFloat = 1.12
         static let shadowOpacity: Double = 0.18
     }
