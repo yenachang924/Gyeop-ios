@@ -193,29 +193,33 @@ private struct AxisSlider: View {
 
     var body: some View {
         GeometryReader { geo in
-            // 손잡이 너비만큼 뺀 이동 가능 거리 — 양 끝에서 손잡이가 트랙 밖으로 안 나간다
-            let span = max(geo.size.width - Layout.thumbWidth, 1)
+            // 손잡이 지름만큼 뺀 이동 가능 거리 — 양 끝에서 손잡이가 트랙 밖으로 안 나간다
+            let span = max(geo.size.width - Layout.thumb, 1)
             let thumbX = CGFloat(clamped) * span
 
             ZStack(alignment: .leading) {
-                // 트랙 전체가 액센트 틴트 Liquid Glass (F54) — 빈/채움 구분 없이 이
-                // 화면 전용으로 소유자가 지시한 처리. iOS 26 미만은 단색 액센트로 폴백.
-                trackBackground
+                // 트랙은 브랜드 색 단색 — 빈/채움 구분 없이 한 덩어리 (F57)
+                Capsule()
+                    .fill(DS.Palette.accent)
                     .frame(height: Layout.track)
 
-                Capsule()
-                    .fill(.background)
-                    .shadow(color: .black.opacity(Layout.shadowOpacity), radius: dragging ? 5 : 2, y: 1)
-                    .frame(width: Layout.thumbWidth, height: Layout.thumbHeight)
+                // 유리는 손잡이에만 (F57). 잡으면 더 두드러진다.
+                thumb
+                    .shadow(
+                        color: .black.opacity(Layout.shadowOpacity),
+                        radius: dragging ? Layout.grabShadowRadius : Layout.restShadowRadius,
+                        y: 1
+                    )
+                    .frame(width: Layout.thumb, height: Layout.thumb)
                     .scaleEffect(dragging ? Layout.grabScale : 1)
                     .offset(x: thumbX)
                     // 제스처가 **손잡이에만** 붙는다 — 트랙을 눌러도 아무 일이 없다
                     .gesture(drag(span: span))
                     .animation(reduceMotion ? nil : DS.Motion.quick, value: dragging)
             }
-            .frame(height: Layout.thumbHeight)
+            .frame(height: Layout.thumb)
         }
-        .frame(height: Layout.thumbHeight)
+        .frame(height: Layout.thumb)
         .accessibilityRepresentation {
             Slider(value: $value, in: 0...1) { Text(label) }
         }
@@ -234,27 +238,32 @@ private struct AxisSlider: View {
             .onEnded { _ in dragging = false }
     }
 
-    /// 트랙 배경 (F54) — 액센트 틴트 Liquid Glass. iOS 26 미만은 단색 액센트로 폴백.
+    /// 손잡이 (F57) — Liquid Glass 원. `interactive()`가 누르는 동안 유리를 굴절·확대시켜
+    /// "잡았다"를 재질 자체로 알린다. 액센트 트랙 위에 뜨는 유리라 틴트는 주지 않는다 —
+    /// 틴트를 주면 같은 색 트랙에 묻혀 손잡이 위치가 오히려 안 읽힌다.
+    /// iOS 26 미만은 유리 재질이 없으므로 기존 불투명 원으로 폴백.
     @ViewBuilder
-    private var trackBackground: some View {
+    private var thumb: some View {
         if #available(iOS 26.0, *) {
-            Capsule()
+            Circle()
                 .fill(.clear)
-                .glassEffect(.regular.tint(DS.Palette.accent), in: Capsule())
+                .glassEffect(.regular.interactive(), in: Circle())
         } else {
-            Capsule()
-                .fill(DS.Palette.accent)
+            Circle()
+                .fill(.background)
         }
     }
 
     private enum Layout {
         static let track: CGFloat = 6
-        /// 손잡이 너비 — 높이와 분리해야 `Capsule`이 알약으로 그려진다 (정사각이면 원과 같다).
-        /// 44pt는 HIG 최소 터치 타깃이기도 하다 (CLAUDE.md UI 원칙).
-        static let thumbWidth: CGFloat = 44
-        static let thumbHeight: CGFloat = 28
-        static let grabScale: CGFloat = 1.12
+        static let thumb: CGFloat = 28
+        /// 잡는 순간의 확대 — F48의 1.12에서 올렸다. 유리는 커질수록 굴절이 도드라져
+        /// "누르면 더 두드러지게"(F57 지시)가 스케일에서도 읽힌다.
+        static let grabScale: CGFloat = 1.2
         static let shadowOpacity: Double = 0.18
+        /// 잡은 동안 그림자를 깊게 — 유리가 트랙에서 떠오른 것처럼 보인다.
+        static let grabShadowRadius: CGFloat = 6
+        static let restShadowRadius: CGFloat = 2
     }
 }
 
