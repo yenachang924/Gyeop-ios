@@ -21,7 +21,6 @@
 		4845F680AABE071714A9F6FC /* OnboardingDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B8BBBC567132FCFDD3F9BD2 /* OnboardingDraft.swift */; };
 		56F8704BC3A29AC15159ADC5 /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = C624FB5B92E45527785D84F5 /* Core */; };
 		57C22720352022862D32EDBD /* ClipOnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C9ED94E8F7098CD904FC93 /* ClipOnboardingFlowView.swift */; };
-		58D46EA90DB166CF49C524DB /* GyeopClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = 8B25C63ADE80AD156FF1590D /* GyeopClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5D509A29E200FB2EE6BD26DD /* CardDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A315153ABBD0D3E154457254 /* CardDetailView.swift */; };
 		61AF2EDDE559D5AF86611CC2 /* ExchangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E760C13518A80D90639DEC4B /* ExchangeView.swift */; };
 		6CDE9AAA490BD44344B255C5 /* DataKit in Frameworks */ = {isa = PBXBuildFile; productRef = E5924117A6E01668E7DD321B /* DataKit */; };
@@ -60,13 +59,6 @@
 			remoteGlobalIDString = B1083FE0C382C899D4BEC2C1;
 			remoteInfo = Gyeop;
 		};
-		22F6E79C5117A77E6B8B3D65 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A33CB8CED062E3DE3233310F /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = E89A9007526AD57464586023;
-			remoteInfo = GyeopClip;
-		};
 		9D8B2E9BCA7DAF6EDE6A9E65 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A33CB8CED062E3DE3233310F /* Project object */;
@@ -75,20 +67,6 @@
 			remoteInfo = GyeopClip;
 		};
 /* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		A18A9F26529B53EF57EE9065 /* Embed App Clips */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/AppClips";
-			dstSubfolderSpec = 16;
-			files = (
-				58D46EA90DB166CF49C524DB /* GyeopClip.app in Embed App Clips */,
-			);
-			name = "Embed App Clips";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		040CA6E8AD22284574773BEE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -370,12 +348,10 @@
 				51E6E47E7A236930211B18B5 /* Sources */,
 				6672362FBD1457E8CDBB6E65 /* Resources */,
 				2D51D19841A255895CF13003 /* Frameworks */,
-				A18A9F26529B53EF57EE9065 /* Embed App Clips */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				64ADA76138D9EED527BF5B46 /* PBXTargetDependency */,
 			);
 			name = Gyeop;
 			packageProductDependencies = (
@@ -424,17 +400,21 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					4EEC88EC9466B5948A04989D = {
+						DevelopmentTeam = M63YMWAA5V;
 						ProvisioningStyle = Automatic;
 						TestTargetID = E89A9007526AD57464586023;
 					};
 					7D8AB88A1F8880EF555C7B69 = {
+						DevelopmentTeam = M63YMWAA5V;
 						ProvisioningStyle = Automatic;
 						TestTargetID = B1083FE0C382C899D4BEC2C1;
 					};
 					B1083FE0C382C899D4BEC2C1 = {
+						DevelopmentTeam = M63YMWAA5V;
 						ProvisioningStyle = Automatic;
 					};
 					E89A9007526AD57464586023 = {
+						DevelopmentTeam = M63YMWAA5V;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -550,11 +530,6 @@
 			target = B1083FE0C382C899D4BEC2C1 /* Gyeop */;
 			targetProxy = 188B55BC40B8E6260417DB22 /* PBXContainerItemProxy */;
 		};
-		64ADA76138D9EED527BF5B46 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E89A9007526AD57464586023 /* GyeopClip */;
-			targetProxy = 22F6E79C5117A77E6B8B3D65 /* PBXContainerItemProxy */;
-		};
 		DDF2A344DE8887EF29E16151 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E89A9007526AD57464586023 /* GyeopClip */;
@@ -631,6 +606,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = M63YMWAA5V;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -723,6 +699,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = M63YMWAA5V;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;

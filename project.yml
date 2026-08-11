@@ -13,6 +13,7 @@ settings:
     SWIFT_STRICT_CONCURRENCY: complete
     INFOPLIST_KEY_UILaunchScreen_Generation: YES
     CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: M63YMWAA5V
 
 packages:
   GyeopPackages:
@@ -29,7 +30,6 @@ targets:
     dependencies:
       - package: GyeopPackages
         products: [Core, DesignSystem, CardKit, GyeopKit, DataKit]
-      - target: GyeopClip
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.gyeop.app
@@ -41,6 +41,8 @@ targets:
       path: App/Support/Info.plist
       properties:
         CFBundleDisplayName: 겹
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "2"
         UILaunchScreen: {}
         # MPC 로컬 네트워크 권한 (실기기 맞대기) — 서비스명은 GyeopKit ExchangeConstants.serviceType
         NSLocalNetworkUsageDescription: 근처 상대와 아이폰을 맞대 카드를 교환하려면 로컬 네트워크 접근이 필요합니다.

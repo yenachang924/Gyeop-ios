@@ -1,6 +1,6 @@
 # 심사 대비물 (Review Kit)
 
-제출(App Store Connect) 때 그대로 옮겨 쓰는 재료 모음. 상태 표시: ✅ 준비됨 · 🔲 촬영/작성 필요 · ⏳ 외부 대기
+제출(App Store Connect) 때 그대로 옮겨 쓰는 재료 모음. 상태 표시: ✅ 준비됨 · 촬영/작성 필요 · ⏳ 외부 대기
 
 ## 1. 스크린샷 세트 (6.9" — iPhone 17 Pro Max, 1320×2868, 세로 고정)
 
@@ -37,10 +37,12 @@ ASC에는 7장 이내 큐레이션(1·2·4·5·7·8·9번 권장).
 - 로그인은 **Sign in with Apple 단독**이므로 별도 아이디/비밀번호 데모 계정이 없다.
   리뷰어 본인 Apple ID로 즉시 로그인 가능 — 폐쇄형 가입 제한 없음(이메일 검증은 v1 미포함).
 - 리뷰 노트 초안:
-  > 겹은 Apple Developer Academy 러너용 근접 카드 교환 앱입니다. 서버 없이 모든 데이터는
-  > 기기 내 저장(SwiftData/Keychain)됩니다. 카드 맞대기(MultipeerConnectivity)는 기기 2대가
-  > 필요하므로 시연 영상을 첨부합니다: [영상 URL]. 시뮬레이터/기기 1대에서는 온보딩·카드
-  > 생성·컬렉션·계정 삭제를 확인할 수 있습니다. 계정 삭제: 컬렉션 좌상단 설정 > 계정 삭제.
+  > 겹은 가까이 있는 두 사람이 정체성 카드를 교환하는 앱입니다. 교환은 서버나 공개 공간을
+  > 거치지 않는 로컬 1:1 상호작용이며, 공개 프로필·피드·검색 기능이 없습니다. 데이터는 기기
+  > 내 SwiftData와 Keychain에만 저장됩니다. 실제 MultipeerConnectivity 교환은 기기 2대가
+  > 필요하므로 시연 영상을 첨부합니다: [영상 URL]. 시뮬레이터 또는 기기 1대에서는 Sign in with
+  > Apple 로그인 후 온보딩을 완료하고, 나의 카드 > 카드 맞대기에서 자동 Mock 교환으로 겹 결과와
+  > 받은 카드를 확인할 수 있습니다. 계정 삭제: 나의 카드 우상단 설정 > 계정 삭제.
 - 심사 필수 대응: 계정 삭제 ✅ (설정 > 계정 삭제, 5.1.1(v)) · 추적 없음 · 결제 없음.
 
 ## 4. App Clip 경험 등록 (App Store Connect)
@@ -50,7 +52,8 @@ ASC에는 7장 이내 큐레이션(1·2·4·5·7·8·9번 권장).
 `docs/assets/appclip-header-generate.swift`를 `swift appclip-header-generate.swift <출력경로>`로
 실행(CoreGraphics 절차적 렌더 — 팔레트·판 개수·비네트 세기 등 스크립트 상단에서 조정 가능).
 
-⏳ 선행 대기: **어소시에이티드 도메인 실도메인 확정**.
+⏳ **후속 릴리스 항목** — 1차 제출과 TestFlight 빌드에는 App Clip을 포함하지 않는다. 실도메인과
+AASA가 준비된 뒤에 아래 절차를 진행한다.
 
 등록 절차 (도메인 확정 후):
 1. App Store Connect > 앱 > App Clip > 기본 경험 설정
@@ -60,14 +63,14 @@ ASC에는 7장 이내 큐레이션(1·2·4·5·7·8·9번 권장).
    `inviter` 파라미터를 해석한다 (AppClipKit 테스트로 검증됨).
 3. 도메인 웹서버에 AASA(apple-app-site-association) 배포: `appclips` 섹션에
    `<TeamID>.com.gyeop.app.Clip`.
-4. entitlements 교체: `AppClip/App/AppClip.entitlements` + `App/Support/Gyeop.entitlements`의
-   `PLACEHOLDER.gyeop.example` → 실도메인 (교체 후 `xcodegen generate`).
+4. App Clip entitlement의 `PLACEHOLDER.gyeop.example`을 실도메인으로 교체하고, 본앱
+   associated domains와 `Gyeop → GyeopClip` 의존성을 복원한 뒤 `xcodegen generate`.
 5. 시뮬레이터 검증: 스킴 실행 인자 `_XCAppClipURL` = 위 URL (Xcode GyeopClip 스킴에서).
 
 ## 5. App Store Connect 메타데이터 초안
 
 - 이름: 겹 / 부제: 아이폰을 맞대면, 만남이 쌓입니다
 - 카테고리: 소셜 네트워킹 / 연령 등급: 4+ (수집 데이터 없음, UGC는 카드 닉네임 수준)
-- 개인정보 처리방침 URL: `docs/privacy-policy.md`를 팀 웹 공간(GitHub Pages 등)에 게시 후 URL 기입 🔲
+- 개인정보 처리방침 URL: `docs/privacy-policy.md`를 팀 웹 공간(GitHub Pages 등)에 게시 후 URL 기입 필요
 - 개인정보 라벨: 데이터가 수집되지 않음 (근거: privacy-policy.md 하단 매핑)
 - 수출 규정: ITSAppUsesNonExemptEncryption = NO (Info.plist에 반영됨 ✅)
