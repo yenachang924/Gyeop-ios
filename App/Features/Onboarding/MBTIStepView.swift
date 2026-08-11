@@ -90,6 +90,9 @@ struct MBTIStepView: View {
             }
             .padding(.horizontal, DS.Spacing.m)
             .padding(.bottom, DS.Spacing.s)
+            .frame(maxWidth: .infinity)
+            // F67: 하단 페이드 바 — 1/3과 같은 결
+            .dsBottomBarFade()
         }
     }
 
@@ -151,17 +154,35 @@ struct MBTIStepView: View {
         }
     }
 
-    /// 선택 = 브랜드 레드 채움 (F61, 소유자 목업), 미선택 = 글라스 + 무채 글자.
+    /// 선택 = 브랜드 레드 채움 (F61, 소유자 목업), 미선택 = 유리 + 무채 글자.
+    ///
+    /// F68 — 깜빡임 오류 수정: 이전에는 선택 여부에 따라 **다른 버튼 스타일**
+    /// (glassProminent ↔ glass)로 if/else 구조 교체를 했다. 뷰 아이덴티티가 리셋되면
+    /// 전환이 애니메이션되지 않고 재생성 플래시가 난다 — 같은 축의 반대쪽 알약이
+    /// 선택 해제될 때마다 깜빡이던 원인. 이제 **한 버튼이 배경 채움의 불투명도만**
+    /// 바꾼다 (유리 캡슐은 상시, 레드 캡슐이 위에서 페이드) — 아이덴티티 유지,
+    /// 시각 결과는 이전과 동일.
     private func pill(
         letter: String, word: String, isSelected: Bool, action: @escaping () -> Void
     ) -> some View {
-        Group {
-            if isSelected {
-                pillButton(letter: letter, isSelected: true, action: action)
-            } else {
-                pillButton(letter: letter, isSelected: false, action: action)
-                    .tint(.secondary)
+        Button(action: action) {
+            Text(letter)
+                .font(DS.Typo.title)
+                .foregroundStyle(isSelected ? AnyShapeStyle(.white) : AnyShapeStyle(.primary))
+                .frame(maxWidth: .infinity, minHeight: DS.Layout.primaryActionHeight)
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .background {
+            ZStack {
+                Capsule().fill(.ultraThinMaterial)
+                Capsule().fill(DS.Palette.accent)
+                    .opacity(isSelected ? 1 : 0)
             }
+        }
+        .overlay {
+            Capsule().strokeBorder(.quaternary)
+                .opacity(isSelected ? 0 : 1)
         }
         // 고른 쪽이 살짝 부풀며 응답한다 (F62) — 관심사 칩(1.04)과 같은 언어.
         .scaleEffect(isSelected ? 1.04 : 1)
@@ -169,24 +190,6 @@ struct MBTIStepView: View {
         .accessibilityLabel("\(word) \(letter)")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityIdentifier("onboarding.mbti.\(letter)")
-    }
-
-    @ViewBuilder
-    private func pillButton(
-        letter: String, isSelected: Bool, action: @escaping () -> Void
-    ) -> some View {
-        let label = Button(action: action) {
-            Text(letter)
-                .font(DS.Typo.title)
-                .foregroundStyle(isSelected ? AnyShapeStyle(.white) : AnyShapeStyle(.primary))
-                .frame(maxWidth: .infinity, minHeight: DS.Layout.primaryActionHeight)
-        }
-        // 전역 tint가 액센트라 prominent가 곧 브랜드 레드 채움이 된다 (CTA와 같은 결).
-        if isSelected {
-            label.dsProminentButton()
-        } else {
-            label.dsGlassButton()
-        }
     }
 
     // MARK: - 누를 때만 피는 배경 색 흐름

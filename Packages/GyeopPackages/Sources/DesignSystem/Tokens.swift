@@ -255,4 +255,36 @@ public extension View {
             buttonStyle(.bordered)
         }
     }
+
+    /// 하단 고정 CTA 뒤의 페이드 바 (F67). 위 경계는 투명에서 시작해 유리(Material)가
+    /// 점점 짙어지고, 맨 아래는 화면 배경색으로 **불투명하게** 닫힌다 — 딱 잘린 바가
+    /// 콘텐츠와 분리되어 보이던 문제(특히 다크 모드)를 없앤다. 지도 앱의 하단 페이드 문법.
+    func dsBottomBarFade() -> some View {
+        background {
+            ZStack {
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+                    .mask {
+                        LinearGradient(
+                            stops: [
+                                .init(color: .clear, location: 0),
+                                .init(color: .black, location: 0.4),
+                                .init(color: .black, location: 1),
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    }
+                LinearGradient(
+                    stops: [
+                        .init(color: DS.Palette.background.opacity(0), location: 0),
+                        .init(color: DS.Palette.background.opacity(0.55), location: 0.7),
+                        .init(color: DS.Palette.background, location: 1),
+                    ],
+                    startPoint: .top, endPoint: .bottom
+                )
+            }
+            .ignoresSafeArea(edges: .bottom)
+            .allowsHitTesting(false)
+        }
+    }
 }

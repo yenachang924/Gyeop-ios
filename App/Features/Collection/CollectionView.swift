@@ -120,6 +120,9 @@ struct CollectionView: View {
         .padding(.horizontal, DS.Spacing.m)
         .padding(.bottom, DS.Spacing.s)
         .accessibilityIdentifier("collection.exchange")
+        .frame(maxWidth: .infinity)
+        // F67: 받은 카드가 맞대기 캡슐 밑을 지날 때도 읽히는 하단 페이드 바
+        .dsBottomBarFade()
     }
 
     /// 내 카드는 홈에서 바로 뒤집는다 (F61 — 소유자 목업): 섹션 헤더 없이 카드가

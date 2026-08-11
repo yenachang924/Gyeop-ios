@@ -55,7 +55,8 @@ struct InterestsStepView: View {
             .disabled(selected.isEmpty)
             .accessibilityIdentifier("onboarding.interests.next")
             .frame(maxWidth: .infinity)
-            .background(.ultraThinMaterial, ignoresSafeAreaEdges: .bottom)
+            // F67: 딱 잘린 유리 바 → 아래로 갈수록 짙어져 맨 아래는 불투명한 페이드
+            .dsBottomBarFade()
         }
     }
 
