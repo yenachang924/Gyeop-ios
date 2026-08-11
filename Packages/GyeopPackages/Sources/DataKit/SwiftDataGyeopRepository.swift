@@ -86,6 +86,13 @@ public actor SwiftDataGyeopRepository: GyeopRepository {
         return try modelContext.fetch(descriptor).map { $0.toDomain() }
     }
 
+    /// 받은 카드 개별 삭제 (F65 — 사용자가 원치 않는 카드를 지울 수 있어야 한다, 심사 1.2 대비).
+    public func deleteGyeop(id: String) async throws {
+        guard let entity = try existingEntity(id: id) else { return }
+        modelContext.delete(entity)
+        try modelContext.save()
+    }
+
     /// 클립 30일 보존 정책 집행 — `cutoff` 이전의 겹 기록을 지운다.
     /// 클립 조립 지점이 실행 시마다 `ClipRetentionPolicy.cutoffDate()`로 호출한다.
     /// 본앱 스토어에는 호출부가 없다 — 본앱의 겹은 기한 없이 남는 게 제품 규칙이다.

@@ -108,16 +108,10 @@ struct ProfileStepView: View {
                 .listRowBackground(Color.clear)
             }
         }
-        // 스크롤만 해도 키보드가 내려간다 (F45)
+        // 키보드 닫는 길 (F65 — 「완료」 버튼 전면 은퇴, 시스템 기본만 남긴다):
+        // 스크롤로 내려가고(F45), 닉네임·한 줄은 리턴 키(submitLabel)로 닫히며,
+        // 이모지는 담기는 순간 스스로 닫힌다(F64).
         .scrollDismissesKeyboard(.interactively)
-        .toolbar {
-            // 키보드 위 「완료」 — 스크롤을 모르는 사용자도 확실히 닫을 수 있다 (F45)
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("완료") { focusedField = nil }
-                    .accessibilityIdentifier("onboarding.keyboard.done")
-            }
-        }
         // F46: Form 전체에 `.animation(value:)`를 걸면 안 된다. `incomplete`가 뒤집히는
         // 순간 **폼 안의 모든 행**(이모지 셀 137개 포함)이 위치 애니메이션을 타서 이모지가
         // 칸 밖으로 날아다녔다. 애니메이션은 실제로 변하는 뷰에만 국소적으로 붙인다.

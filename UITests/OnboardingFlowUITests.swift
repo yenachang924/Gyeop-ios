@@ -51,7 +51,7 @@ final class OnboardingFlowUITests: XCTestCase {
         toCollection.tap()
 
         // 컬렉션 도착 (첫 진입은 빈 상태 — 데모 시딩 제거됨)
-        XCTAssertTrue(app.navigationBars["나의 카드"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["나의 카드"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["collection.myCard"].waitForExistence(timeout: 5))
 
         // 맞대기 — 시뮬레이터는 MockExchangeSession 스크립트가 겹을 성립시킨다

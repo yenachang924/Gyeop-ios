@@ -42,6 +42,7 @@ struct InterestsStepView: View {
         .safeAreaInset(edge: .bottom) {
             // 카운터는 제목 줄로 올라갔다 (F61). CTA는 「다음」 하나만 말하고,
             // 화면에서 가장 도드라진다 (F62 — 카드 완성 버튼과 같은 전폭 구성).
+            // F65: CTA 뒤에 블러 바 — 스크롤되는 칩이 버튼 밑을 지나가도 읽힌다 (사진 앱 문법).
             Button {
                 onNext()
             } label: {
@@ -53,6 +54,8 @@ struct InterestsStepView: View {
             .padding(DS.Spacing.m)
             .disabled(selected.isEmpty)
             .accessibilityIdentifier("onboarding.interests.next")
+            .frame(maxWidth: .infinity)
+            .background(.ultraThinMaterial, ignoresSafeAreaEdges: .bottom)
         }
     }
 
@@ -96,7 +99,12 @@ struct InterestsStepView: View {
                         columns: [GridItem(.adaptive(minimum: 76), spacing: DS.Spacing.s)],
                         spacing: DS.Spacing.s
                     ) {
-                        ForEach(EmojiCatalog.icons(in: category)) { icon in
+                        // 이름이 긴 항목은 선택지에서 뺀다 (F65) — 칩에서 …로 잘리는
+                        // 문제의 근본 해결 (소유자 결정). 이모지 자체는 3/3 키보드로 여전히 열려 있다.
+                        ForEach(
+                            EmojiCatalog.icons(in: category)
+                                .filter { $0.name.count <= Layout.maxNameLength }
+                        ) { icon in
                             interestChip(icon)
                         }
                     }
@@ -108,6 +116,8 @@ struct InterestsStepView: View {
     private enum Layout {
         /// 칩 라벨 높이 (F64 — 스타일 패딩 포함 최종 ≈44pt).
         static let chipLabelHeight: CGFloat = 30
+        /// 선택지 이름 길이 상한 (F65) — 이보다 길면 컴팩트 칩에서 …로 잘린다.
+        static let maxNameLength = 4
     }
 
     private func interestChip(_ icon: EmojiIcon) -> some View {
@@ -145,18 +155,16 @@ struct InterestsStepView: View {
                 selected.append(icon.name)
             }
         } label: {
-            HStack(spacing: DS.Spacing.xs) {
-                Text(icon.emoji)
-                Text(icon.name)
-                    // F64: 칩 -20% — 라벨을 한 급 줄인다 (footnote 13pt, 12pt 하한은 유지)
-                    .font(DS.Typo.footnote)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.92)
-            }
-            .foregroundStyle(isSelected ? DS.Palette.onSelection : Color.secondary)
-            // 라벨 높이를 낮춰도 버튼 스타일 패딩을 더하면 최종 높이가 44pt 언저리 —
-            // 시각은 -20%, 터치 타깃 규칙(HIG 44pt)은 지켜진다.
-            .frame(maxWidth: .infinity, minHeight: Layout.chipLabelHeight)
+            // F65: 텍스트 전용 칩 (소유자 목업 그대로) — 이모지를 빼자 4글자 이름이
+            // 컴팩트 4열에서도 잘리지 않는다. 이모지는 카드와 3/3 키보드의 몫.
+            Text(icon.name)
+                .font(DS.Typo.footnote)
+                .lineLimit(1)
+                .minimumScaleFactor(0.92)
+                .foregroundStyle(isSelected ? DS.Palette.onSelection : Color.secondary)
+                // 라벨 높이를 낮춰도 버튼 스타일 패딩을 더하면 최종 높이가 44pt 언저리 —
+                // 시각은 -20%, 터치 타깃 규칙(HIG 44pt)은 지켜진다.
+                .frame(maxWidth: .infinity, minHeight: Layout.chipLabelHeight)
         }
     }
 }

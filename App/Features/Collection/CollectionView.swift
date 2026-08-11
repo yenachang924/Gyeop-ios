@@ -14,6 +14,8 @@ struct CollectionView: View {
     @State private var selectedCard: CardSnapshot?
     @State private var showingExchange = false
     @State private var showingSettings = false
+    /// 삭제 확인을 기다리는 받은 카드 (F65) — 파괴적 액션은 alert로 붙잡는다 (F47 관례).
+    @State private var pendingDeletion: GyeopRecord?
     /// 컬렉션 ↔ 카드 상세 줌 전환 — 시스템 zoom 전환이 matchedGeometry 페어링을 대신한다.
     @Namespace private var cardZoom
 
@@ -21,6 +23,8 @@ struct CollectionView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: DS.Spacing.xl) {
+                    header
+
                     if let myCard = model.myCard {
                         myCardSection(myCard)
                     }
@@ -30,19 +34,9 @@ struct CollectionView: View {
                 .padding(DS.Spacing.m)
             }
             .background(DS.Palette.background)
-            .navigationTitle("나의 카드")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingSettings = true
-                    } label: {
-                        Label("설정", systemImage: "gearshape")
-                    }
-                    // 무채 크롬 — 이 화면의 빨강은 주인공 액션(맞대기) 하나뿐 (U1 원칙 1)
-                    .tint(.primary)
-                    .accessibilityIdentifier("collection.settings")
-                }
-            }
+            // 제목과 설정이 같은 줄에 앉는다 (F65 — App Store 투데이·피트니스 요약 문법).
+            // 시스템 내비게이션 바는 쓰지 않는다 — 큰 타이틀 위에 뜨던 설정 버튼이 어긋나 보였다.
+            .toolbar(.hidden, for: .navigationBar)
             // 주요 액션은 하단 고정 (F40) — 아이콘도 크게
             .safeAreaInset(edge: .bottom) {
                 exchangeButton
@@ -67,6 +61,43 @@ struct CollectionView: View {
                     .presentationCornerRadius(DS.Radius.card)
                     .presentationDragIndicator(.visible)
             }
+            // 받은 카드 삭제 (F65) — 되돌릴 수 없으므로 alert로 확인 (F47 관례)
+            .alert(
+                "이 카드를 삭제할까요?",
+                isPresented: .init(
+                    get: { pendingDeletion != nil },
+                    set: { if !$0 { pendingDeletion = nil } }
+                ),
+                presenting: pendingDeletion
+            ) { record in
+                Button("삭제", role: .destructive) {
+                    Task { await model.deleteGyeop(record) }
+                }
+                Button("취소", role: .cancel) {}
+            } message: { record in
+                Text("\(record.counterpartCard.nickname)님의 카드와 겹 기록이 사라져요. 되돌릴 수 없어요.")
+            }
+        }
+    }
+
+    /// 큰 제목 + 설정이 한 줄 (F65 — App Store 투데이 문법).
+    private var header: some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text("나의 카드")
+                .font(DS.Typo.largeTitle)
+                .accessibilityAddTraits(.isHeader)
+            Spacer()
+            Button {
+                showingSettings = true
+            } label: {
+                Label("설정", systemImage: "gearshape")
+                    .labelStyle(.iconOnly)
+                    .font(DS.Typo.actionIcon)
+                    .frame(minWidth: DS.minTapTarget, minHeight: DS.minTapTarget)
+            }
+            // 무채 크롬 — 이 화면의 빨강은 주인공 액션(맞대기) 하나뿐 (U1 원칙 1)
+            .tint(.primary)
+            .accessibilityIdentifier("collection.settings")
         }
     }
 
@@ -141,6 +172,12 @@ struct CollectionView: View {
                             CardView(card: gyeop.counterpartCard)
                         }
                         .buttonStyle(.plain)
+                        // 받은 카드 삭제 (F65) — 길게 눌러 지우는 시스템 관례 (사진·메시지)
+                        .contextMenu {
+                            Button("카드 삭제", systemImage: "trash", role: .destructive) {
+                                pendingDeletion = gyeop
+                            }
+                        }
                         .matchedTransitionSource(id: gyeop.counterpartCard.id, in: cardZoom)
                         .accessibilityIdentifier("collection.card.\(gyeop.counterpartCard.nickname)")
                     }

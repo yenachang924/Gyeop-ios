@@ -47,7 +47,7 @@ final class ExchangeFailureUITests: XCTestCase {
 
         // 닫기 → 컬렉션은 여전히 빈 상태 (실패는 겹을 만들지 않는다)
         app.buttons["exchange.close"].tap()
-        XCTAssertTrue(app.navigationBars["나의 카드"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["나의 카드"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["collection.card.하람"].exists)
     }
 }

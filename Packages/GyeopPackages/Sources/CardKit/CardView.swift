@@ -147,8 +147,15 @@ public struct CardBackView: View {
         // 좌정렬 세로 구성 (F61 — 소유자 목업 그대로): MBTI 아래 관심사가 한 줄씩.
         VStack(alignment: .leading, spacing: DS.Spacing.m) {
             if let mbti = card.mbti {
+                // 유리 글자 (F65) — 잉크가 아니라 반투명 흰 유리로 음각된 인상.
+                // 라이트·다크 모두에서 유리가 빛을 받는 쪽이라 흰빛 고정이 맞다.
                 Text(mbti.code)
                     .font(DS.Typo.mbtiHero)
+                    .foregroundStyle(DS.Palette.glassSheen.opacity(Glass.mbtiOpacity))
+                    .shadow(
+                        color: .black.opacity(Glass.mbtiShadowOpacity),
+                        radius: Glass.mbtiShadowRadius, y: 1
+                    )
                     .accessibilityLabel("MBTI \(mbti.code)")
             }
 
@@ -285,6 +292,10 @@ private enum Glass {
     static let sheenOpacity: Double = 0.28
     /// 유리 테두리 강도.
     static let edgeOpacity: Double = 0.45
+    /// 뒷면 MBTI 유리 글자 (F65) — 흰 유리의 불투명도와 윤곽 그림자.
+    static let mbtiOpacity: Double = 0.88
+    static let mbtiShadowOpacity: Double = 0.22
+    static let mbtiShadowRadius: CGFloat = 2
 }
 
 /// F11 stir 튜닝 상수 — 값 조정은 여기서만.

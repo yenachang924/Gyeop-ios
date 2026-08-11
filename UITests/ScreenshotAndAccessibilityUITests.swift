@@ -149,7 +149,7 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         toCollection.tap()
 
         // 컬렉션 (빈 상태)
-        XCTAssertTrue(app.navigationBars["나의 카드"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["나의 카드"].waitForExistence(timeout: 5))
         snap(app, "\(prefix)-5-collection-empty")
 
         // 맞대기 — 탐색 중 → 겹 성립
