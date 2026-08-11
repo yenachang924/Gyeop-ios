@@ -5,6 +5,10 @@ import UIKit
 /// 그룹 아이콘 방식). 탭하면 이모지 키보드가 뜨고, 무엇을 입력하든 **마지막 이모지
 /// 한 글자만** 남는다 — 이모지가 아닌 글자는 버려진다.
 ///
+/// F64: 키보드는 **이모지가 담기는 순간 스스로 닫힌다** (메시지 반응 픽커의 문법 —
+/// 고르면 끝). 액세서리 「완료」 버튼은 동작 오류로 은퇴. 안 고르고 나가는 길은
+/// 스크롤 내리기(F45 계승)와 다른 필드 탭이 맡는다.
+///
 /// SwiftUI에는 이모지 키보드를 지정하는 API가 없다(`keyboardType`에 이모지 없음) —
 /// `UITextInputMode` 오버라이드가 필요한 지점만 UIKit을 래핑한다 (CLAUDE.md 예외 조건).
 struct EmojiKeyboardField: UIViewRepresentable {
@@ -20,18 +24,6 @@ struct EmojiKeyboardField: UIViewRepresentable {
         field.tintColor = .clear
         field.accessibilityIdentifier = "onboarding.emoji"
         field.accessibilityLabel = "나를 나타내는 이모지"
-
-        // 이모지 키보드에는 리턴 키가 없다 — 키보드 위 「완료」로 닫는 길을 만든다 (F45 계승).
-        let toolbar = UIToolbar()
-        toolbar.items = [
-            UIBarButtonItem(systemItem: .flexibleSpace),
-            UIBarButtonItem(
-                title: "완료",
-                primaryAction: UIAction { [weak field] _ in field?.resignFirstResponder() }
-            ),
-        ]
-        toolbar.sizeToFit()
-        field.inputAccessoryView = toolbar
         return field
     }
 
@@ -69,6 +61,11 @@ struct EmojiKeyboardField: UIViewRepresentable {
             let kept = proposed.last(where: \.isEmojiGlyph).map(String.init) ?? ""
             text = kept
             textField.text = kept
+            // 담을 것은 한 글자뿐 — 이모지가 담기는 순간 키보드가 스스로 닫힌다
+            // (메시지 반응 픽커의 문법: 고르면 끝. 액세서리 「완료」 버튼은 은퇴).
+            if !kept.isEmpty {
+                textField.resignFirstResponder()
+            }
             return false
         }
     }

@@ -91,9 +91,9 @@ struct InterestsStepView: View {
                         .foregroundStyle(DS.Palette.secondaryText)
                         .accessibilityAddTraits(.isHeader)
                     LazyVGrid(
-                        // 컴팩트 칩 (F61 — 소유자 목업의 촘촘한 4열 결). 폭을 줄이는 대신
-                        // 글자 축소 하한(0.75)이 이름을 지킨다. 터치 타깃 44pt는 유지.
-                        columns: [GridItem(.adaptive(minimum: 88), spacing: DS.Spacing.s)],
+                        // 컴팩트 칩 (F61 → F64에서 다시 -20%). 폭을 줄이는 대신
+                        // 글자 축소 하한(0.75)이 이름을 지킨다.
+                        columns: [GridItem(.adaptive(minimum: 76), spacing: DS.Spacing.s)],
                         spacing: DS.Spacing.s
                     ) {
                         ForEach(EmojiCatalog.icons(in: category)) { icon in
@@ -103,6 +103,11 @@ struct InterestsStepView: View {
                 }
             }
         }
+    }
+
+    private enum Layout {
+        /// 칩 라벨 높이 (F64 — 스타일 패딩 포함 최종 ≈44pt).
+        static let chipLabelHeight: CGFloat = 30
     }
 
     private func interestChip(_ icon: EmojiIcon) -> some View {
@@ -143,13 +148,15 @@ struct InterestsStepView: View {
             HStack(spacing: DS.Spacing.xs) {
                 Text(icon.emoji)
                 Text(icon.name)
-                    .font(DS.Typo.body)
+                    // F64: 칩 -20% — 라벨을 한 급 줄인다 (footnote 13pt, 12pt 하한은 유지)
+                    .font(DS.Typo.footnote)
                     .lineLimit(1)
-                    // 12pt 밑으로는 줄이지 않는다 (F36) — body 17pt 기준 하한
-                    .minimumScaleFactor(0.75)
+                    .minimumScaleFactor(0.92)
             }
             .foregroundStyle(isSelected ? DS.Palette.onSelection : Color.secondary)
-            .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
+            // 라벨 높이를 낮춰도 버튼 스타일 패딩을 더하면 최종 높이가 44pt 언저리 —
+            // 시각은 -20%, 터치 타깃 규칙(HIG 44pt)은 지켜진다.
+            .frame(maxWidth: .infinity, minHeight: Layout.chipLabelHeight)
         }
     }
 }

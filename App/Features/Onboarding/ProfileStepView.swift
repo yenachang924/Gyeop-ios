@@ -72,7 +72,7 @@ struct ProfileStepView: View {
             } header: {
                 Text("나를 나타내는 이모지")
             } footer: {
-                Text("탭하면 이모지 키보드가 열려요. 하나만 담겨요.")
+                Text("탭해서 하나만 골라 주세요. 고르면 키보드가 닫혀요.")
             }
 
             Section {
