@@ -11,10 +11,10 @@ final class OnboardingFlowUITests: XCTestCase {
         app.launch()
 
         // 1/3 관심사 — 2개 선택 후 다음
-        let firstInterest = app.buttons["onboarding.interest.클라이밍"]
+        let firstInterest = app.buttons["onboarding.interest.달리기"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         firstInterest.tap()
-        app.buttons["onboarding.interest.보드게임"].tap()
+        app.buttons["onboarding.interest.자전거"].tap()
         app.buttons["onboarding.interests.next"].tap()
 
         // 2/3 MBTI — 네 축 미완성이면 다음 비활성 (F55, navigation-map §1-3)
@@ -83,7 +83,7 @@ final class OnboardingFlowUITests: XCTestCase {
         app.launch()
 
         // 1/3 관심사 — 1개만 선택하고 다음 (프리뷰가 물드는지는 접근성 식별자로 확인)
-        let firstInterest = app.buttons["onboarding.interest.클라이밍"]
+        let firstInterest = app.buttons["onboarding.interest.달리기"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         firstInterest.tap()
         let filledPreview = app.descendants(matching: .any)["onboarding.interests.preview.filled"]
@@ -190,7 +190,7 @@ final class U2DemoRecordingUITests: XCTestCase {
         app.launchArguments = ["-uitest-reset"]
         app.launch()
 
-        completeOnboarding(app, interests: ["클라이밍", "보드게임", "커피"])
+        completeOnboarding(app, interests: ["달리기", "자전거", "수영"])
 
         let toCollection = app.buttons["reveal.toCollection"]
         XCTAssertTrue(toCollection.waitForExistence(timeout: 5))
@@ -201,7 +201,8 @@ final class U2DemoRecordingUITests: XCTestCase {
     }
 
     /// 장면 2 — 겹! 순간: 융합(goo) → 링 파동 1회 → "겹!" → 겹친 칩 순차 페이드인.
-    /// Mock 상대(하람)의 관심사와 2개 겹치도록 클라이밍·보드게임을 고른다.
+    /// (F66에서 긴 이름이 선택지에서 빠져 Mock 상대(하람)와의 겹침은 데모에서 재현되지 않는다 —
+    /// 겹침 0개 변형이 대신 보인다.)
     @MainActor
     func testScene2_GyeopMoment() throws {
         try guardDemo()
@@ -209,7 +210,7 @@ final class U2DemoRecordingUITests: XCTestCase {
         app.launchArguments = ["-uitest-reset"]
         app.launch()
 
-        completeOnboarding(app, interests: ["클라이밍", "보드게임"])
+        completeOnboarding(app, interests: ["달리기", "자전거"])
 
         let toCollection = app.buttons["reveal.toCollection"]
         XCTAssertTrue(toCollection.waitForExistence(timeout: 5))
@@ -237,7 +238,7 @@ final class U2DemoRecordingUITests: XCTestCase {
         app.launch()
 
         // 칩을 천천히 — 자리표시 → 카드 전환, 고를 때마다 색이 물들고, 해제하면 되돌아온다
-        let first = app.buttons["onboarding.interest.클라이밍"]
+        let first = app.buttons["onboarding.interest.달리기"]
         XCTAssertTrue(first.waitForExistence(timeout: 5))
         first.tap()
         hold(1.2)

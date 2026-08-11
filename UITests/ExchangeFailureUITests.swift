@@ -11,7 +11,7 @@ final class ExchangeFailureUITests: XCTestCase {
         app.launch()
 
         // 최단 경로 온보딩
-        let firstInterest = app.buttons["onboarding.interest.클라이밍"]
+        let firstInterest = app.buttons["onboarding.interest.달리기"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         firstInterest.tap()
         app.buttons["onboarding.interests.next"].tap()

@@ -99,7 +99,7 @@ struct InterestsStepView: View {
                         columns: [GridItem(.adaptive(minimum: 76), spacing: DS.Spacing.s)],
                         spacing: DS.Spacing.s
                     ) {
-                        // 이름이 긴 항목은 선택지에서 뺀다 (F65) — 칩에서 …로 잘리는
+                        // 이름이 긴 항목은 선택지에서 뺀다 (F65·F66) — 칩에서 …로 잘리는
                         // 문제의 근본 해결 (소유자 결정). 이모지 자체는 3/3 키보드로 여전히 열려 있다.
                         ForEach(
                             EmojiCatalog.icons(in: category)
@@ -116,8 +116,9 @@ struct InterestsStepView: View {
     private enum Layout {
         /// 칩 라벨 높이 (F64 — 스타일 패딩 포함 최종 ≈44pt).
         static let chipLabelHeight: CGFloat = 30
-        /// 선택지 이름 길이 상한 (F65) — 이보다 길면 컴팩트 칩에서 …로 잘린다.
-        static let maxNameLength = 4
+        /// 선택지 이름 길이 상한 (F66) — 이모지와 함께 넣을 때 이보다 길면
+        /// 컴팩트 4열 칩에서 …로 잘린다. 137개 중 17개 제외, 120개 노출.
+        static let maxNameLength = 3
     }
 
     private func interestChip(_ icon: EmojiIcon) -> some View {
@@ -155,16 +156,19 @@ struct InterestsStepView: View {
                 selected.append(icon.name)
             }
         } label: {
-            // F65: 텍스트 전용 칩 (소유자 목업 그대로) — 이모지를 빼자 4글자 이름이
-            // 컴팩트 4열에서도 잘리지 않는다. 이모지는 카드와 3/3 키보드의 몫.
-            Text(icon.name)
-                .font(DS.Typo.footnote)
-                .lineLimit(1)
-                .minimumScaleFactor(0.92)
-                .foregroundStyle(isSelected ? DS.Palette.onSelection : Color.secondary)
-                // 라벨 높이를 낮춰도 버튼 스타일 패딩을 더하면 최종 높이가 44pt 언저리 —
-                // 시각은 -20%, 터치 타깃 규칙(HIG 44pt)은 지켜진다.
-                .frame(maxWidth: .infinity, minHeight: Layout.chipLabelHeight)
+            // F66: 이모지 유지 (소유자 재결정 — F65의 텍스트 전용을 되돌림).
+            // 대신 이모지와 함께 넣으면 …로 넘치는 이름(4글자 이상)은 선택지에서 뺀다.
+            HStack(spacing: DS.Spacing.xs) {
+                Text(icon.emoji)
+                Text(icon.name)
+                    .font(DS.Typo.footnote)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.92)
+            }
+            .foregroundStyle(isSelected ? DS.Palette.onSelection : Color.secondary)
+            // 라벨 높이를 낮춰도 버튼 스타일 패딩을 더하면 최종 높이가 44pt 언저리 —
+            // 시각은 -20%, 터치 타깃 규칙(HIG 44pt)은 지켜진다.
+            .frame(maxWidth: .infinity, minHeight: Layout.chipLabelHeight)
         }
     }
 }

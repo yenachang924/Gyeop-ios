@@ -47,7 +47,7 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         let first = app.buttons["onboarding.interest.달리기"]
         XCTAssertTrue(first.waitForExistence(timeout: 5))
         first.tap()
-        app.buttons["onboarding.interest.클라이밍"].tap()
+        app.buttons["onboarding.interest.자전거"].tap()
         snap(app, "default-1b-interests-selected")
 
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
@@ -101,12 +101,12 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
     @MainActor
     private func runFullFlow(_ app: XCUIApplication, prefix: String) throws {
         // 1/3 관심사
-        let firstInterest = app.buttons["onboarding.interest.클라이밍"]
+        let firstInterest = app.buttons["onboarding.interest.달리기"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-1-onboarding-interests")
         firstInterest.tap()
         // AX5에서는 LazyVGrid가 화면 밖 칩을 아직 안 만들었을 수 있다 — 스크롤해서 탭
-        tapEvenIfOffscreen(app, app.buttons["onboarding.interest.보드게임"])
+        tapEvenIfOffscreen(app, app.buttons["onboarding.interest.자전거"])
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
 
         // 2/3 MBTI — 네 축 선택 후 「다음」 (F55)
