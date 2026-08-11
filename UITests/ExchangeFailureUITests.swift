@@ -28,7 +28,8 @@ final class ExchangeFailureUITests: XCTestCase {
         nickname.typeText("yena")
         app.textFields["onboarding.tagline"].tap()
         app.textFields["onboarding.tagline"].typeText("test")
-        app.buttons["onboarding.emoji.클라이밍"].tap()
+        app.textFields["onboarding.emoji"].tap()
+        app.textFields["onboarding.emoji"].typeText("🧗")
         app.buttons["onboarding.createCard"].tap()
         let toCollection = app.buttons["reveal.toCollection"]
         XCTAssertTrue(toCollection.waitForExistence(timeout: 5))

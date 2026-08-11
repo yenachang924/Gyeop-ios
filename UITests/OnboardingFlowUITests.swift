@@ -39,7 +39,8 @@ final class OnboardingFlowUITests: XCTestCase {
         tagline.tap()
         tagline.typeText("test user")
 
-        app.buttons["onboarding.emoji.클라이밍"].tap()
+        app.textFields["onboarding.emoji"].tap()
+        app.textFields["onboarding.emoji"].typeText("🧗")
 
         let create = app.buttons["onboarding.createCard"]
         create.tap()
@@ -74,9 +75,9 @@ final class OnboardingFlowUITests: XCTestCase {
     }
 
     /// 완료 기준 검증: 닉네임·한 줄·이모지가 **전부 필수**(F28)라 하나라도 비면 카드 완성이
-    /// 비활성이다. 이모지는 카테고리 피커로 "추천" 묶음 밖 항목에도 닿을 수 있다 (F45).
+    /// 비활성이다. 이모지는 시스템 키보드 필드 하나이고, 이모지가 아닌 글자는 버려진다 (F63).
     @MainActor
-    func testProfileFieldsAreAllRequiredAndCategoryPickerReachesAllEmoji() throws {
+    func testProfileFieldsAreAllRequiredAndEmojiFieldFiltersInput() throws {
         let app = XCUIApplication()
         app.launchArguments = ["-uitest-reset"]
         app.launch()
@@ -98,14 +99,10 @@ final class OnboardingFlowUITests: XCTestCase {
         app.buttons["onboarding.mbti.P"].tap()
         app.buttons["onboarding.mbti.next"].tap()
 
-        // 3/3 — "추천" 묶음(1차 16개) 밖인 "낚시"는 카테고리를 바꾸면 나타난다 (F45).
-        // 검색 텍스트 필드는 없앴다 — 키보드가 그리드를 가리던 문제 때문 (F45).
-        let recommended = app.buttons["onboarding.emoji.category.추천"]
-        XCTAssertTrue(recommended.waitForExistence(timeout: 5))
-        XCTAssertFalse(app.textFields["onboarding.emoji.search"].exists, "검색 필드가 남아 있음")
-        XCTAssertFalse(app.buttons["onboarding.emoji.낚시"].exists)
-        app.buttons["onboarding.emoji.category.활동"].tap()
-        XCTAssertTrue(app.buttons["onboarding.emoji.낚시"].waitForExistence(timeout: 5))
+        // 3/3 — 이모지 칸은 필드 하나 (F63, 카테고리 그리드 은퇴)
+        let emojiField = app.textFields["onboarding.emoji"]
+        XCTAssertTrue(emojiField.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["onboarding.emoji.category.추천"].exists, "카테고리 칩이 남아 있음")
 
         // 아무것도 안 채우면 카드 완성은 비활성 (F28 — 셋 다 필수)
         let create = app.buttons["onboarding.createCard"]
@@ -123,8 +120,11 @@ final class OnboardingFlowUITests: XCTestCase {
         tagline.typeText("test user")
         XCTAssertFalse(create.isEnabled, "이모지가 비었는데 카드 완성이 활성화됨")
 
-        // 이모지까지 고르면 활성
-        app.buttons["onboarding.emoji.클라이밍"].tap()
+        // 이모지까지 담으면 활성. 이모지가 아닌 글자는 버려진다 (F63)
+        emojiField.tap()
+        emojiField.typeText("a")
+        XCTAssertFalse(create.isEnabled, "이모지가 아닌 글자가 담김")
+        emojiField.typeText("🧗")
         XCTAssertTrue(create.isEnabled)
         create.tap()
 
@@ -174,7 +174,8 @@ final class U2DemoRecordingUITests: XCTestCase {
         let tagline = app.textFields["onboarding.tagline"]
         tagline.tap()
         tagline.typeText("새벽 러닝에 빠졌어요")
-        app.buttons["onboarding.emoji.클라이밍"].tap()
+        app.textFields["onboarding.emoji"].tap()
+        app.textFields["onboarding.emoji"].typeText("🧗")
 
         let create = app.buttons["onboarding.createCard"]
         XCTAssertTrue(create.waitForExistence(timeout: 5))
@@ -266,9 +267,10 @@ final class U2DemoRecordingUITests: XCTestCase {
         tagline.tap()
         tagline.typeText("새벽 러닝에 빠졌어요")
 
-        let emoji = app.buttons["onboarding.emoji.클라이밍"]
-        XCTAssertTrue(emoji.waitForExistence(timeout: 5))
-        emoji.tap()
+        let emojiField = app.textFields["onboarding.emoji"]
+        XCTAssertTrue(emojiField.waitForExistence(timeout: 5))
+        emojiField.tap()
+        emojiField.typeText("🧗")
         hold(1.0)
         app.buttons["onboarding.createCard"].tap()
 

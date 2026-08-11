@@ -129,7 +129,16 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         nickname.typeText("yena")
         app.textFields["onboarding.tagline"].tap()
         app.textFields["onboarding.tagline"].typeText("보드게임 좋아하는 사람")
-        tapEvenIfOffscreen(app, app.buttons["onboarding.emoji.클라이밍"])
+        // UIKit 필드(F63)는 첫 응답자 전환이 반 박자 늦을 수 있다 — 포커스가 잡힐 때까지 재탭
+        let emojiField = app.textFields["onboarding.emoji"]
+        tapEvenIfOffscreen(app, emojiField)
+        var focusTries = 0
+        while (emojiField.value(forKey: "hasKeyboardFocus") as? Bool) != true && focusTries < 4 {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.5))
+            emojiField.tap()
+            focusTries += 1
+        }
+        emojiField.typeText("🧗")
         snap(app, "\(prefix)-3-onboarding-profile")
         tapEvenIfOffscreen(app, app.buttons["onboarding.createCard"])
 
@@ -161,8 +170,8 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         XCTAssertTrue(received.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-8-collection-filled")
 
-        // 카드 상세
-        received.tap()
+        // 카드 상세 — 카드가 하단 맞대기 캡슐에 걸쳐 있으면 스크롤로 끌어올린 뒤 탭
+        tapEvenIfOffscreen(app, received)
         let close = app.buttons["닫기"]
         XCTAssertTrue(close.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-9-card-detail")

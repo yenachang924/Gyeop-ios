@@ -70,6 +70,7 @@ targets:
       - AppClip/App
       - App/Features/Onboarding/InterestsStepView.swift
       - App/Features/Onboarding/MBTIStepView.swift
+      - App/Features/Onboarding/EmojiKeyboardField.swift
       - App/Features/Onboarding/ProfileStepView.swift
       - App/Features/Onboarding/OnboardingDraft.swift
       - App/Support/EmojiCatalog.swift

@@ -6,27 +6,22 @@ import SwiftUI
 /// 처음 만나는 자리에서 카드가 비어 있으면 대화가 시작되지 않는다 — 강제성은
 /// 주저함을 덜어주는 장치로 받아들인다 (F4를 한 줄·이모지까지 확대).
 ///
-/// F45 — 이모지 칸 전면 재구성: **검색창을 없앴다.** 텍스트 필드가 있으면 키보드가 뜬 채
-/// 그리드를 가리고, 내리기도 어려웠다. 대신 **카테고리 피커 + 그리드**로 137개 전부에
-/// 동등하게 닿을 수 있게 했다 — 이모지 선택 경로에 키보드가 아예 등장하지 않는다.
-/// 닉네임·한 줄의 키보드는 스크롤로 내려가고, 키보드 위 「완료」로도 닫힌다.
+/// F63 — 이모지 칸을 **연락처 포스터·메시지 그룹 아이콘 방식**으로 (소유자 선택,
+/// F45 카테고리 그리드 은퇴): 필드를 탭하면 시스템 이모지 키보드가 바로 열리고,
+/// 마지막 이모지 한 글자만 남는다. 137개 카탈로그 제한이 사라진다.
+/// 키보드는 스크롤로 내려가고, 키보드 위 「완료」로도 닫힌다 (F45 계승).
 struct ProfileStepView: View {
     @Binding var draft: OnboardingDraft
     let onCreate: () async -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isCreating = false
-    /// 선택된 이모지 카테고리. 첫 진입은 관심사 기반 "추천".
-    @State private var category: String = Self.recommendedCategory
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable {
         case nickname
         case tagline
     }
-
-    /// 관심사에서 뽑아 주는 맞춤 묶음 (F5) — 실제 CSV 카테고리가 아닌 가상 카테고리다.
-    private static let recommendedCategory = "추천"
 
     private var nicknameMissing: Bool {
         draft.nickname.trimmingCharacters(in: .whitespaces).isEmpty
@@ -39,21 +34,6 @@ struct ProfileStepView: View {
     private var emojiMissing: Bool { draft.emoji.isEmpty }
 
     private var incomplete: Bool { nicknameMissing || taglineMissing || emojiMissing }
-
-    private var categories: [String] {
-        [Self.recommendedCategory] + EmojiCatalog.categories
-    }
-
-    /// "추천"은 내가 고른 관심사와 이름이 같은 이모지를 앞에 두고, 나머지는 카탈로그 순서.
-    private var visibleEmojis: [EmojiIcon] {
-        guard category == Self.recommendedCategory else {
-            return EmojiCatalog.icons(in: category)
-        }
-        let picked = Set(draft.interests)
-        let mine = EmojiCatalog.all.filter { picked.contains($0.name) }
-        let rest = EmojiCatalog.all.filter { !picked.contains($0.name) }
-        return Array((mine + rest).prefix(EmojiCatalog.initialDisplayCount))
-    }
 
     var body: some View {
         Form {
@@ -86,18 +66,23 @@ struct ProfileStepView: View {
             }
 
             Section {
-                categoryPicker
-                emojiGrid
+                // 연락처 포스터 방식 (F63): 필드 하나, 탭하면 이모지 키보드.
+                EmojiKeyboardField(text: $draft.emoji)
+                    .frame(minHeight: Layout.emojiFieldHeight)
             } header: {
                 Text("나를 나타내는 이모지")
             } footer: {
-                Text("하나만 골라 주세요. 묶음을 넘기면 전부 볼 수 있어요.")
+                Text("탭하면 이모지 키보드가 열려요. 하나만 담겨요.")
             }
 
             Section {
                 Button {
-                    // 키보드가 떠 있으면 먼저 내리고 진행한다 (F45)
+                    // 키보드가 떠 있으면 먼저 내리고 진행한다 (F45).
+                    // 이모지 필드는 UIKit이라 FocusState 밖 — 첫 응답자를 직접 내린다.
                     focusedField = nil
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
+                    )
                     isCreating = true
                     Task {
                         await onCreate()
@@ -149,76 +134,9 @@ struct ProfileStepView: View {
         return "\(missing.joined(separator: " · "))를 채우면 카드가 완성돼요"
     }
 
-    /// 카테고리 피커 — 가로 스크롤 칩. 모든 묶음이 같은 깊이에 있어 동등하게 닿는다 (F45).
-    private var categoryPicker: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: DS.Spacing.xs) {
-                ForEach(categories, id: \.self) { name in
-                    Button(name) {
-                        // 이모지를 고르러 왔으면 키보드는 필요 없다
-                        focusedField = nil
-                        category = name
-                    }
-                    .font(DS.Typo.footnote)
-                    .buttonStyle(.plain)
-                    .foregroundStyle(category == name ? DS.Palette.onSelection : .secondary)
-                    .padding(.horizontal, DS.Spacing.s)
-                    .frame(minHeight: DS.minTapTarget)
-                    .background(
-                        category == name ? DS.Palette.selection : .clear,
-                        in: Capsule()
-                    )
-                    .accessibilityAddTraits(category == name ? .isSelected : [])
-                    .accessibilityIdentifier("onboarding.emoji.category.\(name)")
-                }
-            }
-            .padding(.vertical, DS.Spacing.xs)
-        }
-        .scrollIndicators(.hidden)
-        .listRowInsets(EdgeInsets(top: 0, leading: DS.Spacing.m, bottom: 0, trailing: 0))
-    }
-
-    /// 이모지 그리드. **격자는 절대 애니메이션하지 않는다** (F46) — 이모지는 사전에 이미
-    /// 꽂혀 있던 것처럼 제자리에 있어야 한다. 움직이는 건 눌린 칸의 배경·크기뿐이고,
-    /// 그 변화도 자기 칸에만 국한된다.
-    private var emojiGrid: some View {
-        LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: DS.minTapTarget), spacing: DS.Spacing.xs)],
-            spacing: DS.Spacing.xs
-        ) {
-            ForEach(visibleEmojis) { icon in
-                emojiCell(icon)
-            }
-        }
-        // 카테고리를 바꾸면 내용이 통째로 갈린다 — 위치를 보간하면 이전 묶음의 이모지가
-        // 새 자리로 날아가는 것처럼 보이므로 전환은 즉시 (F46).
-        .animation(nil, value: category)
-    }
-
-    private func emojiCell(_ icon: EmojiIcon) -> some View {
-        let isSelected = draft.emoji == icon.emoji
-        return Button {
-            focusedField = nil
-            // 필수 항목이므로 같은 이모지를 다시 눌러도 해제되지 않는다 (F28)
-            draft.emoji = icon.emoji
-        } label: {
-            Text(icon.emoji)
-                .font(DS.Typo.title)
-                .frame(minWidth: DS.minTapTarget, minHeight: DS.minTapTarget)
-                .background(
-                    // 선택 표시는 무채 — 이모지 자체가 색을 갖고 있다 (U1 원칙 1)
-                    isSelected ? DS.Palette.selection.opacity(0.25) : .clear,
-                    in: RoundedRectangle(cornerRadius: DS.Radius.chip)
-                )
-                // 눌린 칸만 살짝 커진다. 값이 `draft.emoji`가 아니라 **이 칸의 선택 여부**라
-                // 다른 칸은 아무 반응도 하지 않는다 (F46).
-                .scaleEffect(isSelected ? 1.06 : 1)
-                .animation(reduceMotion ? nil : DS.Motion.quick, value: isSelected)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("이모지 \(icon.name)")
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
-        .accessibilityIdentifier("onboarding.emoji.\(icon.name)")
+    private enum Layout {
+        /// 이모지 필드 행 높이 — 34pt 글리프가 여유 있게 앉는다.
+        static let emojiFieldHeight: CGFloat = 52
     }
 }
 
