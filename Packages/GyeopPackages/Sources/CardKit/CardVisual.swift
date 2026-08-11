@@ -5,13 +5,15 @@ import SwiftUI
 /// 시드 → 카드 비주얼 파라미터의 결정적 변환.
 /// **계약: 같은 시드 = 같은 파라미터 = 픽셀 동일 렌더.**
 ///
-/// F56 (카드 리디자인 라운드, 소유자 오라 레퍼런스): 색 규율을 **오라 파스텔**로 개정.
-/// · 한 카드는 **7색 팔레트** — 상한은 F25에서 승계
-/// · 7색의 색상은 각각 색상환 **전체에서 무작위**, 25개 제어점 배치도 **무작위** (F25 승계)
-/// · 은은함의 방향이 뒤집혔다: 딥 톤(채도 70~80·명도 45~62)이 아니라 **밝고 뽀얀
-///   고명도 저채도**(채도 25~45·명도 82~96)가 오라를 만든다
-/// · 카드 위 텍스트는 흰색 → **잉크**(`inkColor`) — 채도·명도는 잉크 대비 4.5:1이
-///   항상 만족되도록 보정된다 (보정 방향도 반전: 명도를 올리고, 모자라면 채도를 뺀다)
+/// F56 (오라 파스텔) + F61 (소유자 그라디언트 레퍼런스 2차): 색 규율.
+/// · 색 종류를 줄였다 (F61): 한 카드는 **4색 앵커**. 25점 무작위 배치(F25)는 은퇴 —
+///   앵커 4색이 카드 네 코너에 앉고 나머지 제어점은 **이중선형 보간**으로 그 사이를
+///   흐른다. 레퍼런스(오라 배경화면)의 "큰 면이 부드럽게 이어지는" 인상이 목표다
+/// · 앵커 hue는 기준 hue에서 **이웃 간격(0.08~0.15)으로만** 벌어진다 — 레퍼런스의
+///   파랑→보라→분홍→주황처럼 인접 색상들이 한 방향으로 스윕한다
+/// · 밝기 결은 F56 유지: **밝고 뽀얀 고명도 저채도**(채도 25~45·명도 82~96)
+/// · 카드 위 텍스트는 **잉크**(`inkColor`) — 채도·명도는 잉크 대비 4.5:1이
+///   항상 만족되도록 보정된다 (명도를 올리고, 모자라면 채도를 뺀다)
 public struct CardVisual: Equatable, Sendable {
     /// 하나의 MeshGradient 제어점. HSB(SwiftUI `Color(hue:saturation:brightness:)`) 성분.
     public struct ControlPoint: Equatable, Sendable {
@@ -35,8 +37,10 @@ public struct CardVisual: Equatable, Sendable {
     /// WCAG AA 기준 잉크 텍스트 최소 대비 (F56 — 흰 텍스트 기준에서 반전).
     public static let minimumInkContrast: Double = 4.5
 
-    /// 한 카드를 구성하는 색의 수 (F21에서 유지 — "색상 다양성 7개 정도").
-    public static let paletteCount = 7
+    /// 한 카드를 구성하는 앵커 색의 수 (F61 — "색깔 종류를 줄이고").
+    public static let anchorCount = 4
+    /// 앵커 사이 hue 간격 — 인접 색상으로만 흐른다 (F61 레퍼런스 스윕).
+    public static let hueStepRange: ClosedRange<Double> = 0.08...0.15
 
     /// 카드 위 텍스트 잉크 — 카드 그라데이션은 라이트·다크 동일하므로(R2) 잉크도 고정값이다.
     /// 순흑 대신 카드의 결에 맞는 딥 플럼 톤 (#33283A).
@@ -46,9 +50,14 @@ public struct CardVisual: Equatable, Sendable {
     public init(seed: String) {
         var rng = SplitMix64(seed: Self.seedValue(from: seed))
 
-        // 7색 팔레트: 색상은 각각 색상환 전체에서 무작위 (F25 — 색 제한 없음).
-        let palette: [ControlPoint] = (0..<Self.paletteCount).map { _ in
-            let hue = Double.random(in: 0...1, using: &rng)
+        // 4색 앵커: 기준 hue에서 이웃 간격으로만 스윕 (F61) — 레퍼런스처럼
+        // 파랑→보라→분홍→주황 같은 인접 색의 흐름이 된다.
+        var hue = Double.random(in: 0...1, using: &rng)
+        let anchors: [ControlPoint] = (0..<Self.anchorCount).map { index in
+            if index > 0 {
+                hue = (hue + Double.random(in: Self.hueStepRange, using: &rng))
+                    .truncatingRemainder(dividingBy: 1)
+            }
             let rawSaturation = Double.random(in: Self.saturationRange, using: &rng)
             let rawBrightness = Double.random(in: Self.brightnessRange, using: &rng)
             let corrected = Self.colorGuaranteeingInkContrast(
@@ -57,11 +66,38 @@ public struct CardVisual: Equatable, Sendable {
             return ControlPoint(hue: hue, saturation: corrected.saturation, brightness: corrected.brightness)
         }
 
-        // 25개 제어점에 무작위 배치 (F25). MeshGradient 보간이 점 사이를 부드럽게
-        // 섞으므로, 같은 색이 이웃해도 자연스러운 면이 된다.
-        controlPoints = (0..<Self.controlPointCount).map { _ in
-            palette[Int.random(in: 0..<Self.paletteCount, using: &rng)]
+        // 앵커를 네 코너(좌상·우상·좌하·우하)에 두고, 25개 제어점은 이중선형 보간으로
+        // 그 사이를 흐른다 — 큰 면이 부드럽게 이어지는 오라 (F61, 무작위 배치 은퇴).
+        let n = Self.meshDimension
+        controlPoints = (0..<Self.controlPointCount).map { index in
+            let u = Double(index % n) / Double(n - 1)
+            let v = Double(index / n) / Double(n - 1)
+            let weights = [(1 - u) * (1 - v), u * (1 - v), (1 - u) * v, u * v]
+            let blended = Self.blend(anchors: anchors, weights: weights)
+            let corrected = Self.colorGuaranteeingInkContrast(
+                hue: blended.hue, saturation: blended.saturation, brightness: blended.brightness
+            )
+            return ControlPoint(
+                hue: blended.hue, saturation: corrected.saturation, brightness: corrected.brightness
+            )
         }
+    }
+
+    /// 가중 블렌드 — hue는 원형(색상환)이라 벡터 합으로 섞는다. 앵커들이 인접
+    /// 색상이라(스윕 상한 0.45) 벡터 합이 0에 가까워지는 퇴화는 실질적으로 없다.
+    private static func blend(
+        anchors: [ControlPoint], weights: [Double]
+    ) -> (hue: Double, saturation: Double, brightness: Double) {
+        var x = 0.0, y = 0.0, saturation = 0.0, brightness = 0.0
+        for (anchor, weight) in zip(anchors, weights) {
+            x += weight * cos(anchor.hue * 2 * .pi)
+            y += weight * sin(anchor.hue * 2 * .pi)
+            saturation += weight * anchor.saturation
+            brightness += weight * anchor.brightness
+        }
+        var hue = atan2(y, x) / (2 * .pi)
+        if hue < 0 { hue += 1 }
+        return (hue, saturation, brightness)
     }
 
     /// MeshGradient에 바로 넣을 수 있는 25색.

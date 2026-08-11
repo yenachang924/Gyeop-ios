@@ -40,7 +40,8 @@ struct InterestsStepView: View {
         .navigationTitle("1 / 3")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
-            Button("다음 · \(selected.count)/\(UserProfile.maxInterests)") { onNext() }
+            // 카운터는 제목 줄로 올라갔다 (F61) — CTA는 「다음」 하나만 말한다.
+            Button("다음") { onNext() }
                 .dsProminentButton()
                 .controlSize(.large)
                 .frame(maxWidth: .infinity)
@@ -52,9 +53,18 @@ struct InterestsStepView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
-            Text("요즘 나를 이루는 것")
-                .font(DS.Typo.largeTitle)
-            Text("최대 \(UserProfile.maxInterests)개, 고를수록 화면이 나의 색으로 물들어요")
+            HStack(alignment: .firstTextBaseline) {
+                Text("요즘 나를 이루는 것")
+                    .font(DS.Typo.largeTitle)
+                Spacer()
+                // 진행 카운터는 제목 줄 오른쪽, 브랜드 레드 (F61 — 소유자 목업 "1/5")
+                Text("\(selected.count)/\(UserProfile.maxInterests)")
+                    .font(DS.Typo.section)
+                    .foregroundStyle(DS.Palette.accent)
+                    .monospacedDigit()
+                    .accessibilityLabel("\(UserProfile.maxInterests)개 중 \(selected.count)개 선택")
+            }
+            Text("최대 \(UserProfile.maxInterests)개 고를 수 있어요")
                 .font(DS.Typo.body)
                 .foregroundStyle(DS.Palette.secondaryText)
         }
@@ -76,7 +86,9 @@ struct InterestsStepView: View {
                         .foregroundStyle(DS.Palette.secondaryText)
                         .accessibilityAddTraits(.isHeader)
                     LazyVGrid(
-                        columns: [GridItem(.adaptive(minimum: 124), spacing: DS.Spacing.s)],
+                        // 컴팩트 칩 (F61 — 소유자 목업의 촘촘한 4열 결). 폭을 줄이는 대신
+                        // 글자 축소 하한(0.75)이 이름을 지킨다. 터치 타깃 44pt는 유지.
+                        columns: [GridItem(.adaptive(minimum: 88), spacing: DS.Spacing.s)],
                         spacing: DS.Spacing.s
                     ) {
                         ForEach(EmojiCatalog.icons(in: category)) { icon in

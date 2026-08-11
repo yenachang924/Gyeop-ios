@@ -116,7 +116,10 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         firstAxis.tap()
         app.buttons["onboarding.mbti.N"].tap()
         app.buttons["onboarding.mbti.T"].tap()
-        tapEvenIfOffscreen(app, app.buttons["onboarding.mbti.P"])
+        let pPill = app.buttons["onboarding.mbti.P"]
+        tapEvenIfOffscreen(app, pPill)
+        // 스크롤 감속과 겹치면 탭이 스크롤 정지로 소비될 수 있다 — 선택 상태로 확인 후 재탭
+        if !pPill.isSelected { pPill.tap() }
         tapEvenIfOffscreen(app, app.buttons["onboarding.mbti.next"])
 
         // 3/3 프로필

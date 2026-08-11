@@ -144,7 +144,8 @@ public struct CardBackView: View {
     }
 
     public var body: some View {
-        VStack(spacing: DS.Spacing.m) {
+        // 좌정렬 세로 구성 (F61 — 소유자 목업 그대로): MBTI 아래 관심사가 한 줄씩.
+        VStack(alignment: .leading, spacing: DS.Spacing.m) {
             if let mbti = card.mbti {
                 Text(mbti.code)
                     .font(DS.Typo.mbtiHero)
@@ -157,7 +158,7 @@ public struct CardBackView: View {
         }
         .foregroundStyle(.primary)
         .padding(DS.Spacing.l)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .aspectRatio(dynamicTypeSize.isAccessibilitySize ? nil : 0.7, contentMode: .fit)
         .background {
             // 앞면과 같은 오라를 깔고 유리(Material)를 덮는다 — 뒤집어도 "같은 카드"라는
@@ -179,7 +180,7 @@ public struct CardBackView: View {
     }
 
     private var interestChips: some View {
-        FlowingPillsLayout(spacing: DS.Spacing.xs) {
+        VStack(alignment: .leading, spacing: DS.Spacing.xs) {
             ForEach(card.interests, id: \.self) { interest in
                 Text(interest)
                     .font(DS.Typo.footnote)

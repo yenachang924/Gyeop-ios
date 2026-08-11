@@ -277,15 +277,13 @@ final class U2DemoRecordingUITests: XCTestCase {
         hold(1.5)
         toCollection.tap()
 
-        // 컬렉션 ↔ 카드 상세 — matchedTransitionSource + zoom 전환
+        // 홈 카드 플립 (F61) — 탭하면 뒷면(MBTI·관심사), 다시 탭하면 앞면
         let myCard = app.buttons["collection.myCard"]
         XCTAssertTrue(myCard.waitForExistence(timeout: 5))
         hold(1.0)
         myCard.tap()
-        let close = app.buttons["닫기"]
-        XCTAssertTrue(close.waitForExistence(timeout: 5))
         hold(1.5)
-        close.tap()
+        myCard.tap()
         hold(1.5)
     }
 }

@@ -29,8 +29,8 @@ public enum DS {
         public static let primaryActionHeight: CGFloat = 50
         /// 카드 상세(플립) 카드 최대 폭 (F54 — 시안 62% 폭에서 +20% 상향 지시 반영)
         public static let cardDetailMaxWidth: CGFloat = 300
-        /// 홈("나의 카드")의 내 카드 썸네일 최대 폭 (F54 — 같은 +20% 상향)
-        public static let homeMyCardMaxWidth: CGFloat = 220
+        /// 홈("나의 카드")의 내 카드 최대 폭 (F61 — 홈에서 바로 뒤집는 주인공 카드)
+        public static let homeMyCardMaxWidth: CGFloat = 250
     }
 
     public enum Palette {

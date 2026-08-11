@@ -91,23 +91,22 @@ struct CollectionView: View {
         .accessibilityIdentifier("collection.exchange")
     }
 
+    /// 내 카드는 홈에서 바로 뒤집는다 (F61 — 소유자 목업): 섹션 헤더 없이 카드가
+    /// 화면 상단의 주인공으로 서고, 상세 시트를 거치지 않는다. 공유는 받은 카드
+    /// 상세와 달리 카드 자체가 목적이라 이 화면에는 두지 않는다.
     private func myCardSection(_ card: CardSnapshot) -> some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.s) {
-            Text("내 카드")
-                .font(DS.Typo.section)
-            Button {
-                selectedCard = card
-            } label: {
-                CardView(card: card)
-                    // "본인의 영역" — 내 카드에만 은은한 쉬머링 (F7)
-                    .overlay { ShimmerFrame() }
-            }
-            .buttonStyle(.plain)
-            // 전체 폭 카드는 받은 카드 그리드를 밀어냈다 — 썸네일 폭으로 (F54)
-            .frame(maxWidth: DS.Layout.homeMyCardMaxWidth)
-            .matchedTransitionSource(id: card.id, in: cardZoom)
-            .accessibilityIdentifier("collection.myCard")
+        VStack(spacing: DS.Spacing.s) {
+            CardFlipView(card: card)
+                // "본인의 영역" — 내 카드에만 은은한 쉬머링 (F7)
+                .overlay { ShimmerFrame().allowsHitTesting(false) }
+                .frame(maxWidth: DS.Layout.homeMyCardMaxWidth)
+                .accessibilityIdentifier("collection.myCard")
+            Text("카드를 탭하면 뒤집혀요")
+                .font(DS.Typo.footnote)
+                .foregroundStyle(DS.Palette.secondaryText)
+                .accessibilityHidden(true) // CardFlipView가 힌트를 전달한다
         }
+        .frame(maxWidth: .infinity)
     }
 
     private var collectedSection: some View {
