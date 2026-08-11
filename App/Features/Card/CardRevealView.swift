@@ -56,7 +56,7 @@ struct CardRevealView: View {
             Button {
                 Task { await goToCollection() }
             } label: {
-                Text("컬렉션으로")
+                Text("나의 카드로")
                     .font(DS.Typo.headline)
                     .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
             }

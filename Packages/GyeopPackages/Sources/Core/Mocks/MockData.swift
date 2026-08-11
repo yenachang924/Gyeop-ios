@@ -13,7 +13,7 @@ public enum MockData {
             tagline: "퇴근하고 클라이밍 가실 분",
             emoji: "🧗",
             interests: ["클라이밍", "보드게임", "커피"],
-            leisureStyle: LeisureStyle(energy: .active, venue: .indoor),
+            mbti: MBTI(code: "ESTP"),
             createdAt: referenceDate
         ),
         UserProfile(
@@ -22,7 +22,7 @@ public enum MockData {
             tagline: "영일대 일몰 수집 중",
             emoji: "🌅",
             interests: ["사진", "커피", "여행"],
-            leisureStyle: LeisureStyle(energy: .calm, venue: .outdoor),
+            mbti: MBTI(code: "INFP"),
             createdAt: referenceDate
         ),
         UserProfile(
@@ -31,7 +31,7 @@ public enum MockData {
             tagline: "보드게임 정원 채우러 왔습니다",
             emoji: "🎲",
             interests: ["보드게임", "독서", "요리"],
-            leisureStyle: LeisureStyle(energy: .calm, venue: .indoor),
+            mbti: nil,
             createdAt: referenceDate
         ),
     ]

@@ -190,7 +190,7 @@ final class AppModel {
         tagline: String,
         emoji: String,
         interests: [String],
-        style: LeisureStyle
+        mbti: MBTI?
     ) async -> CardSnapshot? {
         let profile = UserProfile(
             id: "user-\(UUID().uuidString.lowercased())",
@@ -198,7 +198,7 @@ final class AppModel {
             tagline: tagline,
             emoji: emoji,
             interests: Array(interests.prefix(UserProfile.maxInterests)),
-            leisureStyle: style,
+            mbti: mbti,
             createdAt: .now
         )
         let card = cardGenerator.makeCard(from: profile)

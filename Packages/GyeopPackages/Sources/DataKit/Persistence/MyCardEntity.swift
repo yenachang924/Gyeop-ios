@@ -11,8 +11,8 @@ final class MyCardEntity {
     var tagline: String
     var emoji: String
     var interests: [String]
-    var energyRaw: String
-    var venueRaw: String
+    /// MBTI 4글자 코드 — 건너뛴 경우 빈 문자열 (F55, 성향 energy/venue를 대체).
+    var mbtiRaw: String = ""
     var version: Int
     var createdAt: Date
 
@@ -23,8 +23,7 @@ final class MyCardEntity {
         tagline = card.tagline
         emoji = card.emoji
         interests = card.interests
-        energyRaw = card.leisureStyle.energy.rawValue
-        venueRaw = card.leisureStyle.venue.rawValue
+        mbtiRaw = card.mbti?.code ?? ""
         version = card.version
         createdAt = card.createdAt
     }
@@ -36,8 +35,7 @@ final class MyCardEntity {
         tagline = card.tagline
         emoji = card.emoji
         interests = card.interests
-        energyRaw = card.leisureStyle.energy.rawValue
-        venueRaw = card.leisureStyle.venue.rawValue
+        mbtiRaw = card.mbti?.code ?? ""
         version = card.version
         createdAt = card.createdAt
     }
@@ -50,10 +48,7 @@ final class MyCardEntity {
             tagline: tagline,
             emoji: emoji,
             interests: interests,
-            leisureStyle: LeisureStyle(
-                energy: LeisureStyle.Energy(rawValue: energyRaw) ?? .calm,
-                venue: LeisureStyle.Venue(rawValue: venueRaw) ?? .indoor
-            ),
+            mbti: MBTI(code: mbtiRaw),
             version: version,
             createdAt: createdAt
         )

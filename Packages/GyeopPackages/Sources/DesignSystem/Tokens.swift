@@ -25,10 +25,12 @@ public enum DS {
         public static let signInMaxWidth: CGFloat = 280
         /// 로그인 버튼 높이 (Figma 캡슐 비례)
         public static let signInHeight: CGFloat = 50
-        /// 온보딩 슬라이더 최대 폭 (F35) — 화면 끝까지 늘어나면 조작감이 둔해진다.
-        public static let sliderMaxWidth: CGFloat = 260
         /// 하단 고정 주요 액션 버튼 높이 (F40 — 애플 순정 하단 액션 관습)
         public static let primaryActionHeight: CGFloat = 50
+        /// 카드 상세(플립) 카드 최대 폭 (F54 — 시안 62% 폭에서 +20% 상향 지시 반영)
+        public static let cardDetailMaxWidth: CGFloat = 300
+        /// 홈("나의 카드")의 내 카드 썸네일 최대 폭 (F54 — 같은 +20% 상향)
+        public static let homeMyCardMaxWidth: CGFloat = 220
     }
 
     public enum Palette {
@@ -161,9 +163,13 @@ public enum DS {
         public static let caption = Font.system(.caption, design: .default)
         /// 하단 주요 액션 아이콘 (F40 컬렉션 맞대기) — 라벨보다 한 급 크게.
         public static let actionIcon = Font.system(.title2, design: .default).weight(.semibold)
-        /// 카드 대표 이모지 (F5 — 카드에서 더 크게). 이모지는 글자가 아니라 픽토그램이라
-        /// Dynamic Type 대상에서 제외한다 — 카드 정보는 접근성 레이블이 전달한다.
-        public static let cardEmoji = Font.system(size: 56)
+        /// 카드 이모지 마크 (F54 — 56pt 히어로에서 좌상단 마크로 강등, 지갑 카드의 로고 자리).
+        /// 이모지는 글자가 아니라 픽토그램이라 Dynamic Type 대상에서 제외한다 —
+        /// 카드 정보는 접근성 레이블이 전달한다.
+        public static let cardMark = Font.system(size: 24)
+        /// 카드 뒷면 MBTI 4글자 (F54·F55). 라틴 전용이라 Heavy가 F42의 한글 굵기 상한과
+        /// 충돌하지 않는다. 소유자 지시로 시안 52pt에서 한 급 줄인 값.
+        public static let mbtiHero = Font.system(size: 44, weight: .heavy, design: .default)
     }
 
     /// 상태 전환 애니메이션 프리셋. 시스템 시트·탭 전환과 같은 계열의 스프링을 재사용해
@@ -187,6 +193,10 @@ public enum DS {
         public static let depart = Animation.smooth(duration: 0.3)
         /// 관심사를 고를 때 카드가 "물드는" 색 보간 — 축하가 아니라 반영이므로 무바운스.
         public static let dye = Animation.smooth(duration: 0.5)
+        /// 카드 플립 (F54) — 유동 무드의 무바운스 회전.
+        public static let flip = Animation.smooth(duration: 0.55)
+        /// MBTI 알약을 누를 때 배경에 한 번 피었다 지는 색 흐름 (F55).
+        public static let bloom = Animation.smooth(duration: 1.4)
         /// "겹!" 융합 — 결정 R7: `.smooth` 스프링, response 0.5, 거의 무바운스(단조 감속).
         public static let merge = Animation.smooth(duration: 0.5)
         /// "겹!" 링 파동 1회 — 확장하며 사라진다. 무바운스(파동은 되돌아오지 않는다).

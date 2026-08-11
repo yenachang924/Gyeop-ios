@@ -80,7 +80,7 @@ public struct ClipOverlapView: View {
         if let first = sharedInterests.first {
             return "\"\(first) 좋아하세요? 저도요\" 첫 마디는 이미 준비됐어요."
         }
-        return "성향이 닿아 있어요. 서로 없는 걸 갖고 있다는 것도 대화가 됩니다."
+        return "겹치지 않아도 괜찮아요. 서로 없는 걸 갖고 있다는 것도 대화가 됩니다."
     }
 
     /// 겹친 관심사는 강조, 상대만 가진 관심사는 흐리게 — 프로토타입 overlap-chips 구성.

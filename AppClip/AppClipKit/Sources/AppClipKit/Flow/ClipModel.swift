@@ -63,7 +63,7 @@ public final class ClipModel {
         tagline: String,
         emoji: String,
         interests: [String],
-        style: LeisureStyle
+        mbti: MBTI?
     ) async {
         let profile = UserProfile(
             id: "clip-user-\(UUID().uuidString.lowercased())",
@@ -71,7 +71,7 @@ public final class ClipModel {
             tagline: tagline,
             emoji: emoji,
             interests: Array(interests.prefix(UserProfile.maxInterests)),
-            leisureStyle: style,
+            mbti: mbti,
             createdAt: .now
         )
         let card = cardGenerator.makeCard(from: profile)

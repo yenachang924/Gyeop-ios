@@ -3,7 +3,7 @@ import Core
 import DesignSystem
 import SwiftUI
 
-/// 컬렉션 — 내 카드 + 겹에서 받은 카드들.
+/// 나의 카드 (홈) — 내 카드 + 겹에서 받은 카드들. (F58: "컬렉션"에서 개명)
 ///
 /// F40: 배치를 애플 순정 앱 관습에 맞췄다. 큰 내비게이션 타이틀, 섹션 헤더는 시스템
 /// 위계(`title3`)로, **주요 액션(맞대기)은 하단 고정 캡슐**로 — 미리 알림의
@@ -30,7 +30,7 @@ struct CollectionView: View {
                 .padding(DS.Spacing.m)
             }
             .background(DS.Palette.background)
-            .navigationTitle("컬렉션")
+            .navigationTitle("나의 카드")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -47,9 +47,14 @@ struct CollectionView: View {
             .safeAreaInset(edge: .bottom) {
                 exchangeButton
             }
+            // 시트는 블러 유리로 통일 (F59) — 뒤의 카드 색이 은은하게 비친다.
+            // 교환 시트는 전체 화면 성격이라 제외.
             .sheet(item: $selectedCard) { card in
                 CardDetailView(card: card, myCard: model.myCard)
                     .navigationTransition(.zoom(sourceID: card.id, in: cardZoom))
+                    .presentationBackground(.ultraThinMaterial)
+                    .presentationCornerRadius(DS.Radius.card)
+                    .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showingExchange, onDismiss: {
                 Task { await model.enterCollection() }
@@ -58,6 +63,9 @@ struct CollectionView: View {
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
+                    .presentationBackground(.ultraThinMaterial)
+                    .presentationCornerRadius(DS.Radius.card)
+                    .presentationDragIndicator(.visible)
             }
         }
     }
@@ -95,6 +103,8 @@ struct CollectionView: View {
                     .overlay { ShimmerFrame() }
             }
             .buttonStyle(.plain)
+            // 전체 폭 카드는 받은 카드 그리드를 밀어냈다 — 썸네일 폭으로 (F54)
+            .frame(maxWidth: DS.Layout.homeMyCardMaxWidth)
             .matchedTransitionSource(id: card.id, in: cardZoom)
             .accessibilityIdentifier("collection.myCard")
         }
@@ -121,7 +131,8 @@ struct CollectionView: View {
                 )
             } else {
                 LazyVGrid(
-                    columns: [GridItem(.adaptive(minimum: 150), spacing: DS.Spacing.s)],
+                    // 150 → 180: 카드 전반 크기 상향 (F54, 소유자 "20% 정도 크게")
+                    columns: [GridItem(.adaptive(minimum: 180), spacing: DS.Spacing.s)],
                     spacing: DS.Spacing.s
                 ) {
                     ForEach(model.gyeops) { gyeop in

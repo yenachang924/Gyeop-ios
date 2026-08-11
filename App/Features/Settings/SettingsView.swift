@@ -27,7 +27,7 @@ struct SettingsView: View {
                     }
                     .accessibilityIdentifier("settings.cardColorGuide")
                 } footer: {
-                    Text("색이 성향을 어떻게 담는지, 겹의 공식 규칙을 알려드려요.")
+                    Text("카드 색이 무엇을 담는지, 겹의 공식 규칙을 알려드려요.")
                 }
 
                 Section {
@@ -88,14 +88,14 @@ struct SettingsView: View {
     }
 }
 
-/// "카드 색 읽는 법" — 색 → 성향 유추 규칙의 인앱 공식 문서 (F21).
+/// "카드 색 읽는 법" — 카드 색 규칙의 인앱 공식 문서 (F21).
 /// 애플 건강 앱의 교육 화면처럼, 앱이 정한 룰을 그대로 알려준다.
 /// 원문·단일 진실 원천: docs/card-color-guide.md (같은 파일에 두어 pbxproj 재생성 불필요).
 struct CardColorGuideView: View {
     var body: some View {
         List {
             Section {
-                Text("카드의 색은 한 사람의 취미와 성향을 종합적으로 담아낸 것입니다. 고른 관심사, 성향, 이름, 한 줄, 이모지가 모두 섞여 세상에 하나뿐인 일곱 빛깔이 되고, 같은 입력이면 언제나 같은 카드가 됩니다.")
+                Text("카드의 색은 나를 이루는 선택들을 종합적으로 담아낸 것입니다. 고른 관심사, MBTI, 닉네임, 이모지가 모두 섞여 세상에 하나뿐인 일곱 빛깔이 되고, 같은 입력이면 언제나 같은 카드가 됩니다.")
                     .font(DS.Typo.body)
             }
 

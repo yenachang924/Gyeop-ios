@@ -51,10 +51,12 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         snap(app, "default-1b-interests-selected")
 
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
         snap(app, "default-2b-style-selected")
     }
 
@@ -107,13 +109,15 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         tapEvenIfOffscreen(app, app.buttons["onboarding.interest.보드게임"])
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
 
-        // 2/3 성향 — 2축 슬라이더 조작 후 「다음」 (F17)
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        snap(app, "\(prefix)-2-onboarding-style")
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
-        tapEvenIfOffscreen(app, app.buttons["onboarding.style.next"])
+        // 2/3 MBTI — 네 축 선택 후 「다음」 (F55)
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        snap(app, "\(prefix)-2-onboarding-mbti")
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        tapEvenIfOffscreen(app, app.buttons["onboarding.mbti.P"])
+        tapEvenIfOffscreen(app, app.buttons["onboarding.mbti.next"])
 
         // 3/3 프로필
         let nickname = app.textFields["onboarding.nickname"]
@@ -133,7 +137,7 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         toCollection.tap()
 
         // 컬렉션 (빈 상태)
-        XCTAssertTrue(app.navigationBars["컬렉션"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["나의 카드"].waitForExistence(timeout: 5))
         snap(app, "\(prefix)-5-collection-empty")
 
         // 맞대기 — 탐색 중 → 겹 성립
@@ -159,6 +163,13 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         let close = app.buttons["닫기"]
         XCTAssertTrue(close.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-9-card-detail")
+
+        // 카드 플립 — 뒷면(hue 유리 + MBTI) 기록 (F54)
+        let flipCard = app.descendants(matching: .any)["card.flip"].firstMatch
+        if flipCard.waitForExistence(timeout: 2) {
+            flipCard.tap()
+            snap(app, "\(prefix)-9b-card-back")
+        }
         close.tap()
 
         // 설정 (계정 삭제 노출 확인 — 심사 5.1.1(v))

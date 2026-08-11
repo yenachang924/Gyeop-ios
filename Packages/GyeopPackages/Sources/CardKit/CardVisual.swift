@@ -3,14 +3,15 @@ import Foundation
 import SwiftUI
 
 /// 시드 → 카드 비주얼 파라미터의 결정적 변환.
-/// **계약: 같은 시드(+성향) = 같은 파라미터 = 픽셀 동일 렌더.**
+/// **계약: 같은 시드 = 같은 파라미터 = 픽셀 동일 렌더.**
 ///
-/// F25 (최종, 1차 시연 피드백 라운드): 색에 규칙을 씌우지 않는다 — 성향-색 결합(F21
-/// 웜/쿨, F24 퍼짐)은 전부 폐기(소유자: "결정으로 하라고 한 적 없다. 색깔 제한 하지 마").
-/// · 한 카드는 **7색 팔레트** — 형형색색하되 과하지 않은 상한 (F21에서 유지된 유일한 것)
-/// · 7색의 색상은 각각 색상환 **전체에서 무작위**, 25개 제어점 배치도 **무작위**
-/// · 은은함은 색 제한이 아니라 채도·명도의 규율이 만든다 (`saturationRange`·`brightnessRange`)
-/// 채도·명도는 카드 위 흰 텍스트가 항상 WCAG AA 4.5:1 대비를 만족하도록 보정된다.
+/// F56 (카드 리디자인 라운드, 소유자 오라 레퍼런스): 색 규율을 **오라 파스텔**로 개정.
+/// · 한 카드는 **7색 팔레트** — 상한은 F25에서 승계
+/// · 7색의 색상은 각각 색상환 **전체에서 무작위**, 25개 제어점 배치도 **무작위** (F25 승계)
+/// · 은은함의 방향이 뒤집혔다: 딥 톤(채도 70~80·명도 45~62)이 아니라 **밝고 뽀얀
+///   고명도 저채도**(채도 25~45·명도 82~96)가 오라를 만든다
+/// · 카드 위 텍스트는 흰색 → **잉크**(`inkColor`) — 채도·명도는 잉크 대비 4.5:1이
+///   항상 만족되도록 보정된다 (보정 방향도 반전: 명도를 올리고, 모자라면 채도를 뺀다)
 public struct CardVisual: Equatable, Sendable {
     /// 하나의 MeshGradient 제어점. HSB(SwiftUI `Color(hue:saturation:brightness:)`) 성분.
     public struct ControlPoint: Equatable, Sendable {
@@ -25,13 +26,22 @@ public struct CardVisual: Equatable, Sendable {
     /// MeshGradient 격자 한 변의 제어점 수 (결정 R2: 5×5).
     public static let meshDimension = 5
     public static let controlPointCount = meshDimension * meshDimension
-    public static let saturationRange: ClosedRange<Double> = 0.70...0.80
-    public static let brightnessRange: ClosedRange<Double> = 0.45...0.62
-    /// WCAG AA 기준 흰 텍스트 최소 대비.
-    public static let minimumWhiteContrast: Double = 4.5
+    /// 오라 파스텔 채도 대역 (F56) — 이보다 진하면 원색, 옅으면 회색이 된다.
+    public static let saturationRange: ClosedRange<Double> = 0.25...0.45
+    /// 오라 파스텔 명도 대역 (F56) — 뽀얀 밝기. 대비 보정으로 상한 위까지 올라갈 수 있다.
+    public static let brightnessRange: ClosedRange<Double> = 0.82...0.96
+    /// 대비 보정이 명도를 올릴 수 있는 천장 — 1.0까지 가면 흰색이 되어 오라가 사라진다.
+    public static let brightnessCeiling: Double = 0.97
+    /// WCAG AA 기준 잉크 텍스트 최소 대비 (F56 — 흰 텍스트 기준에서 반전).
+    public static let minimumInkContrast: Double = 4.5
 
     /// 한 카드를 구성하는 색의 수 (F21에서 유지 — "색상 다양성 7개 정도").
     public static let paletteCount = 7
+
+    /// 카드 위 텍스트 잉크 — 카드 그라데이션은 라이트·다크 동일하므로(R2) 잉크도 고정값이다.
+    /// 순흑 대신 카드의 결에 맞는 딥 플럼 톤 (#33283A).
+    public static let inkColor = Color(red: inkRGB.r, green: inkRGB.g, blue: inkRGB.b)
+    static let inkRGB = (r: 0x33 / 255.0, g: 0x28 / 255.0, b: 0x3A / 255.0)
 
     public init(seed: String) {
         var rng = SplitMix64(seed: Self.seedValue(from: seed))
@@ -39,12 +49,12 @@ public struct CardVisual: Equatable, Sendable {
         // 7색 팔레트: 색상은 각각 색상환 전체에서 무작위 (F25 — 색 제한 없음).
         let palette: [ControlPoint] = (0..<Self.paletteCount).map { _ in
             let hue = Double.random(in: 0...1, using: &rng)
-            let saturation = Double.random(in: Self.saturationRange, using: &rng)
+            let rawSaturation = Double.random(in: Self.saturationRange, using: &rng)
             let rawBrightness = Double.random(in: Self.brightnessRange, using: &rng)
-            let brightness = Self.brightnessGuaranteeingContrast(
-                hue: hue, saturation: saturation, brightness: rawBrightness
+            let corrected = Self.colorGuaranteeingInkContrast(
+                hue: hue, saturation: rawSaturation, brightness: rawBrightness
             )
-            return ControlPoint(hue: hue, saturation: saturation, brightness: brightness)
+            return ControlPoint(hue: hue, saturation: corrected.saturation, brightness: corrected.brightness)
         }
 
         // 25개 제어점에 무작위 배치 (F25). MeshGradient 보간이 점 사이를 부드럽게
@@ -78,27 +88,37 @@ public struct CardVisual: Equatable, Sendable {
         return result == 0 ? 0x9E3779B97F4A7C15 : result
     }
 
-    /// `brightnessRange` 상한(0.62)은 노랑 계열 색상(hue≈60°)에서는 흰 텍스트 대비를
-    /// 4.5:1 밑으로 떨어뜨린다 — 채도·명도 범위만으로는 전 색상에서 대비를 보장할 수
-    /// 없다는 뜻이라, 실제로 필요한 색상에서만 명도를 낮춰 대비를 지킨다.
-    private static func brightnessGuaranteeingContrast(
+    /// 파스텔 대역만으로는 전 색상에서 잉크 대비를 보장할 수 없다 — 특히 파랑 계열은
+    /// 같은 HSB 명도에서도 상대 휘도가 낮다. 부족하면 **명도를 먼저 올리고**(천장까지),
+    /// 그래도 모자라면 **채도를 뺀다**. 두 축 모두 "더 뽀얘지는" 방향이라 오라의 결을 지킨다.
+    static func colorGuaranteeingInkContrast(
         hue: Double, saturation: Double, brightness: Double
-    ) -> Double {
-        var candidate = brightness
-        while candidate > 0,
-            contrastAgainstWhite(hue: hue, saturation: saturation, brightness: candidate)
-                < minimumWhiteContrast
+    ) -> (saturation: Double, brightness: Double) {
+        var saturation = saturation
+        var brightness = brightness
+        while contrastAgainstInk(hue: hue, saturation: saturation, brightness: brightness)
+            < minimumInkContrast
         {
-            candidate -= 0.01
+            if brightness < brightnessCeiling {
+                brightness = min(brightness + 0.01, brightnessCeiling)
+            } else if saturation > 0 {
+                saturation = max(saturation - 0.01, 0)
+            } else {
+                break
+            }
         }
-        return max(candidate, 0)
+        return (saturation, brightness)
     }
 
-    static func contrastAgainstWhite(hue: Double, saturation: Double, brightness: Double) -> Double {
-        let rgb = hsbToRGB(hue: hue, saturation: saturation, brightness: brightness)
-        let luminance = relativeLuminance(rgb)
-        return 1.05 / (luminance + 0.05)
+    /// 배경색(밝음) 대 잉크(어두움)의 WCAG 대비.
+    static func contrastAgainstInk(hue: Double, saturation: Double, brightness: Double) -> Double {
+        let backgroundLuminance = relativeLuminance(
+            hsbToRGB(hue: hue, saturation: saturation, brightness: brightness)
+        )
+        return (backgroundLuminance + 0.05) / (inkLuminance + 0.05)
     }
+
+    private static let inkLuminance = relativeLuminance(inkRGB)
 
     private static func hsbToRGB(hue: Double, saturation: Double, brightness: Double) -> (r: Double, g: Double, b: Double) {
         let h = hue * 6

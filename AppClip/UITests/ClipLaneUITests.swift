@@ -79,14 +79,16 @@ final class ClipLaneUITests: XCTestCase {
         snap("clip-2-interests")
         app.buttons["onboarding.interests.next"].tap()
 
-        // 3 vibe — 2축 슬라이더 조작 후 「다음」 (F17, navigation-map §1-3)
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5), "온보딩 2/3(성향) 진입 실패")
-        assertNoInstallSuggestion(stage: "vibe")
-        snap("clip-3-vibe")
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.8)
-        app.buttons["onboarding.style.next"].tap()
+        // 3 mbti — 네 축 선택 후 「다음」 (F55, navigation-map §1-3)
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5), "온보딩 2/3(MBTI) 진입 실패")
+        assertNoInstallSuggestion(stage: "mbti")
+        snap("clip-3-mbti")
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
+        app.buttons["onboarding.mbti.next"].tap()
 
         // 4 intro — 닉네임·한 줄·이모지 입력 (F28: 셋 다 필수)
         let nickname = app.textFields["onboarding.nickname"]
@@ -143,11 +145,13 @@ final class ClipLaneUITests: XCTestCase {
         interest.tap()
         app.buttons["onboarding.interests.next"].tap()
 
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        energySlider.adjust(toNormalizedSliderPosition: 0.2)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
-        app.buttons["onboarding.style.next"].tap()
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
+        app.buttons["onboarding.mbti.next"].tap()
 
         let nickname = app.textFields["onboarding.nickname"]
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))

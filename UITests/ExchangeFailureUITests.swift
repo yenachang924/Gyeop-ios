@@ -15,11 +15,13 @@ final class ExchangeFailureUITests: XCTestCase {
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         firstInterest.tap()
         app.buttons["onboarding.interests.next"].tap()
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
-        app.buttons["onboarding.style.next"].tap()
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
+        app.buttons["onboarding.mbti.next"].tap()
         let nickname = app.textFields["onboarding.nickname"]
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))
         nickname.tap()
@@ -44,7 +46,7 @@ final class ExchangeFailureUITests: XCTestCase {
 
         // 닫기 → 컬렉션은 여전히 빈 상태 (실패는 겹을 만들지 않는다)
         app.buttons["exchange.close"].tap()
-        XCTAssertTrue(app.navigationBars["컬렉션"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["나의 카드"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["collection.card.하람"].exists)
     }
 }

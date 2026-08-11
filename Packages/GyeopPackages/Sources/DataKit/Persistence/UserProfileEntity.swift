@@ -10,8 +10,8 @@ final class UserProfileEntity {
     var tagline: String
     var emoji: String
     var interests: [String]
-    var energyRaw: String
-    var venueRaw: String
+    /// MBTI 4글자 코드 — 건너뛴 경우 빈 문자열 (F55, 성향 energy/venue를 대체).
+    var mbtiRaw: String = ""
     var createdAt: Date
 
     init(profile: UserProfile) {
@@ -20,8 +20,7 @@ final class UserProfileEntity {
         tagline = profile.tagline
         emoji = profile.emoji
         interests = profile.interests
-        energyRaw = profile.leisureStyle.energy.rawValue
-        venueRaw = profile.leisureStyle.venue.rawValue
+        mbtiRaw = profile.mbti?.code ?? ""
         createdAt = profile.createdAt
     }
 
@@ -31,8 +30,7 @@ final class UserProfileEntity {
         tagline = profile.tagline
         emoji = profile.emoji
         interests = profile.interests
-        energyRaw = profile.leisureStyle.energy.rawValue
-        venueRaw = profile.leisureStyle.venue.rawValue
+        mbtiRaw = profile.mbti?.code ?? ""
         createdAt = profile.createdAt
     }
 
@@ -43,10 +41,7 @@ final class UserProfileEntity {
             tagline: tagline,
             emoji: emoji,
             interests: interests,
-            leisureStyle: LeisureStyle(
-                energy: LeisureStyle.Energy(rawValue: energyRaw) ?? .calm,
-                venue: LeisureStyle.Venue(rawValue: venueRaw) ?? .indoor
-            ),
+            mbti: MBTI(code: mbtiRaw),
             createdAt: createdAt
         )
     }

@@ -11,8 +11,7 @@ public struct MockCardGenerator: CardGenerating {
             profile.nickname,
             profile.emoji,
             profile.interests.sorted().joined(separator: ","),
-            profile.leisureStyle.energy.rawValue,
-            profile.leisureStyle.venue.rawValue,
+            profile.mbti?.code ?? "",
             "v\(version)",
         ].joined(separator: "|")
 
@@ -23,7 +22,7 @@ public struct MockCardGenerator: CardGenerating {
             tagline: profile.tagline,
             emoji: profile.emoji,
             interests: profile.interests,
-            leisureStyle: profile.leisureStyle,
+            mbti: profile.mbti,
             version: version,
             createdAt: profile.createdAt
         )

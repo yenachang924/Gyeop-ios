@@ -139,10 +139,11 @@ struct ExchangeView: View {
     // Dynamic Type 극단에서 내용이 화면을 넘칠 수 있다 — 내용은 스크롤,
     // 행동 버튼은 safeAreaInset으로 항상 화면 안에 남긴다.
     // 겹치는 관심사는 카드 하단 알약 줄로 카드 안에 들어간다 (F3) — 별도 줄 폐기.
+    // F60 (겹 결과 담백화): 화면은 새로 겹친 것만 말한다 — 제목, 카드, 겹침 알약.
+    // 성향 라벨 대체(F14)와 이모지 이스터에그는 은퇴. 상대 MBTI는 카드를 뒤집어야
+    // 보이는 발견 요소로만 남는다.
     private func completedView(_ record: GyeopRecord) -> some View {
         let shared = model.myCard.map { record.counterpartCard.sharedInterests(with: $0) } ?? []
-        // 겹치는 관심사가 없으면 상대 성향 라벨이 알약 자리를 지킨다 (F14)
-        let pills = shared.isEmpty ? [record.counterpartCard.leisureStyle.label] : shared
         return ScrollView {
             VStack(spacing: DS.Spacing.l) {
                 VStack(spacing: DS.Spacing.s) {
@@ -157,22 +158,11 @@ struct ExchangeView: View {
                 .offset(y: celebrated ? 0 : -16)
                 .animation(reduceMotion ? nil : DS.Motion.settle.delay(0.15), value: celebrated)
 
-                CardView(card: record.counterpartCard, overlap: pills)
-                    .padding(.horizontal, DS.Spacing.xl)
+                CardView(card: record.counterpartCard, overlap: shared)
+                    .padding(.horizontal, DS.Spacing.l)
                     .scaleEffect(celebrated ? 1 : 0.9)
                     .opacity(celebrated ? 1 : 0)
                     .animation(reduceMotion ? nil : DS.Motion.cardAppear, value: celebrated)
-
-                if let myCard = model.myCard,
-                   !myCard.emoji.isEmpty, myCard.emoji == record.counterpartCard.emoji {
-                    // 이모지 겹침도 "겹침" — 와인 톤(overlapInk)으로, 빨강은 제목·CTA 둘만 (U1)
-                    Text("이모지도 겹쳤어요 \(myCard.emoji), 오늘의 이스터에그")
-                        .font(DS.Typo.headline)
-                        .foregroundStyle(DS.Palette.overlapInk)
-                        .multilineTextAlignment(.center)
-                        .opacity(celebrated ? 1 : 0)
-                        .animation(reduceMotion ? nil : DS.Motion.settle.delay(0.3), value: celebrated)
-                }
             }
         }
         // 내용이 화면보다 작으면 세로 중앙에 앉는다 (1차 시연: 하단이 비어 상단 쏠림)
@@ -183,7 +173,7 @@ struct ExchangeView: View {
             Button {
                 dismiss()
             } label: {
-                Text("컬렉션으로")
+                Text("나의 카드로")
                     .font(DS.Typo.headline)
                     .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
             }

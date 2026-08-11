@@ -17,15 +17,17 @@ final class OnboardingFlowUITests: XCTestCase {
         app.buttons["onboarding.interest.보드게임"].tap()
         app.buttons["onboarding.interests.next"].tap()
 
-        // 2/3 성향 — 슬라이더 미조작이면 다음 비활성 (F17, navigation-map §1-3)
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        let styleNext = app.buttons["onboarding.style.next"]
-        XCTAssertFalse(styleNext.isEnabled, "성향 미조작인데 다음이 활성화됨")
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
-        XCTAssertTrue(styleNext.isEnabled, "슬라이더 조작 후에도 다음이 비활성")
-        styleNext.tap()
+        // 2/3 MBTI — 네 축 미완성이면 다음 비활성 (F55, navigation-map §1-3)
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        let mbtiNext = app.buttons["onboarding.mbti.next"]
+        XCTAssertFalse(mbtiNext.isEnabled, "MBTI 미완성인데 다음이 활성화됨")
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
+        XCTAssertTrue(mbtiNext.isEnabled, "네 축을 다 골랐는데 다음이 비활성")
+        mbtiNext.tap()
 
         // 3/3 닉네임·한 줄·이모지
         let nickname = app.textFields["onboarding.nickname"]
@@ -48,7 +50,7 @@ final class OnboardingFlowUITests: XCTestCase {
         toCollection.tap()
 
         // 컬렉션 도착 (첫 진입은 빈 상태 — 데모 시딩 제거됨)
-        XCTAssertTrue(app.navigationBars["컬렉션"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["나의 카드"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["collection.myCard"].waitForExistence(timeout: 5))
 
         // 맞대기 — 시뮬레이터는 MockExchangeSession 스크립트가 겹을 성립시킨다
@@ -88,11 +90,13 @@ final class OnboardingFlowUITests: XCTestCase {
         app.buttons["onboarding.interests.next"].tap()
 
         // 2/3 성향 — 선택 후 「다음」
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
-        app.buttons["onboarding.style.next"].tap()
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
+        app.buttons["onboarding.mbti.next"].tap()
 
         // 3/3 — "추천" 묶음(1차 16개) 밖인 "낚시"는 카테고리를 바꾸면 나타난다 (F45).
         // 검색 텍스트 필드는 없앴다 — 키보드가 그리드를 가리던 문제 때문 (F45).
@@ -155,11 +159,13 @@ final class U2DemoRecordingUITests: XCTestCase {
         }
         app.buttons["onboarding.interests.next"].tap()
 
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
-        app.buttons["onboarding.style.next"].tap()
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
+        app.buttons["onboarding.mbti.next"].tap()
 
         let nickname = app.textFields["onboarding.nickname"]
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))
@@ -243,12 +249,14 @@ final class U2DemoRecordingUITests: XCTestCase {
         hold(1.2)
         app.buttons["onboarding.interests.next"].tap()
 
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
         hold(1.0)
-        app.buttons["onboarding.style.next"].tap()
+        app.buttons["onboarding.mbti.next"].tap()
 
         let nickname = app.textFields["onboarding.nickname"]
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))

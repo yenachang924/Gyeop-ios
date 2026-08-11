@@ -5,10 +5,13 @@ import SwiftUI
 
 /// 온보딩 1/3 — 관심사 선택 (최대 5개).
 ///
-/// F36: 카드 프리뷰를 **화면에서 뺐다**. 카드는 크고 위치가 고정돼 칩이 들어설 자리를
-/// 잡아먹었고, 첫 선택에서 레이아웃이 튀는 원인이기도 했다. 대신 **배경이 고른 관심사의
-/// 색으로 은은하게 물들고 천천히 흐른다** — "고를수록 물든다"는 경험은 그대로 두면서
-/// 칩에 여유를 준다. 배경은 저채도·고블러라 텍스트 가독성을 해치지 않는다.
+/// F36: 카드 프리뷰를 **화면에서 뺐다**. 대신 **배경이 고른 관심사의 색으로 은은하게
+/// 물들고 천천히 흐른다.** 배경은 저채도·고블러라 텍스트 가독성을 해치지 않는다.
+///
+/// F57 (카드 리디자인 라운드): 칩 무더기를 **카테고리 구획**으로 나눴다 — 섹션 헤더와
+/// 여백만으로 구획하고 흰 컨테이너 칸은 두지 않는다 (소유자 지시). 카테고리는 이모지
+/// 카탈로그의 실분류(활동·취미·음식·동물·자연 등)를 CSV 순서 그대로 쓴다.
+/// 「다음」은 하단 고정 CTA — 어떤 칩보다 크다.
 struct InterestsStepView: View {
     @Binding var selected: [String]
     let onNext: () -> Void
@@ -18,10 +21,7 @@ struct InterestsStepView: View {
     /// 선택으로 만든 카드 색 — 배경 물듦의 원천. 선택이 없으면 배경도 중립이다.
     private var backdropColors: [Color] {
         guard !selected.isEmpty else { return [] }
-        return CardPreview.visual(
-            nickname: "", emoji: "", interests: selected,
-            leisureStyle: LeisureStyle(energy: .calm, venue: .indoor)
-        ).colors
+        return CardPreview.visual(nickname: "", emoji: "", interests: selected).colors
     }
 
     var body: some View {
@@ -65,14 +65,25 @@ struct InterestsStepView: View {
         )
     }
 
-    /// 칩에 여유를 준다 (F36) — 폭을 넓혀 이름이 줄바꿈·축소되지 않게.
+    /// 카테고리 구획 (F57) — 헤더 + 여백이 구획을 만들고, 컨테이너 칸은 없다.
+    /// 칩 폭(F36)은 유지 — 이름이 줄바꿈·축소되지 않게.
     private var interestGrid: some View {
-        LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: 124), spacing: DS.Spacing.s)],
-            spacing: DS.Spacing.s
-        ) {
-            ForEach(EmojiCatalog.all) { icon in
-                interestChip(icon)
+        VStack(alignment: .leading, spacing: DS.Spacing.l) {
+            ForEach(EmojiCatalog.categories, id: \.self) { category in
+                VStack(alignment: .leading, spacing: DS.Spacing.s) {
+                    Text(category)
+                        .font(DS.Typo.footnote)
+                        .foregroundStyle(DS.Palette.secondaryText)
+                        .accessibilityAddTraits(.isHeader)
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: 124), spacing: DS.Spacing.s)],
+                        spacing: DS.Spacing.s
+                    ) {
+                        ForEach(EmojiCatalog.icons(in: category)) { icon in
+                            interestChip(icon)
+                        }
+                    }
+                }
             }
         }
     }
