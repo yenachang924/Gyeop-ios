@@ -29,8 +29,8 @@ public enum DS {
         public static let primaryActionHeight: CGFloat = 50
         /// 카드 상세(플립) 카드 최대 폭 (F54 — 시안 62% 폭에서 +20% 상향 지시 반영)
         public static let cardDetailMaxWidth: CGFloat = 300
-        /// 홈("나의 카드")의 내 카드 최대 폭 (F61 — 홈에서 바로 뒤집는 주인공 카드)
-        public static let homeMyCardMaxWidth: CGFloat = 250
+        /// 홈("나의 카드")의 내 카드 최대 폭 (F62 — F61의 250에서 소유자 지시로 +20%)
+        public static let homeMyCardMaxWidth: CGFloat = 300
     }
 
     public enum Palette {
@@ -197,6 +197,9 @@ public enum DS {
         public static let flip = Animation.smooth(duration: 0.55)
         /// MBTI 알약을 누를 때 배경에 한 번 피었다 지는 색 흐름 (F55).
         public static let bloom = Animation.smooth(duration: 1.4)
+        /// MBTI 가운데 글자가 튀어오르며 자리 잡는 등장 (F62) — 선택의 손맛을 주는
+        /// 몇 안 되는 유바운스 스프링. 실제 SwiftUI 스프링 기반 (모션 레퍼런스 원칙).
+        public static let letterPop = Animation.spring(response: 0.38, dampingFraction: 0.62)
         /// "겹!" 융합 — 결정 R7: `.smooth` 스프링, response 0.5, 거의 무바운스(단조 감속).
         public static let merge = Animation.smooth(duration: 0.5)
         /// "겹!" 링 파동 1회 — 확장하며 사라진다. 무바운스(파동은 되돌아오지 않는다).

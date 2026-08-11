@@ -40,14 +40,19 @@ struct InterestsStepView: View {
         .navigationTitle("1 / 3")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
-            // 카운터는 제목 줄로 올라갔다 (F61) — CTA는 「다음」 하나만 말한다.
-            Button("다음") { onNext() }
-                .dsProminentButton()
-                .controlSize(.large)
-                .frame(maxWidth: .infinity)
-                .padding(DS.Spacing.m)
-                .disabled(selected.isEmpty)
-                .accessibilityIdentifier("onboarding.interests.next")
+            // 카운터는 제목 줄로 올라갔다 (F61). CTA는 「다음」 하나만 말하고,
+            // 화면에서 가장 도드라진다 (F62 — 카드 완성 버튼과 같은 전폭 구성).
+            Button {
+                onNext()
+            } label: {
+                Text("다음")
+                    .font(DS.Typo.headline)
+                    .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
+            }
+            .dsProminentButton()
+            .padding(DS.Spacing.m)
+            .disabled(selected.isEmpty)
+            .accessibilityIdentifier("onboarding.interests.next")
         }
     }
 

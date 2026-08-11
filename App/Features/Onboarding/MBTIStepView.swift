@@ -67,12 +67,18 @@ struct MBTIStepView: View {
         .onChange(of: composed) { selected = composed }
         .safeAreaInset(edge: .bottom) {
             VStack(spacing: DS.Spacing.xs) {
-                Button("다음") { onNext() }
-                    .dsProminentButton()
-                    .controlSize(.large)
-                    .frame(maxWidth: .infinity)
-                    .disabled(composed == nil)
-                    .accessibilityIdentifier("onboarding.mbti.next")
+                // CTA는 화면에서 가장 도드라져야 한다 (F62) — 카드 완성 버튼과 같은
+                // 전폭 구성. 프레임은 라벨 안에 있어야 캡슐이 화면 폭까지 늘어난다.
+                Button {
+                    onNext()
+                } label: {
+                    Text("다음")
+                        .font(DS.Typo.headline)
+                        .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
+                }
+                .dsProminentButton()
+                .disabled(composed == nil)
+                .accessibilityIdentifier("onboarding.mbti.next")
                 Button("건너뛰기") {
                     selected = nil
                     onNext()
@@ -115,14 +121,24 @@ struct MBTIStepView: View {
             }
 
             // 가운데: 이 축에서 고른 글자가 크게 선다 — 네 줄이 모여 세로로 MBTI가 완성된다.
-            Text(selectedLetter ?? "·")
-                .font(DS.Typo.mbtiHero)
-                .foregroundStyle(
-                    selectedLetter == nil ? AnyShapeStyle(.quaternary) : AnyShapeStyle(DS.Palette.accent)
-                )
-                .frame(width: Layout.centerLetterWidth)
-                .animation(reduceMotion ? nil : DS.Motion.quick, value: selectedLetter)
-                .accessibilityHidden(true) // 선택 상태는 알약이 전달한다
+            // 고를 때마다 글자가 스프링으로 튀어오르며 자리를 잡는다 (F62 — 선택 애니메이션 강화).
+            ZStack {
+                if let selectedLetter {
+                    Text(selectedLetter)
+                        .font(DS.Typo.mbtiHero)
+                        .foregroundStyle(DS.Palette.accent)
+                        .id(selectedLetter) // 같은 축에서 글자가 바뀌어도 새로 등장한다
+                        .transition(.scale(scale: 0.3).combined(with: .opacity))
+                } else {
+                    Text("·")
+                        .font(DS.Typo.mbtiHero)
+                        .foregroundStyle(.quaternary)
+                        .transition(.opacity)
+                }
+            }
+            .frame(width: Layout.centerLetterWidth)
+            .animation(reduceMotion ? nil : DS.Motion.letterPop, value: selectedLetter)
+            .accessibilityHidden(true) // 선택 상태는 알약이 전달한다
 
             pill(
                 letter: options[1].letter,
@@ -147,7 +163,9 @@ struct MBTIStepView: View {
                     .tint(.secondary)
             }
         }
-        .animation(reduceMotion ? nil : DS.Motion.quick, value: isSelected)
+        // 고른 쪽이 살짝 부풀며 응답한다 (F62) — 관심사 칩(1.04)과 같은 언어.
+        .scaleEffect(isSelected ? 1.04 : 1)
+        .animation(reduceMotion ? nil : DS.Motion.standard, value: isSelected)
         .accessibilityLabel("\(word) \(letter)")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityIdentifier("onboarding.mbti.\(letter)")
