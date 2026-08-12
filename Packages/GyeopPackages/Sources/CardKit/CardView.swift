@@ -189,11 +189,15 @@ public struct CardBackView: View {
     private var interestChips: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.xs) {
             ForEach(card.interests, id: \.self) { interest in
-                Text(interest)
-                    .font(DS.Typo.footnote)
-                    .foregroundStyle(.primary)
-                    .padding(.horizontal, DS.Spacing.s)
-                    .padding(.vertical, DS.Spacing.xs)
+                HStack(spacing: DS.Spacing.xs) {
+                    Text(InterestSymbol.emoji(for: interest))
+                        .font(DS.Typo.title)
+                    Text(interest)
+                        .font(DS.Typo.footnote)
+                }
+                .foregroundStyle(.primary)
+                .padding(.horizontal, DS.Spacing.m)
+                .padding(.vertical, DS.Spacing.s)
                     .background(.ultraThinMaterial, in: Capsule())
                     .overlay(Capsule().strokeBorder(.quaternary))
                     .fixedSize()
@@ -223,6 +227,8 @@ public struct CardBackView: View {
 public struct CardFlipView: View {
     private let card: CardSnapshot
     @State private var isFlipped = false
+    /// 정지 중에는 현재 면만 그린다(F74). 플립 중에만 양 면을 겹쳐 회전시킨다.
+    @State private var isTransitioning = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(card: CardSnapshot) {
@@ -230,28 +236,55 @@ public struct CardFlipView: View {
     }
 
     public var body: some View {
-        ZStack {
-            CardView(card: card)
-                .opacity(isFlipped ? 0 : 1)
-                .rotation3DEffect(
-                    .degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.55
-                )
-            CardBackView(card: card)
-                .opacity(isFlipped ? 1 : 0)
-                .rotation3DEffect(
-                    .degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0), perspective: 0.55
-                )
+        Group {
+            if isTransitioning {
+                ZStack {
+                    cardFront
+                    cardBack
+                }
+            } else if isFlipped {
+                CardBackView(card: card)
+            } else {
+                CardView(card: card)
+            }
         }
         .contentShape(RoundedRectangle(cornerRadius: DS.Radius.card))
         .onTapGesture {
-            withAnimation(reduceMotion ? nil : DS.Motion.flip) {
+            if reduceMotion {
                 isFlipped.toggle()
+            } else {
+                guard !isTransitioning else { return }
+                isTransitioning = true
+                withAnimation(DS.Motion.flip) { isFlipped.toggle() }
+                DispatchQueue.main.asyncAfter(deadline: .now() + Flip.duration) {
+                    isTransitioning = false
+                }
             }
         }
         .accessibilityAddTraits(.isButton)
         .accessibilityHint("탭하면 카드가 뒤집혀요")
         .accessibilityIdentifier("card.flip")
     }
+
+    private var cardFront: some View {
+        CardView(card: card)
+            .opacity(isFlipped ? 0 : 1)
+            .rotation3DEffect(
+                .degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.55
+            )
+    }
+
+    private var cardBack: some View {
+        CardBackView(card: card)
+            .opacity(isFlipped ? 1 : 0)
+            .rotation3DEffect(
+                .degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0), perspective: 0.55
+            )
+    }
+}
+
+private enum Flip {
+    static let duration: TimeInterval = 0.55
 }
 
 /// 유리 카드 마감 (F54) — 위쪽 반사(sheen) 한 겹 + 유리 테두리. 앞·뒷면 공통.

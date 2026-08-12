@@ -174,6 +174,9 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         let flipCard = app.descendants(matching: .any)["card.flip"].firstMatch
         if flipCard.waitForExistence(timeout: 2) {
             flipCard.tap()
+            // F74: 플립 중에는 양면을 잠시 합성한다. 정지한 뒷면을 기록해야 카드 정보
+            // 포스터의 실제 레이아웃을 검증할 수 있다.
+            RunLoop.current.run(until: Date().addingTimeInterval(0.6))
             snap(app, "\(prefix)-9b-card-back")
         }
         close.tap()

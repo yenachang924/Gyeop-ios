@@ -97,7 +97,7 @@ Expected: Task 1 이전에는 `InterestSymbol` 부재로 실패한다. Task 1 �
 
 - [ ] **Step 3: 최소 레이아웃과 플립 구현을 쓴다**
 
-`CardBackView`의 바깥 프레임을 `.topLeading`으로 맞추고, MBTI 다음에 `Text("\\(InterestSymbol.emoji(for: interest)) \\(interest)")` 세로 칩을 둔다. 기존 `DS.Typo.footnote`, `DS.Spacing.s`, `DS.Spacing.xs`, material capsule을 유지한다.
+`CardBackView`의 바깥 프레임은 카드 세로 중앙 왼쪽을 유지한다. MBTI 다음에 대표 이모지와 이름을 분리한 세로 칩을 둔다. 대표 이모지는 `DS.Typo.title`, 이름은 `DS.Typo.footnote`, 칩 여백은 `DS.Spacing.m`·`DS.Spacing.s`, 표면은 material capsule을 사용한다.
 
 `CardFlipView`는 `@State private var displayedSide`와 `@State private var isFlipping`을 쓴다. Reduce Motion에서는 `displayedSide.toggle()`만 수행한다. 일반 탭에서는 `isFlipping = true`로 양 면을 ZStack에 넣고 `DS.Motion.flip`으로 회전한 뒤, 0.55초가 끝나면 반대 면을 `displayedSide`로 확정하고 `isFlipping = false`로 이전 면을 제거한다. 비동기 완료 작업은 취소 가능한 `.task(id:)` 경로로 한 번만 실행하며 중간 계층에서 오류를 잡지 않는다.
 

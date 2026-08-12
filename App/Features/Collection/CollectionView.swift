@@ -100,6 +100,7 @@ struct CollectionView: View {
                     .font(DS.Typo.actionIcon)
                     .frame(minWidth: DS.minTapTarget, minHeight: DS.minTapTarget)
             }
+            .modifier(SettingsGlassSurface())
             // 무채 크롬 — 이 화면의 빨강은 주인공 액션(맞대기) 하나뿐 (U1 원칙 1)
             .tint(.primary)
             .accessibilityIdentifier("collection.settings")
@@ -205,9 +206,6 @@ struct CollectionView: View {
 /// 액센트 틴트를 쓴다 — 흰 광택은 라이트 배경에서 사라진다. 강도는 `DS.Opacity.shimmer`,
 /// 실기기 체감 튜닝 대상. Reduce Motion에서는 회전 없이 고정 광택만 남는다.
 private struct ShimmerFrame: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var spinning = false
-
     var body: some View {
         AngularGradient(
             stops: [
@@ -221,15 +219,22 @@ private struct ShimmerFrame: View {
         )
         // 그라디언트 면을 돌리고 테두리 모양으로 오려낸다 — 모서리가 회전에 어긋나지 않는다.
         .scaleEffect(1.6)
-        .rotationEffect(.degrees(spinning ? 360 : 0))
         .mask { RoundedRectangle(cornerRadius: DS.Radius.card).strokeBorder(lineWidth: 3) }
         .opacity(DS.Opacity.shimmer)
         .allowsHitTesting(false)
-        .onAppear {
-            guard !reduceMotion else { return }
-            withAnimation(.linear(duration: 6).repeatForever(autoreverses: false)) {
-                spinning = true
-            }
+    }
+}
+
+/// 홈 헤더의 시스템 크롬. iOS 26에서는 실제 Liquid Glass, 이전 OS에서는 같은 원형 재질로
+/// 설정 위치를 또렷하게 만든다(F73).
+private struct SettingsGlassSurface: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.glassEffect(.regular, in: Circle())
+        } else {
+            content
+                .background(.ultraThinMaterial, in: Circle())
+                .overlay { Circle().strokeBorder(.quaternary) }
         }
     }
 }

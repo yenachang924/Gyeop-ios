@@ -51,8 +51,12 @@ struct CardDetailView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     // 무채 크롬 — 이 화면의 주인공은 카드다 (U1 원칙 3)
-                    Button("닫기") { dismiss() }
+                    Button { dismiss() } label: {
+                        Label("닫기", systemImage: "xmark")
+                            .labelStyle(.iconOnly)
+                    }
                         .tint(.primary)
+                        .accessibilityLabel("닫기")
                 }
                 if isMyCard, let exportedCard {
                     ToolbarItem(placement: .topBarTrailing) {

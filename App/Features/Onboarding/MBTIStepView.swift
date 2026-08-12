@@ -56,6 +56,8 @@ struct MBTIStepView: View {
                             selectedLetter: lifestyle?.rawValue) { lifestyle = MBTI.Lifestyle(rawValue: $0) }
                 }
                 .padding(.top, DS.Spacing.l)
+                .frame(maxWidth: DS.Layout.homeMyCardMaxWidth)
+                .frame(maxWidth: .infinity)
             }
             .padding(DS.Spacing.m)
         }
