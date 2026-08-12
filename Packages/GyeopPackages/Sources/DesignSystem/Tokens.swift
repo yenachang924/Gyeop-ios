@@ -31,6 +31,9 @@ public enum DS {
         public static let cardDetailMaxWidth: CGFloat = 300
         /// 홈("나의 카드")의 내 카드 최대 폭 (F62 — F61의 250에서 소유자 지시로 +20%)
         public static let homeMyCardMaxWidth: CGFloat = 300
+        /// 하단 페이드 바 전체 높이 (F70) — 버튼(50)과 여백을 덮고도 위로 ~90pt 더
+        /// 올라가야 "바"가 아니라 콘텐츠가 아래로 스며드는 쉐이딩으로 읽힌다.
+        public static let bottomFadeHeight: CGFloat = 220
     }
 
     public enum Palette {
@@ -256,11 +259,13 @@ public extension View {
         }
     }
 
-    /// 하단 고정 CTA 뒤의 페이드 바 (F67). 위 경계는 투명에서 시작해 유리(Material)가
-    /// 점점 짙어지고, 맨 아래는 화면 배경색으로 **불투명하게** 닫힌다 — 딱 잘린 바가
-    /// 콘텐츠와 분리되어 보이던 문제(특히 다크 모드)를 없앤다. 지도 앱의 하단 페이드 문법.
+    /// 하단 고정 CTA 뒤의 페이드 바 (F67 → F70에서 키 상향). 위 경계는 투명에서 시작해
+    /// 유리(Material)가 점점 짙어지고, 맨 아래는 화면 배경색으로 **불투명하게** 닫힌다.
+    /// F70: 페이드가 CTA 높이 안에 갇히면 여전히 "분리된 바"로 읽힌다 — 쉐이딩이
+    /// 버튼 위로 충분히(전체 220pt) 올라가도록 바닥 정렬 고정 높이로 그린다.
+    /// 지도 앱의 하단 페이드 문법.
     func dsBottomBarFade() -> some View {
-        background {
+        background(alignment: .bottom) {
             ZStack {
                 Rectangle()
                     .fill(.ultraThinMaterial)
@@ -268,7 +273,8 @@ public extension View {
                         LinearGradient(
                             stops: [
                                 .init(color: .clear, location: 0),
-                                .init(color: .black, location: 0.4),
+                                .init(color: .black.opacity(0.6), location: 0.45),
+                                .init(color: .black, location: 0.8),
                                 .init(color: .black, location: 1),
                             ],
                             startPoint: .top, endPoint: .bottom
@@ -277,12 +283,13 @@ public extension View {
                 LinearGradient(
                     stops: [
                         .init(color: DS.Palette.background.opacity(0), location: 0),
-                        .init(color: DS.Palette.background.opacity(0.55), location: 0.7),
+                        .init(color: DS.Palette.background.opacity(0.5), location: 0.75),
                         .init(color: DS.Palette.background, location: 1),
                     ],
                     startPoint: .top, endPoint: .bottom
                 )
             }
+            .frame(height: DS.Layout.bottomFadeHeight)
             .ignoresSafeArea(edges: .bottom)
             .allowsHitTesting(false)
         }
