@@ -34,6 +34,10 @@ public enum DS {
         /// 하단 페이드 바 전체 높이 (F70) — 버튼(50)과 여백을 덮고도 위로 ~90pt 더
         /// 올라가야 "바"가 아니라 콘텐츠가 아래로 스며드는 쉐이딩으로 읽힌다.
         public static let bottomFadeHeight: CGFloat = 220
+        /// 페이드가 안전 영역 **아래로** 더 내려가는 길이 (F71). 홈 인디케이터 구간
+        /// (최대 34pt)을 덮고도 남는 값 — 이 여유가 없으면 화면 맨 아래에 콘텐츠가
+        /// 비치는 띠가 생긴다("바닥이 뜨는" 현상).
+        public static let bottomFadeOverflow: CGFloat = 60
     }
 
     public enum Palette {
@@ -289,8 +293,12 @@ public extension View {
                     startPoint: .top, endPoint: .bottom
                 )
             }
-            .frame(height: DS.Layout.bottomFadeHeight)
-            .ignoresSafeArea(edges: .bottom)
+            // F71: `.frame(height:)` 뒤의 `.ignoresSafeArea()`는 이미 확정된 크기를
+            // 옮길 뿐 **늘리지 못한다** — 페이드가 홈 인디케이터 구간 위에 떠서 화면
+            // 맨 아래에 콘텐츠가 비치는 띠가 남았다("바닥이 뜨는" 현상).
+            // 음수 하단 패딩으로 그리는 영역만 컨테이너 아래로 내린다 (배경은 잘리지 않는다).
+            .frame(height: DS.Layout.bottomFadeHeight + DS.Layout.bottomFadeOverflow)
+            .padding(.bottom, -DS.Layout.bottomFadeOverflow)
             .allowsHitTesting(false)
         }
     }

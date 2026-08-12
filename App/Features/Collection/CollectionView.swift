@@ -80,6 +80,11 @@ struct CollectionView: View {
         }
     }
 
+    private enum Layout {
+        /// 받은 카드 열 수 (F71) — 적응형 폭 계산이 1열로 무너지던 문제를 고정 열로 막는다.
+        static let collectedColumns = 2
+    }
+
     /// 큰 제목 + 설정이 한 줄 (F65 — App Store 투데이 문법).
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
@@ -164,8 +169,14 @@ struct CollectionView: View {
                 )
             } else {
                 LazyVGrid(
-                    // 150 → 180: 카드 전반 크기 상향 (F54, 소유자 "20% 정도 크게")
-                    columns: [GridItem(.adaptive(minimum: 180), spacing: DS.Spacing.s)],
+                    // F71: `.adaptive(minimum: 180)`은 393pt 기기에서 두 칸(180×2+8=368)이
+                    // 가용 폭(361)을 넘겨 **1열로 무너지고**, 그 1열이 전폭으로 늘어나
+                    // 받은 카드가 화면을 가득 채웠다. 열 수를 고정해 폭이 기기에 따라
+                    // 계산되게 한다 — 카드는 항상 2열이다.
+                    columns: Array(
+                        repeating: GridItem(.flexible(), spacing: DS.Spacing.s),
+                        count: Layout.collectedColumns
+                    ),
                     spacing: DS.Spacing.s
                 ) {
                     ForEach(model.gyeops) { gyeop in
