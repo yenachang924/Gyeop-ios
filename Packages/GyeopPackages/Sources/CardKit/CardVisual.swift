@@ -22,8 +22,23 @@ public struct CardVisual: Equatable, Sendable {
         public let brightness: Double
     }
 
+    /// F72 리본 배경화면의 시드별 변주. 각 값은 시드에서 한 번만 뽑히므로
+    /// 앞면·뒷면·프리뷰가 같은 방향·폭·교차 위치를 공유한다.
+    public struct RibbonParameters: Equatable, Sendable {
+        public let firstAngle: Double
+        public let secondAngle: Double
+        public let firstWidth: Double
+        public let secondWidth: Double
+        public let firstOffset: Double
+        public let secondOffset: Double
+        public let firstAnchorIndex: Int
+        public let secondAnchorIndex: Int
+    }
+
     /// 5×5 MeshGradient 제어점 25개 (행 우선: 좌상단 → 우하단).
     public let controlPoints: [ControlPoint]
+    /// 두 넓은 대각 리본의 결정적 파라미터 (F72).
+    public let ribbonParameters: RibbonParameters
 
     /// MeshGradient 격자 한 변의 제어점 수 (결정 R2: 5×5).
     public static let meshDimension = 5
@@ -41,6 +56,16 @@ public struct CardVisual: Equatable, Sendable {
     public static let anchorCount = 4
     /// 앵커 사이 hue 간격 — 인접 색상으로만 흐른다 (F61 레퍼런스 스윕).
     public static let hueStepRange: ClosedRange<Double> = 0.08...0.15
+    /// F72 첫 리본은 좌상↔우하 대각을 기준으로 이 범위 안에서 기운다.
+    private static let firstRibbonAngleRange: ClosedRange<Double> = (.pi / 4 - 0.28)...(.pi / 4 + 0.28)
+    /// 두 번째 리본이 첫 리본과 반대 대각으로 교차할 때 허용하는 기울기 차이.
+    private static let secondRibbonDeviationRange: ClosedRange<Double> = -0.28...0.28
+    /// 넓은 면으로 읽히는 리본의 반폭. 작은 카드를 줄무늬로 만들지 않는다.
+    private static let ribbonWidthRange: ClosedRange<Double> = 0.30...0.52
+    /// 리본 중심선의 대각 좌표 오프셋. 폭과 함께 교차 위치를 바꾼다.
+    private static let ribbonOffsetRange: ClosedRange<Double> = -0.22...0.22
+    /// 코너 흐름 위에서 리본이 읽히는 비중. 리본은 투명한 얇은 띠가 아니라 배경화면의 큰 면이다.
+    private static let ribbonStrength = 2.75
 
     /// 카드 위 텍스트 잉크 — 카드 그라데이션은 라이트·다크 동일하므로(R2) 잉크도 고정값이다.
     /// 순흑 대신 카드의 결에 맞는 딥 플럼 톤 (#33283A).
@@ -66,14 +91,50 @@ public struct CardVisual: Equatable, Sendable {
             return ControlPoint(hue: hue, saturation: corrected.saturation, brightness: corrected.brightness)
         }
 
+        let firstAngle = Double.random(in: Self.firstRibbonAngleRange, using: &rng)
+        let firstAnchorIndex = Int.random(in: 0..<Self.anchorCount, using: &rng)
+        let secondAnchorCandidate = Int.random(in: 0..<(Self.anchorCount - 1), using: &rng)
+        let secondAnchorIndex = secondAnchorCandidate >= firstAnchorIndex
+            ? secondAnchorCandidate + 1
+            : secondAnchorCandidate
+        let ribbonParameters = RibbonParameters(
+            firstAngle: firstAngle,
+            secondAngle: -firstAngle + Double.random(in: Self.secondRibbonDeviationRange, using: &rng),
+            firstWidth: Double.random(in: Self.ribbonWidthRange, using: &rng),
+            secondWidth: Double.random(in: Self.ribbonWidthRange, using: &rng),
+            firstOffset: Double.random(in: Self.ribbonOffsetRange, using: &rng),
+            secondOffset: Double.random(in: Self.ribbonOffsetRange, using: &rng),
+            firstAnchorIndex: firstAnchorIndex,
+            secondAnchorIndex: secondAnchorIndex
+        )
+        self.ribbonParameters = ribbonParameters
+
         // 앵커를 네 코너(좌상·우상·좌하·우하)에 두고, 25개 제어점은 이중선형 보간으로
         // 그 사이를 흐른다 — 큰 면이 부드럽게 이어지는 오라 (F61, 무작위 배치 은퇴).
         let n = Self.meshDimension
         controlPoints = (0..<Self.controlPointCount).map { index in
             let u = Double(index % n) / Double(n - 1)
             let v = Double(index / n) / Double(n - 1)
-            let weights = [(1 - u) * (1 - v), u * (1 - v), (1 - u) * v, u * v]
-            let blended = Self.blend(anchors: anchors, weights: weights)
+            let cornerWeights = [(1 - u) * (1 - v), u * (1 - v), (1 - u) * v, u * v]
+            let firstRibbonWeight = Self.ribbonWeight(
+                u: u, v: v, angle: ribbonParameters.firstAngle,
+                width: ribbonParameters.firstWidth, offset: ribbonParameters.firstOffset
+            )
+            let secondRibbonWeight = Self.ribbonWeight(
+                u: u, v: v, angle: ribbonParameters.secondAngle,
+                width: ribbonParameters.secondWidth, offset: ribbonParameters.secondOffset
+            )
+            let sources = anchors + [
+                anchors[ribbonParameters.firstAnchorIndex],
+                anchors[ribbonParameters.secondAnchorIndex],
+            ]
+            let unnormalizedWeights = cornerWeights + [
+                firstRibbonWeight * Self.ribbonStrength,
+                secondRibbonWeight * Self.ribbonStrength,
+            ]
+            let totalWeight = unnormalizedWeights.reduce(0, +)
+            let weights = unnormalizedWeights.map { $0 / totalWeight }
+            let blended = Self.blend(anchors: sources, weights: weights)
             let corrected = Self.colorGuaranteeingInkContrast(
                 hue: blended.hue, saturation: blended.saturation, brightness: blended.brightness
             )
@@ -81,6 +142,20 @@ public struct CardVisual: Equatable, Sendable {
                 hue: blended.hue, saturation: corrected.saturation, brightness: corrected.brightness
             )
         }
+    }
+
+    /// 한 점이 리본 중심선에서 멀어질수록 부드럽게 0이 된다. 5×5의 낮은 해상도에서도
+    /// 계단이나 딱딱한 띠가 생기지 않게 smoothstep 곡선을 쓴다.
+    private static func ribbonWeight(
+        u: Double, v: Double, angle: Double, width: Double, offset: Double
+    ) -> Double {
+        let centeredU = u - 0.5
+        let centeredV = v - 0.5
+        let diagonalPosition = centeredU * cos(angle) + centeredV * sin(angle)
+        let normalizedDistance = abs(diagonalPosition - offset) / width
+        let clamped = min(max(normalizedDistance, 0), 1)
+        let smoothstep = clamped * clamped * (3 - 2 * clamped)
+        return 1 - smoothstep
     }
 
     /// 가중 블렌드 — hue는 원형(색상환)이라 벡터 합으로 섞는다. 앵커들이 인접

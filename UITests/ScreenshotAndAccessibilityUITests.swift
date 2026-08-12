@@ -125,19 +125,13 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         // 3/3 프로필
         let nickname = app.textFields["onboarding.nickname"]
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))
-        nickname.tap()
+        focusTextField(app, nickname)
         nickname.typeText("yena")
-        app.textFields["onboarding.tagline"].tap()
-        app.textFields["onboarding.tagline"].typeText("보드게임 좋아하는 사람")
-        // UIKit 필드(F63)는 첫 응답자 전환이 반 박자 늦을 수 있다 — 포커스가 잡힐 때까지 재탭
+        let tagline = app.textFields["onboarding.tagline"]
+        focusTextField(app, tagline)
+        tagline.typeText("보드게임 좋아하는 사람")
         let emojiField = app.textFields["onboarding.emoji"]
-        tapEvenIfOffscreen(app, emojiField)
-        var focusTries = 0
-        while (emojiField.value(forKey: "hasKeyboardFocus") as? Bool) != true && focusTries < 4 {
-            RunLoop.current.run(until: Date().addingTimeInterval(0.5))
-            emojiField.tap()
-            focusTries += 1
-        }
+        focusTextField(app, emojiField)
         emojiField.typeText("🧗")
         snap(app, "\(prefix)-3-onboarding-profile")
         tapEvenIfOffscreen(app, app.buttons["onboarding.createCard"])
@@ -195,6 +189,20 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         }
         XCTAssertTrue(deleteButton.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-10-settings")
+    }
+
+    /// SwiftUI 전환 직후에는 필드가 존재해도 첫 응답자가 되기 전일 수 있다. 포커스가
+    /// 실제로 잡힌 것을 확인한 뒤에만 합성 입력을 보낸다.
+    @MainActor
+    private func focusTextField(_ app: XCUIApplication, _ field: XCUIElement) {
+        tapEvenIfOffscreen(app, field)
+        var focusTries = 0
+        while (field.value(forKey: "hasKeyboardFocus") as? Bool) != true && focusTries < 4 {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.5))
+            field.tap()
+            focusTries += 1
+        }
+        XCTAssertEqual(field.value(forKey: "hasKeyboardFocus") as? Bool, true)
     }
 
     /// Dynamic Type 극단에서는 버튼이 스크롤 밖에 있을 수 있다 — 화면에 들어올 때까지 스크롤.

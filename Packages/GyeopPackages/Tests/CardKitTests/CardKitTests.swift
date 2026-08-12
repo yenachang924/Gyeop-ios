@@ -27,6 +27,37 @@ struct CardVisualTests {
     }
 }
 
+@Suite("CardVisual — F72 리본 변주")
+struct CardVisualRibbonTests {
+    @Test("같은 시드는 같은 리본 파라미터를 만들고, 여러 시드는 변주를 만든다")
+    func ribbonParametersAreDeterministicAndVaried() {
+        let seeds = [
+            CardSeed.hash(nickname: "예나", emoji: "🏃", interests: ["달리기", "보드게임"], mbti: MBTI(code: "ENFP")),
+            CardSeed.hash(nickname: "민지", emoji: "🎨", interests: ["그림", "사진"], mbti: MBTI(code: "ISFJ")),
+            CardSeed.hash(nickname: "하람", emoji: "🧗", interests: ["클라이밍", "캠핑"], mbti: MBTI(code: "ESTP")),
+            CardSeed.hash(nickname: "도윤", emoji: "🎸", interests: ["기타", "영화"], mbti: MBTI(code: "INTJ")),
+        ]
+
+        let parameters = seeds.map { CardVisual(seed: $0).ribbonParameters }
+        for (seed, parameter) in zip(seeds, parameters) {
+            #expect(CardVisual(seed: seed).ribbonParameters == parameter)
+        }
+        #expect(parameters[0] != parameters[1] || parameters[1] != parameters[2] || parameters[2] != parameters[3])
+    }
+
+    @Test("교차하는 두 리본은 서로 다른 앵커를 사용한다")
+    func ribbonAnchorsAreDistinct() {
+        for index in 0..<100 {
+            let seed = CardSeed.hash(
+                nickname: "리본\(index)", emoji: "✨", interests: ["관심사\(index)"],
+                mbti: MBTI(code: index.isMultiple(of: 2) ? "ENFP" : "ISTJ")
+            )
+            let parameters = CardVisual(seed: seed).ribbonParameters
+            #expect(parameters.firstAnchorIndex != parameters.secondAnchorIndex)
+        }
+    }
+}
+
 @Suite("CardVisual — 오라 파스텔 대역 (F56: 채도 25~45%·명도 82~96%)")
 struct CardVisualRangeTests {
     @Test("모든 제어점의 채도·명도가 오라 대역 안에 있다")
