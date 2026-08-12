@@ -178,7 +178,12 @@ public struct CardBackView: View {
                     colors: meshColors
                 )
                 Rectangle().fill(.ultraThinMaterial)
+                CardBackGlassLayers()
             }
+        }
+        .overlay(alignment: .topTrailing) {
+            CardInterestAssetStack(interests: card.interests)
+                .padding(DS.Spacing.l)
         }
         .clipShape(RoundedRectangle(cornerRadius: DS.Radius.card))
         .cardGlassFinish()
@@ -189,18 +194,14 @@ public struct CardBackView: View {
     private var interestChips: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.xs) {
             ForEach(card.interests, id: \.self) { interest in
-                HStack(spacing: DS.Spacing.xs) {
-                    Text(InterestSymbol.emoji(for: interest))
-                        .font(DS.Typo.title)
-                    Text(interest)
-                        .font(DS.Typo.footnote)
-                }
-                .foregroundStyle(.primary)
+                Text(interest)
+                    .font(DS.Typo.footnote)
+                    .foregroundStyle(.primary)
                 .padding(.horizontal, DS.Spacing.m)
                 .padding(.vertical, DS.Spacing.s)
-                    .background(.ultraThinMaterial, in: Capsule())
-                    .overlay(Capsule().strokeBorder(.quaternary))
-                    .fixedSize()
+                .background(.ultraThinMaterial, in: Capsule())
+                .overlay(Capsule().strokeBorder(.quaternary))
+                .fixedSize()
             }
         }
     }
@@ -220,6 +221,71 @@ public struct CardBackView: View {
             }
         }
     }()
+}
+
+/// F76: 관심사는 왼쪽에서 이름으로 읽고, 대표 이모지는 우측 상단의 겹친 Glass
+/// 버블에서 먼저 읽힌다. 입력 배열 순서를 그대로 써 받는 카드도 결정적이다.
+private struct CardInterestAssetStack: View {
+    let interests: [String]
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            ForEach(Array(CardInterestAssets.symbols(for: interests).enumerated()), id: \.offset) { index, symbol in
+                Text(symbol)
+                    .font(DS.Typo.mbtiHero)
+                    .frame(width: Layout.bubbleSize, height: Layout.bubbleSize)
+                    .modifier(CardInterestAssetSurface())
+                    .offset(
+                        x: -CGFloat(index) * DS.Spacing.m,
+                        y: CGFloat(index) * DS.Spacing.m
+                    )
+                    .accessibilityLabel("관심사 (interests[index])")
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private enum Layout {
+        static let bubbleSize = DS.Layout.primaryActionHeight + DS.Spacing.m
+    }
+}
+
+/// F76: 오라 위에서 카드 안쪽에 깊이를 만드는 정지 유리 두 겹. 서로 다른 지름과
+/// 위치만으로 Apple 배경화면식의 겹친 표면을 만들며, 새 색과 반복 모션은 쓰지 않는다.
+private struct CardBackGlassLayers: View {
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(.ultraThinMaterial)
+                .frame(
+                    width: DS.Layout.homeMyCardMaxWidth - DS.Spacing.xl,
+                    height: DS.Layout.homeMyCardMaxWidth - DS.Spacing.xl
+                )
+                .offset(x: DS.Spacing.l, y: -DS.Spacing.m)
+            Circle()
+                .fill(.thinMaterial)
+                .frame(
+                    width: DS.Layout.homeMyCardMaxWidth - DS.Spacing.xl - DS.Spacing.xl,
+                    height: DS.Layout.homeMyCardMaxWidth - DS.Spacing.xl - DS.Spacing.xl
+                )
+                .offset(x: -DS.Spacing.l, y: DS.Spacing.xl)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/// 우측 이모지 에셋의 실제 Liquid Glass 표면. 이전 OS는 같은 원형 material로 폴백한다.
+private struct CardInterestAssetSurface: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, macOS 26.0, *) {
+            content.glassEffect(.regular, in: Circle())
+        } else {
+            content
+                .background(.ultraThinMaterial, in: Circle())
+                .overlay { Circle().strokeBorder(.quaternary) }
+        }
+    }
 }
 
 /// 카드 플립 — 앞면(색)과 뒷면(MBTI·관심사)을 탭으로 오간다 (F54).
