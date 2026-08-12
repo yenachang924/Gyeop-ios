@@ -39,7 +39,7 @@ struct CardRevealView: View {
                     .rotation3DEffect(
                         .degrees(appeared ? 0 : 22),
                         axis: (x: 1, y: 0, z: 0),
-                        perspective: 0.55
+                        perspective: 80
                     )
                     .offset(y: leaving ? -140 : (appeared ? 0 : 240))
                     .opacity(appeared ? (leaving ? 0 : 1) : 0)
