@@ -173,17 +173,9 @@ struct MBTIStepView: View {
                 .contentShape(Capsule())
         }
         .buttonStyle(.plain)
-        .background {
-            ZStack {
-                Capsule().fill(.ultraThinMaterial)
-                Capsule().fill(DS.Palette.accent)
-                    .opacity(isSelected ? 1 : 0)
-            }
-        }
-        .overlay {
-            Capsule().strokeBorder(.quaternary)
-                .opacity(isSelected ? 0 : 1)
-        }
+        // F69: Liquid Glass 복귀 (소유자 지시) — 단, F68의 교훈대로 스타일 교체가 아니라
+        // **같은 유리의 틴트 값만** 바꾼다. 뷰 아이덴티티가 유지되어 깜빡임이 없다.
+        .modifier(MBTIPillSurface(isSelected: isSelected))
         // 고른 쪽이 살짝 부풀며 응답한다 (F62) — 관심사 칩(1.04)과 같은 언어.
         .scaleEffect(isSelected ? 1.04 : 1)
         .animation(reduceMotion ? nil : DS.Motion.standard, value: isSelected)
@@ -238,6 +230,35 @@ struct MBTIStepView: View {
         static let bloomPeakOpacity: Double = 0.4
         /// 가운데 큰 글자 컬럼 폭 — 네 줄의 글자가 세로로 정렬되게 고정한다.
         static let centerLetterWidth: CGFloat = 64
+    }
+}
+
+/// MBTI 알약 표면 (F69) — iOS 26은 Liquid Glass: 미선택은 맨유리, 선택은 같은 유리에
+/// **액센트 틴트만** 더해진다 (구조 교체 없음 = 깜빡임 없음, F68 교훈).
+/// 이전 OS는 재질 캡슐 폴백 — 같은 원리로 채움 불투명도만 바뀐다.
+private struct MBTIPillSurface: ViewModifier {
+    let isSelected: Bool
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.glassEffect(
+                isSelected ? .regular.tint(DS.Palette.accent) : .regular,
+                in: Capsule()
+            )
+        } else {
+            content
+                .background {
+                    ZStack {
+                        Capsule().fill(.ultraThinMaterial)
+                        Capsule().fill(DS.Palette.accent)
+                            .opacity(isSelected ? 1 : 0)
+                    }
+                }
+                .overlay {
+                    Capsule().strokeBorder(.quaternary)
+                        .opacity(isSelected ? 0 : 1)
+                }
+        }
     }
 }
 
