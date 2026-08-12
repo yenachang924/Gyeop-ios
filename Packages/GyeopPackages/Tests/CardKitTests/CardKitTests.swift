@@ -2,6 +2,20 @@ import Core
 import Testing
 @testable import CardKit
 
+@Suite("InterestSymbol — 카드 관심사 에셋")
+struct InterestSymbolTests {
+    @Test("카탈로그 관심사는 고정 대표 이모지를 낸다")
+    func knownInterestUsesCatalogSymbol() {
+        #expect(InterestSymbol.emoji(for: "탁구") == "🏓")
+        #expect(InterestSymbol.emoji(for: "코딩") == "💻")
+    }
+
+    @Test("미등록 관심사는 공통 반짝임으로 폴백한다")
+    func unknownInterestUsesFallbackSymbol() {
+        #expect(InterestSymbol.emoji(for: "새 관심사") == "✨")
+    }
+}
+
 @Suite("CardVisual — 시드 결정성")
 struct CardVisualTests {
     @Test("같은 시드 = 같은 비주얼 파라미터")
