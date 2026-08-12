@@ -16,16 +16,6 @@ struct InterestSymbolTests {
     }
 }
 
-@Suite("CardInterestAssets — 우측 에셋 순서")
-struct CardInterestAssetsTests {
-    @Test("관심사 순서대로 우측 에셋 심볼을 보존한다")
-    func preservesInterestOrder() {
-        #expect(
-            CardInterestAssets.symbols(for: ["클라이밍", "커피"]) == ["🧗", "☕"]
-        )
-    }
-}
-
 @Suite("CardVisual — 시드 결정성")
 struct CardVisualTests {
     @Test("같은 시드 = 같은 비주얼 파라미터")

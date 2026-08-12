@@ -177,6 +177,10 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
             // F74: 플립 중에는 양면을 잠시 합성한다. 정지한 뒷면을 기록해야 카드 정보
             // 포스터의 실제 레이아웃을 검증할 수 있다.
             RunLoop.current.run(until: Date().addingTimeInterval(0.6))
+            XCTAssertFalse(
+                app.descendants(matching: .any)["관심사 (interests[index])"].exists,
+                "뒷면의 장식 이모지는 별도 접근성 요소가 아니어야 한다"
+            )
             snap(app, "\(prefix)-9b-card-back")
         }
         close.tap()

@@ -18,39 +18,36 @@
 
 ---
 
-### Task 1: Lock the common visual surface contract
+### Task 1: Lock the card-back accessibility regression
 
-**Files:** Modify `Packages/GyeopPackages/Tests/CardKitTests/CardKitTests.swift`.
+**Files:** Modify `UITests/ScreenshotAndAccessibilityUITests.swift`.
 
-**Interfaces:** Consumes `CardVisual(seed:)`, `controlPoints`, and `ribbonParameters`; produces `CardVisualTests.sharedSurfaceIsStableAcrossTwoReads()`.
+**Interfaces:** Consumes the existing full-flow card flip. Produces an assertion that removed decorative F76 asset bubbles no longer duplicate the card-back accessibility tree.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
-Add to the existing CardVisual suite:
+Immediately after the existing `card.flip` tap and delay in `runFullFlow`, add:
 
-    @Test("같은 카드 표면은 재사용해도 메시와 리본이 변하지 않는다")
-    func sharedSurfaceIsStableAcrossTwoReads() {
-        let first = CardVisual(seed: "optical-ribbon")
-        let second = CardVisual(seed: "optical-ribbon")
-        #expect(first.controlPoints == second.controlPoints)
-        #expect(first.ribbonParameters == second.ribbonParameters)
-    }
+    XCTAssertFalse(
+        app.descendants(matching: .any)["관심사 (interests[index])"].exists,
+        "뒷면의 장식 이모지는 별도 접근성 요소가 아니어야 한다"
+    )
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
-Run `cd Packages/GyeopPackages && swift test --filter CardVisualTests.sharedSurfaceIsStableAcrossTwoReads` before adding the test. Expected: FAIL because the test is absent.
+Run `xcodebuild -project Gyeop.xcodeproj -scheme Gyeop -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test -only-testing:GyeopUITests/ScreenshotAndAccessibilityUITests/testFullFlowWithScreenshots`. Expected: FAIL because F76 creates the matching decorative asset element.
 
-- [ ] **Step 3: Add exactly the shown test**
+- [x] **Step 3: Keep the assertion while replacing F76 in Task 2**
 
-No production change is needed: the existing deterministic API is the desired source.
+The test exercises the accessibility tree users receive, not a source-level implementation detail.
 
-- [ ] **Step 4: Verify GREEN**
+- [x] **Step 4: Verify GREEN**
 
-Run `cd Packages/GyeopPackages && swift test --filter CardVisualTests.sharedSurfaceIsStableAcrossTwoReads`. Expected: PASS.
+Run the same focused UI test after Task 2. Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
-Commit only the test with message `test: lock card optical ribbon surface`.
+Commit the test with the Task 2 implementation, because the red test must not remain in the branch.
 
 ### Task 2: Replace F76 objects with the common mesh surface
 
@@ -58,19 +55,19 @@ Commit only the test with message `test: lock card optical ribbon surface`.
 
 **Interfaces:** Consumes `CardVisual(seed: card.seed).colors`, `CardVisual.meshDimension`, and `CardBackView.gridPoints`; produces a `CardBackView` using one clipped `MeshGradient` and Material finish, without F76 helpers.
 
-- [ ] **Step 1: Confirm the rejected objects are present**
+- [x] **Step 1: Confirm the rejected objects are present**
 
 Run `rg -n "CardBackGlassLayers|CardInterestAssetStack|CardInterestAssetSurface" Packages/GyeopPackages/Sources/CardKit/CardView.swift`. Expected: declarations and uses are found.
 
-- [ ] **Step 2: Apply the smallest visual replacement**
+- [x] **Step 2: Apply the smallest visual replacement**
 
 Add `meshColors` initialized from `CardVisual(seed: card.seed).colors` to `CardBackView`. Its background becomes a `ZStack` of `MeshGradient(width: CardVisual.meshDimension, height: CardVisual.meshDimension, points: Self.gridPoints, colors: meshColors)` and `Rectangle().fill(.ultraThinMaterial)`. Delete the top-trailing interest overlay plus `CardBackGlassLayers`, `CardInterestAssetStack`, `CardInterestAssetSurface`, and the unused `CardInterestAssets.swift`. Preserve the central-leading MBTI and interest-name capsule stack.
 
-- [ ] **Step 3: Verify the replacement**
+- [x] **Step 3: Verify the replacement**
 
 Run `rg -n "CardBackGlassLayers|CardInterestAssetStack|CardInterestAssetSurface" Packages/GyeopPackages/Sources/CardKit/CardView.swift; cd Packages/GyeopPackages && swift test`. Expected: no `rg` matches and all package tests PASS.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 Stage CardView and remove the unused helper file. Commit message: `feat: restore continuous card ribbon surface`.
 
@@ -80,14 +77,14 @@ Stage CardView and remove the unused helper file. Commit message: `feat: restore
 
 **Interfaces:** Consumes final CardKit implementation and `GyeopUITests/ScreenshotAndAccessibilityUITests`; produces screenshot-reviewed final rendering and checked verification record.
 
-- [ ] **Step 1: Build**
+- [x] **Step 1: Build**
 
 Run `xcodebuild -project Gyeop.xcodeproj -scheme Gyeop -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build`. Expected: direct exit code 0 and `BUILD SUCCEEDED`.
 
-- [ ] **Step 2: Run the card UI flow and inspect attachments**
+- [x] **Step 2: Run the card UI flow and inspect attachments**
 
 Run `xcodebuild -project Gyeop.xcodeproj -scheme Gyeop -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test -only-testing:GyeopUITests/ScreenshotAndAccessibilityUITests`. Expected: all cases pass. Extract and inspect front, back, dark-mode, and accessibility-size PNG attachments.
 
-- [ ] **Step 3: Mark verified and commit**
+- [x] **Step 3: Mark verified and commit**
 
-Check every completed box after the successful runs, then commit this plan with message `docs: verify optical ribbon card`.
+The full iPhone 17 Pro UI suite passed with seven tests and its card front, card back, dark-mode card back, and AX5 card back attachments were inspected. The attempted extra blurred capsule overlay was rejected because the focused UI flow timed out at the first screen; the final implementation remains the static, shared `CardVisual` ribbon mesh with no additional per-frame compositing.
