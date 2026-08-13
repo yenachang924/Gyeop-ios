@@ -28,6 +28,9 @@ struct MBTIStepView: View {
     @State private var lifestyle: MBTI.Lifestyle?
     /// 탭마다 하나씩 태어나는 배경 색 흐름 — 애니메이션이 끝나면 스스로 걷힌다.
     @State private var blooms: [Bloom] = []
+    /// 알약 탭마다 +1 — 시스템 선택 햅틱의 트리거. 선택 상태를 트리거로 쓰면
+    /// 뒤로 돌아와 복원(restore)될 때도 울려서, 손이 닿은 순간에만 증가하는 값을 쓴다.
+    @State private var hapticTick = 0
 
     private var composed: MBTI? {
         guard let energy, let perception, let judgment, let lifestyle else { return nil }
@@ -63,6 +66,8 @@ struct MBTIStepView: View {
         }
         .background { bloomLayer }
         .background(DS.Palette.background)
+        // 알약 선택 햅틱 — Reduce Motion과 무관하게 유지한다 (모션이 아니라 촉각 응답).
+        .sensoryFeedback(.selection, trigger: hapticTick)
         .navigationTitle("2 / 3")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear(perform: restore)
@@ -123,6 +128,7 @@ struct MBTIStepView: View {
             ) {
                 choose(options[0].letter)
                 bloom(axis: axis)
+                hapticTick += 1
             }
 
             // 가운데: 이 축에서 고른 글자가 크게 선다 — 네 줄이 모여 세로로 MBTI가 완성된다.
@@ -152,6 +158,7 @@ struct MBTIStepView: View {
             ) {
                 choose(options[1].letter)
                 bloom(axis: axis)
+                hapticTick += 1
             }
         }
     }
