@@ -97,14 +97,14 @@
 		2B4B1EA1770D8AE18ED44731 /* EmojiCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiCatalog.swift; sourceTree = "<group>"; };
 		34C9ED94E8F7098CD904FC93 /* ClipOnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipOnboardingFlowView.swift; sourceTree = "<group>"; };
 		3F61AB8788D0608FCA8CD1F6 /* GyeopPackages */ = {isa = PBXFileReference; lastKnownFileType = folder; name = GyeopPackages; path = Packages/GyeopPackages; sourceTree = SOURCE_ROOT; };
-		42DA513B14E1385CA8F5209F /* Gyeop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gyeop.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		42DA513B14E1385CA8F5209F /* Gyeop.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Gyeop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4AFE35854ECECEB624968DDD /* GyeopClipUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = GyeopClipUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6B8BBBC567132FCFDD3F9BD2 /* OnboardingDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingDraft.swift; sourceTree = "<group>"; };
 		77762B5D57F8BEB9881E4F14 /* InterestsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterestsStepView.swift; sourceTree = "<group>"; };
 		7BB9415FD921160F6E33BDE5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		863A4BB1552A39DBD063E27E /* CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionView.swift; sourceTree = "<group>"; };
 		8AE100902A9F49506C6D2A50 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
-		8B25C63ADE80AD156FF1590D /* GyeopClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GyeopClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B25C63ADE80AD156FF1590D /* GyeopClip.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = GyeopClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		96FA8444B0DB1FC4BBA71E12 /* StyleStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyleStepView.swift; sourceTree = "<group>"; };
 		A315153ABBD0D3E154457254 /* CardDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDetailView.swift; sourceTree = "<group>"; };
 		ABD63AB1680EBD8241FB337D /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
@@ -118,7 +118,7 @@
 		DF396ED85073133240235C7A /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		E16E99F9D82C3109EA3DA8DF /* GyeopUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = GyeopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E760C13518A80D90639DEC4B /* ExchangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeView.swift; sourceTree = "<group>"; };
-		EE5F0DB1E684956C240C7993 /* emoji-icons.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "emoji-icons.csv"; sourceTree = "<group>"; };
+		EE5F0DB1E684956C240C7993 /* emoji-icons.csv */ = {isa = PBXFileReference; path = "emoji-icons.csv"; sourceTree = "<group>"; };
 		F1208475C4EFF7B6D64C97F8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		F2B532C58FBE7B2E92053F29 /* ProfileStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileStepView.swift; sourceTree = "<group>"; };
 		FFC5877382240DAE114177A4 /* ClipAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipAssembly.swift; sourceTree = "<group>"; };
@@ -561,7 +561,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = AppClip/App/AppClip.entitlements;
-				DEVELOPMENT_TEAM = M63YMWAA5V;
 				INFOPLIST_FILE = AppClip/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -656,7 +655,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Support/Gyeop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = M63YMWAA5V;
 				INFOPLIST_FILE = App/Support/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -672,7 +670,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = AppClip/App/AppClip.entitlements;
-				DEVELOPMENT_TEAM = M63YMWAA5V;
 				INFOPLIST_FILE = AppClip/App/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -791,7 +788,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/Support/Gyeop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = M63YMWAA5V;
 				INFOPLIST_FILE = App/Support/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -830,7 +826,7 @@
 				9B9954347CFA4FA6F89DE563 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		47847C08AE8B431FF3C62624 /* Build configuration list for PBXNativeTarget "GyeopClip" */ = {
 			isa = XCConfigurationList;
@@ -839,7 +835,7 @@
 				737B18CF55963740E05B92D0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		5155717B36DDC33D6C74F796 /* Build configuration list for PBXProject "Gyeop" */ = {
 			isa = XCConfigurationList;
@@ -848,7 +844,7 @@
 				36A18D70856F1BC10230FFF8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		A1E94A896D4783C78CA95132 /* Build configuration list for PBXNativeTarget "Gyeop" */ = {
 			isa = XCConfigurationList;
@@ -857,7 +853,7 @@
 				6F849D85FEF0B535926AA4F3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		CAA7B08A5A07B848238003B0 /* Build configuration list for PBXNativeTarget "GyeopClipUITests" */ = {
 			isa = XCConfigurationList;
@@ -866,7 +862,7 @@
 				2F7FA441C4FF55AFA9D881A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 
