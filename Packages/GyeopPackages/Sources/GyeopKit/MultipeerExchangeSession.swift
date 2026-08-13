@@ -1,6 +1,7 @@
 import Core
 import Foundation
 @preconcurrency import MultipeerConnectivity
+import Synchronization
 
 /// 카드 맞대기(MPC) 실구현. 상태 전이 로직은 ExchangeStateMachine(순수·테스트 가능)이
 /// 갖고 있고, 이 액터는 MC delegate 콜백을 상태 머신 입력으로 번역하고 머신이 요청한
@@ -20,11 +21,13 @@ public actor MultipeerExchangeSession: ExchangeSession {
     private let advertiser: MCNearbyServiceAdvertiser
     private let browser: MCNearbyServiceBrowser
     private let delegateProxy: ExchangeDelegateProxy
+    private let invitationGate: InvitationGate
     private let haptics = HapticFeedback()
 
     private var machine = ExchangeStateMachine()
     private var myCard: CardSnapshot?
     private var knownPeers: [String: MCPeerID] = [:]
+    /// 진행 중인 상대 락. 반드시 setActivePeer(_:)로만 쓴다 — 초대 게이트 미러를 함께 갱신해야 한다.
     private var activePeerName: String?
     private var timeoutTask: Task<Void, Never>?
     private var isFinished = false
@@ -41,7 +44,9 @@ public actor MultipeerExchangeSession: ExchangeSession {
         session = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: .required)
         advertiser = MCNearbyServiceAdvertiser(peer: peerID, discoveryInfo: nil, serviceType: ExchangeConstants.serviceType)
         browser = MCNearbyServiceBrowser(peer: peerID, serviceType: ExchangeConstants.serviceType)
-        delegateProxy = ExchangeDelegateProxy(session: session)
+        let gate = InvitationGate()
+        invitationGate = gate
+        delegateProxy = ExchangeDelegateProxy(session: session, gate: gate)
         (events, continuation) = AsyncStream.makeStream(of: ExchangeEvent.self)
 
         session.delegate = delegateProxy
@@ -107,8 +112,11 @@ public actor MultipeerExchangeSession: ExchangeSession {
             }
 
         case .retried:
-            activePeerName = nil
+            setActivePeer(nil)
             Task { await MetricCounter.shared.increment(Metric.exchangeRetry) }
+
+        case .releasePeer:
+            setActivePeer(nil)
 
         case .finish:
             teardown()
@@ -139,6 +147,7 @@ public actor MultipeerExchangeSession: ExchangeSession {
     private func teardown() {
         guard !isFinished else { return }
         isFinished = true
+        invitationGate.finish() // 종료 후 도착하는 초대는 게이트가 거절한다
         timeoutTask?.cancel()
         timeoutTask = nil
         advertiser.stopAdvertisingPeer()
@@ -206,12 +215,19 @@ public actor MultipeerExchangeSession: ExchangeSession {
         }
     }
 
+    /// activePeerName의 유일한 쓰기 경로 — 초대 게이트(델리게이트 큐에서 동기 판정)와
+    /// 액터 쪽 락이 어긋나지 않게 항상 함께 갱신한다.
+    private func setActivePeer(_ name: String?) {
+        activePeerName = name
+        invitationGate.sync(lockedPeer: name)
+    }
+
     // MARK: - MC delegate 콜백 (delegateProxy가 호출)
 
     fileprivate func handleFoundPeer(_ peerID: MCPeerID) {
         knownPeers[peerID.displayName] = peerID
         guard activePeerName == nil else { return }
-        activePeerName = peerID.displayName
+        setActivePeer(peerID.displayName)
         let shouldInvite = ExchangeTieBreak.shouldInitiate(local: localPeerID.displayName, remote: peerID.displayName)
         apply(.peerDiscovered(name: peerID.displayName, shouldInvite: shouldInvite))
     }
@@ -222,13 +238,17 @@ public actor MultipeerExchangeSession: ExchangeSession {
         apply(.peerLost(name: peerID.displayName))
     }
 
-    fileprivate func handleReceivedInvitation(from peerID: MCPeerID) {
+    fileprivate func handleReceivedInvitation(from peerID: MCPeerID, accepted: Bool) {
         knownPeers[peerID.displayName] = peerID
+        guard accepted else { return }
+        // 게이트가 수락하며 잠갔다면 액터 쪽 락도 맞춘다. 그 사이 다른 피어로 잠긴 희귀한
+        // 경합에서는 액터가 우선 — 수락된 세션의 콜백은 activePeerName 가드가 걸러낸다.
+        setActivePeer(activePeerName ?? peerID.displayName)
     }
 
     fileprivate func handleSessionStateChange(_ peerID: MCPeerID, state: MCSessionState) {
         knownPeers[peerID.displayName] = peerID
-        if activePeerName == nil { activePeerName = peerID.displayName }
+        if activePeerName == nil { setActivePeer(peerID.displayName) }
         guard activePeerName == peerID.displayName else { return }
 
         switch state {
@@ -273,9 +293,11 @@ private final class ExchangeDelegateProxy: NSObject, MCSessionDelegate, MCNearby
     /// 초대 수락(`invitationHandler`)을 액터로 넘기지 않고 여기서 바로 호출하기 위해 필요.
     /// non-Sendable 클로저를 actor 경계 너머로 보내는 걸 피하는 목적도 있다.
     private let session: MCSession
+    private let gate: InvitationGate
 
-    init(session: MCSession) {
+    init(session: MCSession, gate: InvitationGate) {
         self.session = session
+        self.gate = gate
     }
 
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
@@ -298,9 +320,12 @@ private final class ExchangeDelegateProxy: NSObject, MCSessionDelegate, MCNearby
         withContext context: Data?,
         invitationHandler: @escaping (Bool, MCSession?) -> Void
     ) {
-        // start() 호출 자체가 사용자 동의이므로 겹 서비스 타입으로 들어온 초대는 항상 수락한다.
-        invitationHandler(true, session)
-        Task { [target] in await target?.handleReceivedInvitation(from: peerID) }
+        // tie-break는 초대 '발신' 방향만 정한다 — 다자 환경에서 제3자 초대를 걸러내는 건
+        // 수신 측 몫이다. 이미 다른 상대와 진행 중이거나 종료 후면 거절한다; 거절받은
+        // 초대자는 didChange(.notConnected)를 받고 자기 쪽에서 재시도한다.
+        let accepted = gate.tryAccept(peerID.displayName)
+        invitationHandler(accepted, accepted ? session : nil)
+        Task { [target] in await target?.handleReceivedInvitation(from: peerID, accepted: accepted) }
     }
 
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
@@ -309,5 +334,40 @@ private final class ExchangeDelegateProxy: NSObject, MCSessionDelegate, MCNearby
 
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
         Task { [target] in await target?.handleLostPeer(peerID) }
+    }
+}
+
+/// 초대 수락 여부를 델리게이트 큐에서 즉시(동기) 판정하기 위한 락 미러.
+/// invitationHandler는 non-Sendable 클로저라 액터로 넘겨 비동기 판정할 수 없다 —
+/// 대신 액터가 activePeerName을 바꿀 때마다 sync(lockedPeer:)로 이 미러를 갱신하고,
+/// 프록시는 여기서 바로 수락/거절을 결정한다. 진실 원천은 어디까지나 액터다.
+final class InvitationGate: Sendable {
+    private struct State {
+        var lockedPeer: String?
+        var isFinished = false
+    }
+
+    private let state = Mutex(State())
+
+    /// 미잠금이면 이 피어로 잠그며 수락, 잠겨 있으면 같은 피어일 때만 수락, 종료 후엔 항상 거절.
+    func tryAccept(_ peerName: String) -> Bool {
+        state.withLock { state in
+            guard !state.isFinished else { return false }
+            guard let locked = state.lockedPeer else {
+                state.lockedPeer = peerName
+                return true
+            }
+            return locked == peerName
+        }
+    }
+
+    /// 액터의 activePeerName 변경을 반영한다 (setActivePeer 전용).
+    func sync(lockedPeer: String?) {
+        state.withLock { $0.lockedPeer = lockedPeer }
+    }
+
+    /// teardown 이후 도착하는 모든 초대를 거절 상태로 만든다.
+    func finish() {
+        state.withLock { $0.isFinished = true }
     }
 }

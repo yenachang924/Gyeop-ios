@@ -56,14 +56,44 @@ struct ExchangeStateMachineTests {
         #expect(effects == [.emit(.peerFound(name: "상대")), .emit(.connecting(name: "상대"))])
     }
 
-    @Test("peerFound에서 같은 피어를 잃으면 searching으로 복귀 (이벤트 재방출 없음)")
+    @Test("peerFound에서 같은 피어를 잃으면 searching으로 복귀 + 락 해제 (releasePeer)")
     func peerLostReturnsToSearching() {
         var machine = ExchangeStateMachine()
         machine.reduce(.start)
         machine.reduce(.peerDiscovered(name: "상대", shouldInvite: true))
         let effects = machine.reduce(.peerLost(name: "상대"))
         #expect(machine.state == .searching)
-        #expect(effects.isEmpty)
+        #expect(effects == [.releasePeer])
+    }
+
+    @Test("peerFound에서 초대가 거절·시간초과되면(notConnected) 재시도 규칙을 태운다")
+    func inviteRejectionRetriesFromPeerFound() {
+        var machine = ExchangeStateMachine(maxRetries: 1)
+        machine.reduce(.start)
+        machine.reduce(.peerDiscovered(name: "상대", shouldInvite: true))
+
+        let retried = machine.reduce(.peerDisconnected(name: "상대"))
+        #expect(machine.state == .searching)
+        #expect(retried == [.retried, .emit(.searching)])
+
+        machine.reduce(.peerDiscovered(name: "상대", shouldInvite: true))
+        let failed = machine.reduce(.peerDisconnected(name: "상대"))
+        #expect(machine.state == .failed(.peerLost))
+        #expect(failed == [.emit(.failed(.peerLost)), .finish])
+    }
+
+    @Test("searching 중 락만 걸린 상대가 사라지면 releasePeer로 락을 푼다")
+    func searchingReleasesLockOnPeerLoss() {
+        var machine = ExchangeStateMachine()
+        machine.reduce(.start)
+
+        let lost = machine.reduce(.peerLost(name: "상대"))
+        #expect(machine.state == .searching)
+        #expect(lost == [.releasePeer])
+
+        let disconnected = machine.reduce(.peerDisconnected(name: "상대"))
+        #expect(machine.state == .searching)
+        #expect(disconnected == [.releasePeer])
     }
 
     @Test("connecting → connected: sendCard를 요청하고 awaitingCard로 전이")
@@ -194,6 +224,42 @@ struct ExchangeStateMachineTests {
         let effects = machine.reduce(.peerLost(name: "다른사람"))
         #expect(effects.isEmpty)
         #expect(machine.state == .peerFound(name: "상대"))
+    }
+}
+
+@Suite("InvitationGate — 초대 수락 판정")
+struct InvitationGateTests {
+    @Test("미잠금 상태의 첫 초대는 수락하며 그 피어로 잠근다")
+    func firstInvitationAcceptsAndLocks() {
+        let gate = InvitationGate()
+        #expect(gate.tryAccept("A"))
+        #expect(!gate.tryAccept("B")) // 이미 A로 잠김
+        #expect(gate.tryAccept("A"))  // 같은 피어는 계속 수락
+    }
+
+    @Test("락온한 상대가 아닌 제3자의 초대는 거절한다")
+    func rejectsThirdPartyWhileLocked() {
+        let gate = InvitationGate()
+        gate.sync(lockedPeer: "상대")
+        #expect(!gate.tryAccept("제3자"))
+        #expect(gate.tryAccept("상대"))
+    }
+
+    @Test("락 해제(sync nil) 후에는 새 피어를 수락한다")
+    func acceptsNewPeerAfterRelease() {
+        let gate = InvitationGate()
+        #expect(gate.tryAccept("A"))
+        gate.sync(lockedPeer: nil) // releasePeer/retried 경로
+        #expect(gate.tryAccept("B"))
+    }
+
+    @Test("finish 후에는 모든 초대를 거절한다")
+    func rejectsEverythingAfterFinish() {
+        let gate = InvitationGate()
+        gate.finish()
+        #expect(!gate.tryAccept("A"))
+        gate.sync(lockedPeer: nil)
+        #expect(!gate.tryAccept("A"))
     }
 }
 

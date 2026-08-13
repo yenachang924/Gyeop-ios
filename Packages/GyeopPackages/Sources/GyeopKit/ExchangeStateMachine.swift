@@ -41,6 +41,9 @@ enum ExchangeEffect: Sendable, Equatable {
     case emit(ExchangeEvent)
     /// 재시도 진입 — 액터가 Metric.exchangeRetry 집계 + 락 해제(activePeerName 초기화)를 한다
     case retried
+    /// 락 해제만 — 재시도 집계 없이 activePeerName을 풀어 다음 피어를 받을 수 있게 한다.
+    /// searching으로 복귀·잔류하는 모든 경로에서 락이 새지 않게 하는 안전판.
+    case releasePeer
     /// 세션 종료 — 액터가 advertiser/browser/session 정리 + 스트림 종료
     case finish
 }
@@ -86,20 +89,24 @@ struct ExchangeStateMachine: Sendable {
 
         case (.peerFound(let found), .peerLost(let lost)) where found == lost:
             state = .searching
-            return []
+            return [.releasePeer]
+
+        // 초대를 보냈지만 세션이 열리기 전에 거절·시간초과되면 MC는 didChange(.notConnected)를
+        // 보고한다 — 머신은 아직 peerFound라 connecting 경로와 같은 재시도 규칙을 태운다.
+        case (.peerFound(let name), .peerDisconnected(let lost)) where name == lost:
+            return retryOrFail()
+
+        // 초대 수락 등으로 락만 걸린 채 머신이 searching일 때 상대가 사라지거나
+        // 핸드셰이크가 죽는 경우 — 락을 풀어야 다음 피어를 발견 처리할 수 있다.
+        case (.searching, .peerLost), (.searching, .peerDisconnected):
+            return [.releasePeer]
 
         case (.connecting(let name), .peerConnected(let connected)) where name == connected:
             state = .awaitingCard(name: name)
             return [.sendCard]
 
         case (.connecting(let name), .peerDisconnected(let lost)) where name == lost:
-            if retryCount < maxRetries {
-                retryCount += 1
-                state = .searching
-                return [.retried, .emit(.searching)]
-            }
-            state = .failed(.peerLost)
-            return [.emit(.failed(.peerLost)), .finish]
+            return retryOrFail()
 
         case (.awaitingCard, .cardDataReceived(let card)):
             state = .completed(card)
@@ -125,6 +132,17 @@ struct ExchangeStateMachine: Sendable {
             // 무관한 피어의 발견/소실, 중복 콜백 등 — 안전하게 무시.
             return []
         }
+    }
+
+    /// 연결 성립 전 상대를 잃었을 때의 공통 규칙 — 한도 내면 searching 복귀, 초과면 실패.
+    private mutating func retryOrFail() -> [ExchangeEffect] {
+        if retryCount < maxRetries {
+            retryCount += 1
+            state = .searching
+            return [.retried, .emit(.searching)]
+        }
+        state = .failed(.peerLost)
+        return [.emit(.failed(.peerLost)), .finish]
     }
 }
 
