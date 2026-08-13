@@ -4,7 +4,8 @@ import Core
 /// (ClipOnboardingFlowView — GyeopClip 타깃이 이 파일과 3단계 뷰를 소스 공유)이 함께 쓴다.
 struct OnboardingDraft {
     var interests: [String] = []
-    var style: LeisureStyle?
+    /// MBTI — 건너뛰면 nil (F55).
+    var mbti: MBTI?
     var nickname = ""
     var tagline = ""
     var emoji = ""

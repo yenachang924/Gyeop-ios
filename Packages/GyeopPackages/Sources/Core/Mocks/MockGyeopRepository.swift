@@ -36,4 +36,8 @@ public actor MockGyeopRepository: GyeopRepository {
     public func gyeops() async throws -> [GyeopRecord] {
         records.values.sorted { $0.occurredAt > $1.occurredAt }
     }
+
+    public func deleteGyeop(id: String) async throws {
+        records.removeValue(forKey: id)
+    }
 }

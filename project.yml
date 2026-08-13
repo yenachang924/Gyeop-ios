@@ -13,6 +13,7 @@ settings:
     SWIFT_STRICT_CONCURRENCY: complete
     INFOPLIST_KEY_UILaunchScreen_Generation: YES
     CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: M63YMWAA5V
 
 packages:
   GyeopPackages:
@@ -29,7 +30,6 @@ targets:
     dependencies:
       - package: GyeopPackages
         products: [Core, DesignSystem, CardKit, GyeopKit, DataKit]
-      - target: GyeopClip
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.gyeop.app
@@ -71,7 +71,8 @@ targets:
     sources:
       - AppClip/App
       - App/Features/Onboarding/InterestsStepView.swift
-      - App/Features/Onboarding/StyleStepView.swift
+      - App/Features/Onboarding/MBTIStepView.swift
+      - App/Features/Onboarding/EmojiKeyboardField.swift
       - App/Features/Onboarding/ProfileStepView.swift
       - App/Features/Onboarding/OnboardingDraft.swift
       - App/Support/EmojiCatalog.swift

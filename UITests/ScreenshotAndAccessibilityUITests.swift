@@ -47,14 +47,16 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         let first = app.buttons["onboarding.interest.달리기"]
         XCTAssertTrue(first.waitForExistence(timeout: 5))
         first.tap()
-        app.buttons["onboarding.interest.클라이밍"].tap()
+        app.buttons["onboarding.interest.자전거"].tap()
         snap(app, "default-1b-interests-selected")
 
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
         snap(app, "default-2b-style-selected")
     }
 
@@ -99,30 +101,38 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
     @MainActor
     private func runFullFlow(_ app: XCUIApplication, prefix: String) throws {
         // 1/3 관심사
-        let firstInterest = app.buttons["onboarding.interest.클라이밍"]
+        let firstInterest = app.buttons["onboarding.interest.달리기"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-1-onboarding-interests")
         firstInterest.tap()
         // AX5에서는 LazyVGrid가 화면 밖 칩을 아직 안 만들었을 수 있다 — 스크롤해서 탭
-        tapEvenIfOffscreen(app, app.buttons["onboarding.interest.보드게임"])
+        tapEvenIfOffscreen(app, app.buttons["onboarding.interest.자전거"])
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
 
-        // 2/3 성향 — 2축 슬라이더 조작 후 「다음」 (F17)
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        snap(app, "\(prefix)-2-onboarding-style")
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
-        tapEvenIfOffscreen(app, app.buttons["onboarding.style.next"])
+        // 2/3 MBTI — 네 축 선택 후 「다음」 (F55)
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        snap(app, "\(prefix)-2-onboarding-mbti")
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        let pPill = app.buttons["onboarding.mbti.P"]
+        tapEvenIfOffscreen(app, pPill)
+        // 스크롤 감속과 겹치면 탭이 스크롤 정지로 소비될 수 있다 — 선택 상태로 확인 후 재탭
+        if !pPill.isSelected { pPill.tap() }
+        tapEvenIfOffscreen(app, app.buttons["onboarding.mbti.next"])
 
         // 3/3 프로필
         let nickname = app.textFields["onboarding.nickname"]
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))
-        nickname.tap()
+        focusTextField(app, nickname)
         nickname.typeText("yena")
-        app.textFields["onboarding.tagline"].tap()
-        app.textFields["onboarding.tagline"].typeText("보드게임 좋아하는 사람")
-        tapEvenIfOffscreen(app, app.buttons["onboarding.emoji.클라이밍"])
+        let tagline = app.textFields["onboarding.tagline"]
+        focusTextField(app, tagline)
+        tagline.typeText("보드게임 좋아하는 사람")
+        let emojiField = app.textFields["onboarding.emoji"]
+        focusTextField(app, emojiField)
+        emojiField.typeText("🧗")
         snap(app, "\(prefix)-3-onboarding-profile")
         tapEvenIfOffscreen(app, app.buttons["onboarding.createCard"])
 
@@ -133,7 +143,7 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         toCollection.tap()
 
         // 컬렉션 (빈 상태)
-        XCTAssertTrue(app.navigationBars["컬렉션"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["나의 카드"].waitForExistence(timeout: 5))
         snap(app, "\(prefix)-5-collection-empty")
 
         // 맞대기 — 탐색 중 → 겹 성립
@@ -154,11 +164,25 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         XCTAssertTrue(received.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-8-collection-filled")
 
-        // 카드 상세
-        received.tap()
+        // 카드 상세 — 카드가 하단 맞대기 캡슐에 걸쳐 있으면 스크롤로 끌어올린 뒤 탭
+        tapEvenIfOffscreen(app, received)
         let close = app.buttons["닫기"]
         XCTAssertTrue(close.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-9-card-detail")
+
+        // 카드 플립 — 뒷면(hue 유리 + MBTI) 기록 (F54)
+        let flipCard = app.descendants(matching: .any)["card.flip"].firstMatch
+        if flipCard.waitForExistence(timeout: 2) {
+            flipCard.tap()
+            // F74: 플립 중에는 양면을 잠시 합성한다. 정지한 뒷면을 기록해야 카드 정보
+            // 포스터의 실제 레이아웃을 검증할 수 있다.
+            RunLoop.current.run(until: Date().addingTimeInterval(0.6))
+            XCTAssertFalse(
+                app.descendants(matching: .any)["관심사 (interests[index])"].exists,
+                "뒷면의 장식 이모지는 별도 접근성 요소가 아니어야 한다"
+            )
+            snap(app, "\(prefix)-9b-card-back")
+        }
         close.tap()
 
         // 설정 (계정 삭제 노출 확인 — 심사 5.1.1(v))
@@ -172,6 +196,20 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         }
         XCTAssertTrue(deleteButton.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-10-settings")
+    }
+
+    /// SwiftUI 전환 직후에는 필드가 존재해도 첫 응답자가 되기 전일 수 있다. 포커스가
+    /// 실제로 잡힌 것을 확인한 뒤에만 합성 입력을 보낸다.
+    @MainActor
+    private func focusTextField(_ app: XCUIApplication, _ field: XCUIElement) {
+        tapEvenIfOffscreen(app, field)
+        var focusTries = 0
+        while (field.value(forKey: "hasKeyboardFocus") as? Bool) != true && focusTries < 4 {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.5))
+            field.tap()
+            focusTries += 1
+        }
+        XCTAssertEqual(field.value(forKey: "hasKeyboardFocus") as? Bool, true)
     }
 
     /// Dynamic Type 극단에서는 버튼이 스크롤 밖에 있을 수 있다 — 화면에 들어올 때까지 스크롤.

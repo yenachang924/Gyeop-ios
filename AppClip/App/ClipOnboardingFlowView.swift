@@ -16,7 +16,7 @@ struct ClipOnboardingFlowView: View {
 
     enum Step: Hashable {
         case interests
-        case style
+        case mbti
         case profile
     }
 
@@ -30,10 +30,10 @@ struct ClipOnboardingFlowView: View {
                 switch step {
                 case .interests:
                     InterestsStepView(selected: $draft.interests) {
-                        path.append(.style)
+                        path.append(.mbti)
                     }
-                case .style:
-                    StyleStepView(selected: $draft.style, interests: draft.interests) {
+                case .mbti:
+                    MBTIStepView(selected: $draft.mbti, interests: draft.interests) {
                         path.append(.profile)
                     }
                 case .profile:
@@ -52,13 +52,12 @@ struct ClipOnboardingFlowView: View {
     }
 
     private func createCard() async {
-        guard let style = draft.style else { return }
         await model.completeOnboarding(
             nickname: draft.nickname,
             tagline: draft.tagline,
             emoji: draft.emoji,
             interests: draft.interests,
-            style: style
+            mbti: draft.mbti
         )
     }
 }

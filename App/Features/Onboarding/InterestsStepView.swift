@@ -5,10 +5,13 @@ import SwiftUI
 
 /// 온보딩 1/3 — 관심사 선택 (최대 5개).
 ///
-/// F36: 카드 프리뷰를 **화면에서 뺐다**. 카드는 크고 위치가 고정돼 칩이 들어설 자리를
-/// 잡아먹었고, 첫 선택에서 레이아웃이 튀는 원인이기도 했다. 대신 **배경이 고른 관심사의
-/// 색으로 은은하게 물들고 천천히 흐른다** — "고를수록 물든다"는 경험은 그대로 두면서
-/// 칩에 여유를 준다. 배경은 저채도·고블러라 텍스트 가독성을 해치지 않는다.
+/// F36: 카드 프리뷰를 **화면에서 뺐다**. 대신 **배경이 고른 관심사의 색으로 은은하게
+/// 물들고 천천히 흐른다.** 배경은 저채도·고블러라 텍스트 가독성을 해치지 않는다.
+///
+/// F57 (카드 리디자인 라운드): 칩 무더기를 **카테고리 구획**으로 나눴다 — 섹션 헤더와
+/// 여백만으로 구획하고 흰 컨테이너 칸은 두지 않는다 (소유자 지시). 카테고리는 이모지
+/// 카탈로그의 실분류(활동·취미·음식·동물·자연 등)를 CSV 순서 그대로 쓴다.
+/// 「다음」은 하단 고정 CTA — 어떤 칩보다 크다.
 struct InterestsStepView: View {
     @Binding var selected: [String]
     let onNext: () -> Void
@@ -18,10 +21,7 @@ struct InterestsStepView: View {
     /// 선택으로 만든 카드 색 — 배경 물듦의 원천. 선택이 없으면 배경도 중립이다.
     private var backdropColors: [Color] {
         guard !selected.isEmpty else { return [] }
-        return CardPreview.visual(
-            nickname: "", emoji: "", interests: selected,
-            leisureStyle: LeisureStyle(energy: .calm, venue: .indoor)
-        ).colors
+        return CardPreview.visual(nickname: "", emoji: "", interests: selected).colors
     }
 
     var body: some View {
@@ -40,21 +40,40 @@ struct InterestsStepView: View {
         .navigationTitle("1 / 3")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
-            Button("다음 · \(selected.count)/\(UserProfile.maxInterests)") { onNext() }
-                .dsProminentButton()
-                .controlSize(.large)
-                .frame(maxWidth: .infinity)
-                .padding(DS.Spacing.m)
-                .disabled(selected.isEmpty)
-                .accessibilityIdentifier("onboarding.interests.next")
+            // 카운터는 제목 줄로 올라갔다 (F61). CTA는 「다음」 하나만 말하고,
+            // 화면에서 가장 도드라진다 (F62 — 카드 완성 버튼과 같은 전폭 구성).
+            // F65: CTA 뒤에 블러 바 — 스크롤되는 칩이 버튼 밑을 지나가도 읽힌다 (사진 앱 문법).
+            Button {
+                onNext()
+            } label: {
+                Text("다음")
+                    .font(DS.Typo.headline)
+                    .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
+            }
+            .dsProminentButton()
+            .padding(DS.Spacing.m)
+            .disabled(selected.isEmpty)
+            .accessibilityIdentifier("onboarding.interests.next")
+            .frame(maxWidth: .infinity)
+            // F67: 딱 잘린 유리 바 → 아래로 갈수록 짙어져 맨 아래는 불투명한 페이드
+            .dsBottomBarFade()
         }
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
-            Text("요즘 나를 이루는 것")
-                .font(DS.Typo.largeTitle)
-            Text("최대 \(UserProfile.maxInterests)개, 고를수록 화면이 나의 색으로 물들어요")
+            HStack(alignment: .firstTextBaseline) {
+                Text("요즘 나를 이루는 것")
+                    .font(DS.Typo.largeTitle)
+                Spacer()
+                // 진행 카운터는 제목 줄 오른쪽, 브랜드 레드 (F61 — 소유자 목업 "1/5")
+                Text("\(selected.count)/\(UserProfile.maxInterests)")
+                    .font(DS.Typo.section)
+                    .foregroundStyle(DS.Palette.accent)
+                    .monospacedDigit()
+                    .accessibilityLabel("\(UserProfile.maxInterests)개 중 \(selected.count)개 선택")
+            }
+            Text("최대 \(UserProfile.maxInterests)개 고를 수 있어요")
                 .font(DS.Typo.body)
                 .foregroundStyle(DS.Palette.secondaryText)
         }
@@ -65,16 +84,42 @@ struct InterestsStepView: View {
         )
     }
 
-    /// 칩에 여유를 준다 (F36) — 폭을 넓혀 이름이 줄바꿈·축소되지 않게.
+    /// 카테고리 구획 (F57) — 헤더 + 여백이 구획을 만들고, 컨테이너 칸은 없다.
+    /// 칩 폭(F36)은 유지 — 이름이 줄바꿈·축소되지 않게.
     private var interestGrid: some View {
-        LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: 124), spacing: DS.Spacing.s)],
-            spacing: DS.Spacing.s
-        ) {
-            ForEach(EmojiCatalog.all) { icon in
-                interestChip(icon)
+        VStack(alignment: .leading, spacing: DS.Spacing.l) {
+            ForEach(EmojiCatalog.categories, id: \.self) { category in
+                VStack(alignment: .leading, spacing: DS.Spacing.s) {
+                    Text(category)
+                        .font(DS.Typo.footnote)
+                        .foregroundStyle(DS.Palette.secondaryText)
+                        .accessibilityAddTraits(.isHeader)
+                    LazyVGrid(
+                        // 컴팩트 칩 (F61 → F64에서 다시 -20%). 폭을 줄이는 대신
+                        // 글자 축소 하한(0.75)이 이름을 지킨다.
+                        columns: [GridItem(.adaptive(minimum: 76), spacing: DS.Spacing.s)],
+                        spacing: DS.Spacing.s
+                    ) {
+                        // 이름이 긴 항목은 선택지에서 뺀다 (F65·F66) — 칩에서 …로 잘리는
+                        // 문제의 근본 해결 (소유자 결정). 이모지 자체는 3/3 키보드로 여전히 열려 있다.
+                        ForEach(
+                            EmojiCatalog.icons(in: category)
+                                .filter { $0.name.count <= Layout.maxNameLength }
+                        ) { icon in
+                            interestChip(icon)
+                        }
+                    }
+                }
             }
         }
+    }
+
+    private enum Layout {
+        /// 칩 라벨 높이 (F64 — 스타일 패딩 포함 최종 ≈44pt).
+        static let chipLabelHeight: CGFloat = 30
+        /// 선택지 이름 길이 상한 (F66) — 이모지와 함께 넣을 때 이보다 길면
+        /// 컴팩트 4열 칩에서 …로 잘린다. 137개 중 17개 제외, 120개 노출.
+        static let maxNameLength = 3
     }
 
     private func interestChip(_ icon: EmojiIcon) -> some View {
@@ -112,16 +157,19 @@ struct InterestsStepView: View {
                 selected.append(icon.name)
             }
         } label: {
+            // F66: 이모지 유지 (소유자 재결정 — F65의 텍스트 전용을 되돌림).
+            // 대신 이모지와 함께 넣으면 …로 넘치는 이름(4글자 이상)은 선택지에서 뺀다.
             HStack(spacing: DS.Spacing.xs) {
                 Text(icon.emoji)
                 Text(icon.name)
-                    .font(DS.Typo.body)
+                    .font(DS.Typo.footnote)
                     .lineLimit(1)
-                    // 12pt 밑으로는 줄이지 않는다 (F36) — body 17pt 기준 하한
-                    .minimumScaleFactor(0.75)
+                    .minimumScaleFactor(0.92)
             }
             .foregroundStyle(isSelected ? DS.Palette.onSelection : Color.secondary)
-            .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
+            // 라벨 높이를 낮춰도 버튼 스타일 패딩을 더하면 최종 높이가 44pt 언저리 —
+            // 시각은 -20%, 터치 타깃 규칙(HIG 44pt)은 지켜진다.
+            .frame(maxWidth: .infinity, minHeight: Layout.chipLabelHeight)
         }
     }
 }

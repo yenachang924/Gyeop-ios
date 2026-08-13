@@ -1,6 +1,6 @@
 # 제출 체크리스트 (App Store Connect)
 
-상태: ✅ 완료 · 🔧 이 레포에서 준비됨(외부 작업 남음) · ⏳ 외부 의존 대기 · 🔲 미착수
+상태: ✅ 완료 · 🔧 이 레포에서 준비됨(외부 작업 남음) · ⏳ 외부 의존 대기 · 미착수
 
 ## A. 코드·빌드 (레포에서 완결)
 
@@ -20,25 +20,25 @@
 - [x] ✅ SIWA 실사용자 플로우 (계획 §1) — 2026-08-09 합격
 - [x] ✅ 카드 셰이더 60fps (계획 §3) — 2026-08-09 합격
 - [x] ✅ App Group 클립→본앱 마이그레이션 (계획 §8) — 2026-08-09 합격
-- [ ] 🔲 2대 시연 영상 5컷 (review-kit.md §2)
+- [ ] ⏳ 소유자 촬영 대기: 2대 시연 영상 5컷. 촬영 순서와 리뷰 노트 삽입 위치는 `review-kit.md` §2~3에 준비됨
 
 ## C. App Store Connect (외부 의존)
 
 - [ ] ⏳ Apple Developer Program 팀·번들 ID(com.gyeop.app, .Clip) 등록 확인
-- [ ] 🔲 앱 레코드 생성 + 메타데이터 (review-kit.md §5 초안 그대로)
+- [ ] ⏳ Apple Developer Program 팀 확인 후 앱 레코드 생성 + 메타데이터 입력 (`review-kit.md` §5 초안)
 - [ ] 🔧 스크린샷 업로드 — 6.9" 10장 `docs/screenshots/` 준비됨, ASC 업로드만 남음 (review-kit.md §1)
 - [ ] 🔧 개인정보 처리방침 게시 (docs/privacy-policy.md → 공개 URL) + 라벨 "수집 안 함"
 - [ ] 🔧 리뷰 노트 + 시연 영상 URL (review-kit.md §3 초안)
-- [ ] ⏳ App Clip 경험 등록 — 헤더 이미지 ✅ 준비됨(`docs/assets/appclip-header.png`), **실도메인·AASA** 대기 (review-kit.md §4)
-- [ ] ⏳ entitlements PLACEHOLDER.gyeop.example → 실도메인 교체 후 재빌드
-- [ ] 🔲 Archive → TestFlight 업로드 → 제출
+- [x] ✅ 1차 제출에서 App Clip 제외. Gyeop은 Clip을 임베드하지 않으며 본앱 associated domains 자리 표시도 제거됨
+- [ ] ⏳ 후속 App Clip 릴리스: 실도메인·AASA 확정 후 경험 등록 (`review-kit.md` §4)
+- [ ] ⏳ TestFlight 업로드 대기: `1.0 (2)` 본앱 아카이브 생성 완료. Apple Distribution 인증서와 App Store Connect 업로드 인증 필요
 
 ## D. 제출 전 리스크 (2026-08-08 기준)
 
 | # | 리스크 | 영향 | 완화 |
 |---|---|---|---|
 | 1 | ~~**MPC 실기기 미검증**~~ **해소 (2026-08-09)** — 2대 왕복·엣지 4종·24h 중복 전부 실기기 합격 | – | – |
-| 2 | **어소시에이티드 도메인 미확정** — entitlements가 자리 표시 | App Clip 경험 등록 불가, 자리 표시 도메인은 서명·검증 실패 | 도메인 확정까지 App Clip을 1차 제출에서 빼는 선택지 검토 (project.yml에서 GyeopClip 의존 제거는 1줄) |
+| 2 | ~~**어소시에이티드 도메인 미확정**~~ **1차 제출에서 해소** — GyeopClip 임베드와 본앱 자리 표시 entitlement를 제거 | App Clip 경험 등록은 후속 릴리스까지 보류 | 실도메인·AASA 확정 후 GyeopClip을 다시 임베드하고 associated domains를 복원 |
 | 3 | 아카데미 이메일 검증 미구현 (스펙 ⑤ Lv2의 일부) | 폐쇄형 커뮤니티 보장 없음 — 제품 결정 필요 | 서버 없이는 불가. v1은 개방형으로 제출하고 리뷰 노트에 명시 |
 | 4 | SIWA 토큰을 로컬 검증 없이 저장 (서버 부재로 검증 불가) | 보안상 실해는 없음(로컬 전용), 심사 이슈 아님 | 서버 도입 시 검증 추가 |
 | 5 | 시즌(수료 D-day)이 MockData.season 고정 | 실제 기수 날짜와 불일치 | 제출 전 Core MockData.season 값을 실기수로 갱신 (1줄) |

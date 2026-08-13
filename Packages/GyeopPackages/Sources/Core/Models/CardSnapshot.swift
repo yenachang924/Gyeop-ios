@@ -11,7 +11,8 @@ public struct CardSnapshot: Codable, Hashable, Sendable, Identifiable {
     public let tagline: String
     public let emoji: String
     public let interests: [String]
-    public let leisureStyle: LeisureStyle
+    /// MBTI — 카드 뒷면에 4글자로 실린다. 건너뛴 사용자는 nil (F55).
+    public let mbti: MBTI?
     /// 카드 버전 (관심사가 바뀌면 카드가 "자라며" 버전이 올라간다)
     public let version: Int
     public let createdAt: Date
@@ -25,7 +26,7 @@ public struct CardSnapshot: Codable, Hashable, Sendable, Identifiable {
         tagline: String,
         emoji: String,
         interests: [String],
-        leisureStyle: LeisureStyle,
+        mbti: MBTI?,
         version: Int,
         createdAt: Date
     ) {
@@ -35,7 +36,7 @@ public struct CardSnapshot: Codable, Hashable, Sendable, Identifiable {
         self.tagline = tagline
         self.emoji = emoji
         self.interests = interests
-        self.leisureStyle = leisureStyle
+        self.mbti = mbti
         self.version = version
         self.createdAt = createdAt
     }

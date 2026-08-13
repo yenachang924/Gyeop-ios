@@ -29,7 +29,7 @@ struct ClipModelTests {
             tagline: "달리기 좋아해요",
             emoji: "🏃",
             interests: ["클라이밍", "보드게임"],
-            style: LeisureStyle(energy: .active, venue: .outdoor)
+            mbti: MBTI(code: "ESTP")
         )
     }
 
@@ -51,7 +51,7 @@ struct ClipModelTests {
         // 온보딩 완주 → card (여기서 자동 교환하지 않는다 — 맞대기는 별도 진입)
         await model.completeOnboarding(
             nickname: "겹이", tagline: "달리기 좋아해요", emoji: "🏃",
-            interests: ["클라이밍", "보드게임"], style: LeisureStyle(energy: .active, venue: .outdoor)
+            interests: ["클라이밍", "보드게임"], mbti: MBTI(code: "ESTP")
         )
         guard case .card(let card) = model.stage else {
             Issue.record("온보딩 완주 후 card 단계여야 하는데 \(model.stage)")

@@ -16,6 +16,8 @@ public protocol GyeopRepository: Sendable {
     func record(_ gyeop: GyeopRecord) async throws
     /// 최신순
     func gyeops() async throws -> [GyeopRecord]
+    /// 받은 카드 개별 삭제 (F65 — UGC 완화, 심사 1.2 대비). 없는 id면 조용히 무시.
+    func deleteGyeop(id: String) async throws
 }
 
 extension GyeopRepository {

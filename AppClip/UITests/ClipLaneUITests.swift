@@ -79,14 +79,16 @@ final class ClipLaneUITests: XCTestCase {
         snap("clip-2-interests")
         app.buttons["onboarding.interests.next"].tap()
 
-        // 3 vibe — 2축 슬라이더 조작 후 「다음」 (F17, navigation-map §1-3)
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5), "온보딩 2/3(성향) 진입 실패")
-        assertNoInstallSuggestion(stage: "vibe")
-        snap("clip-3-vibe")
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.8)
-        app.buttons["onboarding.style.next"].tap()
+        // 3 mbti — 네 축 선택 후 「다음」 (F55, navigation-map §1-3)
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5), "온보딩 2/3(MBTI) 진입 실패")
+        assertNoInstallSuggestion(stage: "mbti")
+        snap("clip-3-mbti")
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
+        app.buttons["onboarding.mbti.next"].tap()
 
         // 4 intro — 닉네임·한 줄·이모지 입력 (F28: 셋 다 필수)
         let nickname = app.textFields["onboarding.nickname"]
@@ -96,8 +98,9 @@ final class ClipLaneUITests: XCTestCase {
         let tagline = app.textFields["onboarding.tagline"]
         tagline.tap()
         tagline.typeText("새벽 러닝에 빠졌어요")
-        // 카테고리 칩도 "onboarding.emoji." 접두사를 쓰므로 접두사 매칭 대신 명시 선택 (F45)
-        app.buttons["onboarding.emoji.클라이밍"].tap()
+        // 이모지 필드 → 시스템 이모지 키보드 (F63)
+        app.textFields["onboarding.emoji"].tap()
+        app.textFields["onboarding.emoji"].typeText("🧗")
         assertNoInstallSuggestion(stage: "intro")
         snap("clip-4-intro")
         app.buttons["onboarding.createCard"].tap()
@@ -143,11 +146,13 @@ final class ClipLaneUITests: XCTestCase {
         interest.tap()
         app.buttons["onboarding.interests.next"].tap()
 
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        energySlider.adjust(toNormalizedSliderPosition: 0.2)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
-        app.buttons["onboarding.style.next"].tap()
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
+        app.buttons["onboarding.mbti.next"].tap()
 
         let nickname = app.textFields["onboarding.nickname"]
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))
@@ -156,8 +161,9 @@ final class ClipLaneUITests: XCTestCase {
         let tagline = app.textFields["onboarding.tagline"]
         tagline.tap()
         tagline.typeText("산책을 좋아해요")
-        // 카테고리 칩도 "onboarding.emoji." 접두사를 쓰므로 접두사 매칭 대신 명시 선택 (F45)
-        app.buttons["onboarding.emoji.클라이밍"].tap()
+        // 이모지 필드 → 시스템 이모지 키보드 (F63)
+        app.textFields["onboarding.emoji"].tap()
+        app.textFields["onboarding.emoji"].typeText("🧗")
         app.buttons["onboarding.createCard"].tap()
 
         let bump = app.buttons["clip.card.bump"]

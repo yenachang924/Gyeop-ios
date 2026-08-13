@@ -56,10 +56,14 @@ struct WelcomeView: View {
                 } onCompletion: { result in
                     handle(result)
                 }
-                // 흰 무대에는 검정 캡슐, 검은 무대에는 흰 캡슐 (Figma 확정 + 다크 대조)
+                // 흰 무대에는 검정, 검은 무대에는 흰 버튼 (F43 + 다크 대조)
                 .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                // F67: SignInWithAppleButton은 생성 시 스타일이 고정된다 — 라이트↔다크
+                // 전환 시 색이 안 바뀌던 원인. 모드가 바뀌면 버튼을 새로 만든다.
+                .id(colorScheme)
                 .frame(width: DS.Layout.signInMaxWidth, height: DS.Layout.signInHeight)
-                .clipShape(Capsule())
+                // F67: 캡슐 클립 제거 — Apple 공식 에셋 규정은 시스템이 그리는 버튼
+                // 형태(코너 포함)를 자르거나 변형하지 않는 것이다. 시스템 코너를 그대로 쓴다.
                 .opacity(stage >= 3 ? 1 : 0)
                 .offset(y: stage >= 3 ? 0 : 18)
                 .accessibilityIdentifier("welcome.signInWithApple")

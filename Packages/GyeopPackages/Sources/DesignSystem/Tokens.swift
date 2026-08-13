@@ -25,10 +25,19 @@ public enum DS {
         public static let signInMaxWidth: CGFloat = 280
         /// 로그인 버튼 높이 (Figma 캡슐 비례)
         public static let signInHeight: CGFloat = 50
-        /// 온보딩 슬라이더 최대 폭 (F35) — 화면 끝까지 늘어나면 조작감이 둔해진다.
-        public static let sliderMaxWidth: CGFloat = 260
         /// 하단 고정 주요 액션 버튼 높이 (F40 — 애플 순정 하단 액션 관습)
         public static let primaryActionHeight: CGFloat = 50
+        /// 카드 상세(플립) 카드 최대 폭 (F54 — 시안 62% 폭에서 +20% 상향 지시 반영)
+        public static let cardDetailMaxWidth: CGFloat = 300
+        /// 홈("나의 카드")의 내 카드 최대 폭 (F62 — F61의 250에서 소유자 지시로 +20%)
+        public static let homeMyCardMaxWidth: CGFloat = 300
+        /// 하단 페이드 바 전체 높이 (F70) — 버튼(50)과 여백을 덮고도 위로 ~90pt 더
+        /// 올라가야 "바"가 아니라 콘텐츠가 아래로 스며드는 쉐이딩으로 읽힌다.
+        public static let bottomFadeHeight: CGFloat = 220
+        /// 페이드가 안전 영역 **아래로** 더 내려가는 길이 (F71). 홈 인디케이터 구간
+        /// (최대 34pt)을 덮고도 남는 값 — 이 여유가 없으면 화면 맨 아래에 콘텐츠가
+        /// 비치는 띠가 생긴다("바닥이 뜨는" 현상).
+        public static let bottomFadeOverflow: CGFloat = 60
     }
 
     public enum Palette {
@@ -161,9 +170,13 @@ public enum DS {
         public static let caption = Font.system(.caption, design: .default)
         /// 하단 주요 액션 아이콘 (F40 컬렉션 맞대기) — 라벨보다 한 급 크게.
         public static let actionIcon = Font.system(.title2, design: .default).weight(.semibold)
-        /// 카드 대표 이모지 (F5 — 카드에서 더 크게). 이모지는 글자가 아니라 픽토그램이라
-        /// Dynamic Type 대상에서 제외한다 — 카드 정보는 접근성 레이블이 전달한다.
-        public static let cardEmoji = Font.system(size: 56)
+        /// 카드 이모지 마크 (F54 — 56pt 히어로에서 좌상단 마크로 강등, 지갑 카드의 로고 자리).
+        /// 이모지는 글자가 아니라 픽토그램이라 Dynamic Type 대상에서 제외한다 —
+        /// 카드 정보는 접근성 레이블이 전달한다.
+        public static let cardMark = Font.system(size: 24)
+        /// 카드 뒷면 MBTI 4글자 (F54·F55). 라틴 전용이라 Heavy가 F42의 한글 굵기 상한과
+        /// 충돌하지 않는다. 소유자 지시로 시안 52pt에서 한 급 줄인 값.
+        public static let mbtiHero = Font.system(size: 44, weight: .heavy, design: .default)
     }
 
     /// 상태 전환 애니메이션 프리셋. 시스템 시트·탭 전환과 같은 계열의 스프링을 재사용해
@@ -187,6 +200,13 @@ public enum DS {
         public static let depart = Animation.smooth(duration: 0.3)
         /// 관심사를 고를 때 카드가 "물드는" 색 보간 — 축하가 아니라 반영이므로 무바운스.
         public static let dye = Animation.smooth(duration: 0.5)
+        /// 카드 플립 (F54) — 유동 무드의 무바운스 회전.
+        public static let flip = Animation.smooth(duration: 0.55)
+        /// MBTI 알약을 누를 때 배경에 한 번 피었다 지는 색 흐름 (F55).
+        public static let bloom = Animation.smooth(duration: 1.4)
+        /// MBTI 가운데 글자가 튀어오르며 자리 잡는 등장 (F62) — 선택의 손맛을 주는
+        /// 몇 안 되는 유바운스 스프링. 실제 SwiftUI 스프링 기반 (모션 레퍼런스 원칙).
+        public static let letterPop = Animation.spring(response: 0.38, dampingFraction: 0.62)
         /// "겹!" 융합 — 결정 R7: `.smooth` 스프링, response 0.5, 거의 무바운스(단조 감속).
         public static let merge = Animation.smooth(duration: 0.5)
         /// "겹!" 링 파동 1회 — 확장하며 사라진다. 무바운스(파동은 되돌아오지 않는다).
@@ -240,6 +260,46 @@ public extension View {
             buttonStyle(.glass)
         } else {
             buttonStyle(.bordered)
+        }
+    }
+
+    /// 하단 고정 CTA 뒤의 페이드 바 (F67 → F70에서 키 상향). 위 경계는 투명에서 시작해
+    /// 유리(Material)가 점점 짙어지고, 맨 아래는 화면 배경색으로 **불투명하게** 닫힌다.
+    /// F70: 페이드가 CTA 높이 안에 갇히면 여전히 "분리된 바"로 읽힌다 — 쉐이딩이
+    /// 버튼 위로 충분히(전체 220pt) 올라가도록 바닥 정렬 고정 높이로 그린다.
+    /// 지도 앱의 하단 페이드 문법.
+    func dsBottomBarFade() -> some View {
+        background(alignment: .bottom) {
+            ZStack {
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+                    .mask {
+                        LinearGradient(
+                            stops: [
+                                .init(color: .clear, location: 0),
+                                .init(color: .black.opacity(0.6), location: 0.45),
+                                .init(color: .black, location: 0.8),
+                                .init(color: .black, location: 1),
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    }
+                LinearGradient(
+                    stops: [
+                        .init(color: DS.Palette.background.opacity(0), location: 0),
+                        .init(color: DS.Palette.background.opacity(0.5), location: 0.75),
+                        .init(color: DS.Palette.background, location: 1),
+                    ],
+                    startPoint: .top, endPoint: .bottom
+                )
+            }
+            // F71: `.frame(height:)` 뒤의 `.ignoresSafeArea()`는 이미 확정된 크기를
+            // 옮길 뿐 **늘리지 못한다** — 페이드가 홈 인디케이터 구간 위에 떠서 화면
+            // 맨 아래에 콘텐츠가 비치는 띠가 남았다("바닥이 뜨는" 현상).
+            // 음수 하단 패딩으로 그리는 영역만 컨테이너 아래로 내린다 (배경은 잘리지 않는다).
+            .frame(height: DS.Layout.bottomFadeHeight + DS.Layout.bottomFadeOverflow)
+            .padding(.bottom, -DS.Layout.bottomFadeOverflow)
+            .allowsHitTesting(false)
         }
     }
 }

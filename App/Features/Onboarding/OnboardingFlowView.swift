@@ -2,8 +2,8 @@ import Core
 import DesignSystem
 import SwiftUI
 
-/// 온보딩 3단계: 관심사(최대 5) → 성향 2×2 → 닉네임·한 줄·이모지 원탭 → 카드 리빌.
-/// 카피는 docs/gyeop-prototype.html 기준.
+/// 온보딩 3단계: 관심사(최대 5) → MBTI(건너뛰기 가능) → 닉네임·한 줄·이모지 원탭 → 카드 리빌.
+/// 카피 기준은 카드 리디자인 라운드 시안(review/proposals/mbti-card-redesign.html).
 struct OnboardingFlowView: View {
     @Environment(AppModel.self) private var model
 
@@ -11,7 +11,7 @@ struct OnboardingFlowView: View {
     @State private var draft = OnboardingDraft()
 
     enum Step: Hashable {
-        case style
+        case mbti
         case profile
         case reveal(CardSnapshot)
     }
@@ -19,12 +19,12 @@ struct OnboardingFlowView: View {
     var body: some View {
         NavigationStack(path: $path) {
             InterestsStepView(selected: $draft.interests) {
-                path.append(.style)
+                path.append(.mbti)
             }
             .navigationDestination(for: Step.self) { step in
                 switch step {
-                case .style:
-                    StyleStepView(selected: $draft.style, interests: draft.interests) {
+                case .mbti:
+                    MBTIStepView(selected: $draft.mbti, interests: draft.interests) {
                         path.append(.profile)
                     }
                 case .profile:
@@ -39,13 +39,12 @@ struct OnboardingFlowView: View {
     }
 
     private func createCard() async {
-        guard let style = draft.style else { return }
         let card = await model.completeOnboarding(
             nickname: draft.nickname,
             tagline: draft.tagline,
             emoji: draft.emoji,
             interests: draft.interests,
-            style: style
+            mbti: draft.mbti
         )
         if let card {
             path.append(.reveal(card))

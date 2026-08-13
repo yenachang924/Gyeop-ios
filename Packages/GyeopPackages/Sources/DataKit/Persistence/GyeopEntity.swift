@@ -16,8 +16,8 @@ final class GyeopEntity {
     var counterpartTagline: String
     var counterpartEmoji: String
     var counterpartInterests: [String]
-    var counterpartEnergyRaw: String
-    var counterpartVenueRaw: String
+    /// 상대 MBTI 4글자 코드 — 없으면 빈 문자열 (F55).
+    var counterpartMBTIRaw: String = ""
     var counterpartVersion: Int
     var counterpartCreatedAt: Date
     var methodRaw: String
@@ -32,8 +32,7 @@ final class GyeopEntity {
         counterpartTagline = card.tagline
         counterpartEmoji = card.emoji
         counterpartInterests = card.interests
-        counterpartEnergyRaw = card.leisureStyle.energy.rawValue
-        counterpartVenueRaw = card.leisureStyle.venue.rawValue
+        counterpartMBTIRaw = card.mbti?.code ?? ""
         counterpartVersion = card.version
         counterpartCreatedAt = card.createdAt
         methodRaw = record.method.rawValue
@@ -50,10 +49,7 @@ final class GyeopEntity {
                 tagline: counterpartTagline,
                 emoji: counterpartEmoji,
                 interests: counterpartInterests,
-                leisureStyle: LeisureStyle(
-                    energy: LeisureStyle.Energy(rawValue: counterpartEnergyRaw) ?? .calm,
-                    venue: LeisureStyle.Venue(rawValue: counterpartVenueRaw) ?? .indoor
-                ),
+                mbti: MBTI(code: counterpartMBTIRaw),
                 version: counterpartVersion,
                 createdAt: counterpartCreatedAt
             ),

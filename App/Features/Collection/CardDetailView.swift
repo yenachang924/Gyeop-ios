@@ -3,12 +3,17 @@ import Core
 import DesignSystem
 import SwiftUI
 
-/// 카드 상세. 상대 카드면 겹치는 관심사를 하이라이트하고("어, 너도 클라이밍?"),
-/// 내 카드면 내 관심사·성향을 카드와 함께 보여준다 (F31).
+/// 카드 상세 — 유리 카드 플립이 주인공이다 (F54).
+///
+/// F31 개정: 관심사·MBTI 나열이 **카드 뒷면으로 흡수**되면서 상세의 별도 목록은
+/// 걷어냈다. 카드 아래에는 상대 카드면 겹치는 관심사, 내 카드면 공유 경로만 남는다.
+/// 시트 배경은 블러 유리 (F59) — 뒤의 컬렉션 색이 은은하게 비친다.
 struct CardDetailView: View {
     let card: CardSnapshot
     let myCard: CardSnapshot?
     @Environment(\.dismiss) private var dismiss
+    /// 공유용 카드 이미지 — ImageRenderer 비용이 있어 화면 진입 후 한 번만 만든다.
+    @State private var exportedCard: Image?
 
     private var isMyCard: Bool {
         guard let myCard else { return false }
@@ -23,45 +28,61 @@ struct CardDetailView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: DS.Spacing.l) {
-                    CardView(card: card)
+                VStack(spacing: DS.Spacing.m) {
+                    CardFlipView(card: card)
+                        .frame(maxWidth: DS.Layout.cardDetailMaxWidth)
 
-                    if isMyCard {
-                        myInterestsSection
-                    } else if !sharedInterests.isEmpty {
+                    Text("카드를 탭하면 뒤집혀요")
+                        .font(DS.Typo.footnote)
+                        .foregroundStyle(DS.Palette.secondaryText)
+                        .accessibilityHidden(true) // CardFlipView가 힌트를 전달한다
+
+                    if !sharedInterests.isEmpty {
                         sharedSection
+                            .padding(.top, DS.Spacing.s)
                     }
                 }
+                .frame(maxWidth: .infinity)
                 .padding(DS.Spacing.m)
             }
-            .background(DS.Palette.background)
+            .defaultScrollAnchor(.center)
             .navigationTitle(card.nickname)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     // 무채 크롬 — 이 화면의 주인공은 카드다 (U1 원칙 3)
-                    Button("닫기") { dismiss() }
+                    Button { dismiss() } label: {
+                        Label("닫기", systemImage: "xmark")
+                            .labelStyle(.iconOnly)
+                    }
                         .tint(.primary)
+                        .accessibilityLabel("닫기")
+                }
+                if isMyCard, let exportedCard {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        ShareLink(
+                            item: exportedCard,
+                            preview: SharePreview("\(card.nickname)의 카드", image: exportedCard)
+                        ) {
+                            Label("이미지로 공유", systemImage: "square.and.arrow.up")
+                        }
+                        .tint(.primary)
+                        .accessibilityIdentifier("cardDetail.share")
+                    }
                 }
             }
+            .task { prepareShareImage() }
         }
     }
 
-    /// 내 카드 — 카드 면에는 없는 관심사·성향을 아래에 함께 펼친다 (F31).
-    /// 카드는 이모지·이름·한줄평만 담기로 했으므로(F2), 상세가 그 정보를 보완한다.
-    private var myInterestsSection: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.s) {
-            Text("나를 이루는 것")
-                .font(DS.Typo.title)
-            InterestPills(items: card.interests + [card.leisureStyle.label])
-            Text("이 선택들이 카드의 색이 됐어요")
-                .font(DS.Typo.footnote)
-                .foregroundStyle(DS.Palette.secondaryText)
+    private func prepareShareImage() {
+        guard isMyCard, exportedCard == nil else { return }
+        #if canImport(UIKit)
+        if let data = CardImageExporter.renderPNGData(for: card),
+           let image = UIImage(data: data) {
+            exportedCard = Image(uiImage: image)
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(
-            "나를 이루는 것. 관심사 \(card.interests.joined(separator: ", ")). 성향 \(card.leisureStyle.label). 이 선택들이 카드의 색이 됐어요"
-        )
+        #endif
     }
 
     private var sharedSection: some View {
@@ -78,30 +99,9 @@ struct CardDetailView: View {
                 .font(DS.Typo.footnote)
                 .foregroundStyle(DS.Palette.secondaryText)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("겹치는 관심사 \(sharedInterests.joined(separator: ", ")). 다음에 만나면 여기서 시작하세요")
-    }
-}
-
-/// 내 관심사·성향 알약 줄 — 겹침 알약(카드 안)과 구분되도록 무채 표면을 쓴다.
-private struct InterestPills: View {
-    let items: [String]
-
-    var body: some View {
-        LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: 88), spacing: DS.Spacing.s)],
-            spacing: DS.Spacing.s
-        ) {
-            ForEach(items, id: \.self) { item in
-                Text(item)
-                    .font(DS.Typo.body)
-                    .foregroundStyle(.primary)
-                    .padding(.horizontal, DS.Spacing.s)
-                    .padding(.vertical, DS.Spacing.xs)
-                    .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
-                    .background(DS.Palette.surface, in: Capsule())
-            }
-        }
     }
 }
 

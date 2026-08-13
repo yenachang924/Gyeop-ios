@@ -97,7 +97,7 @@ public struct ClipReceptionView: View {
         VStack(alignment: .leading, spacing: DS.Spacing.m) {
             Text("카드는 어떻게 만들어지나요?")
                 .font(DS.Typo.title)
-            Text("관심사·성향·한 줄, 세 가지 입력이 시드가 되어 카드의 색과 결이 정해져요. 같은 입력이면 언제나 같은 카드. 사진도 계정도 필요 없어요.")
+            Text("고른 관심사와 MBTI, 닉네임과 이모지가 시드가 되어 카드의 색과 결이 정해져요. 같은 입력이면 언제나 같은 카드. 사진도 계정도 필요 없어요.")
                 .font(DS.Typo.body)
                 .foregroundStyle(DS.Palette.secondaryText)
             Spacer()

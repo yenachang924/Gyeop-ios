@@ -190,7 +190,7 @@ final class AppModel {
         tagline: String,
         emoji: String,
         interests: [String],
-        style: LeisureStyle
+        mbti: MBTI?
     ) async -> CardSnapshot? {
         let profile = UserProfile(
             id: "user-\(UUID().uuidString.lowercased())",
@@ -198,7 +198,7 @@ final class AppModel {
             tagline: tagline,
             emoji: emoji,
             interests: Array(interests.prefix(UserProfile.maxInterests)),
-            leisureStyle: style,
+            mbti: mbti,
             createdAt: .now
         )
         let card = cardGenerator.makeCard(from: profile)
@@ -228,6 +228,16 @@ final class AppModel {
     func startExchange() -> (any ExchangeSession)? {
         guard let myCard else { return nil }
         return makeExchangeSession(myCard)
+    }
+
+    /// 받은 카드 개별 삭제 (F65 — 원치 않는 카드를 지울 수 있어야 한다, 심사 1.2 대비).
+    func deleteGyeop(_ record: GyeopRecord) async {
+        do {
+            try await repository.deleteGyeop(id: record.id)
+            try await refreshGyeops()
+        } catch {
+            Log.sync.error("겹 삭제 실패: \(error)")
+        }
     }
 
     /// 교환 성립 기록. `record`는 멱등(같은 GyeopID·24시간 동일 상대 규칙은 리포지토리 소관).

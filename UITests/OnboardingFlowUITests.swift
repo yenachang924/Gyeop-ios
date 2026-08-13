@@ -11,21 +11,23 @@ final class OnboardingFlowUITests: XCTestCase {
         app.launch()
 
         // 1/3 관심사 — 2개 선택 후 다음
-        let firstInterest = app.buttons["onboarding.interest.클라이밍"]
+        let firstInterest = app.buttons["onboarding.interest.달리기"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         firstInterest.tap()
-        app.buttons["onboarding.interest.보드게임"].tap()
+        app.buttons["onboarding.interest.자전거"].tap()
         app.buttons["onboarding.interests.next"].tap()
 
-        // 2/3 성향 — 슬라이더 미조작이면 다음 비활성 (F17, navigation-map §1-3)
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        let styleNext = app.buttons["onboarding.style.next"]
-        XCTAssertFalse(styleNext.isEnabled, "성향 미조작인데 다음이 활성화됨")
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
-        XCTAssertTrue(styleNext.isEnabled, "슬라이더 조작 후에도 다음이 비활성")
-        styleNext.tap()
+        // 2/3 MBTI — 네 축 미완성이면 다음 비활성 (F55, navigation-map §1-3)
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        let mbtiNext = app.buttons["onboarding.mbti.next"]
+        XCTAssertFalse(mbtiNext.isEnabled, "MBTI 미완성인데 다음이 활성화됨")
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
+        XCTAssertTrue(mbtiNext.isEnabled, "네 축을 다 골랐는데 다음이 비활성")
+        mbtiNext.tap()
 
         // 3/3 닉네임·한 줄·이모지
         let nickname = app.textFields["onboarding.nickname"]
@@ -37,7 +39,8 @@ final class OnboardingFlowUITests: XCTestCase {
         tagline.tap()
         tagline.typeText("test user")
 
-        app.buttons["onboarding.emoji.클라이밍"].tap()
+        app.textFields["onboarding.emoji"].tap()
+        app.textFields["onboarding.emoji"].typeText("🧗")
 
         let create = app.buttons["onboarding.createCard"]
         create.tap()
@@ -48,7 +51,7 @@ final class OnboardingFlowUITests: XCTestCase {
         toCollection.tap()
 
         // 컬렉션 도착 (첫 진입은 빈 상태 — 데모 시딩 제거됨)
-        XCTAssertTrue(app.navigationBars["컬렉션"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["나의 카드"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["collection.myCard"].waitForExistence(timeout: 5))
 
         // 맞대기 — 시뮬레이터는 MockExchangeSession 스크립트가 겹을 성립시킨다
@@ -72,15 +75,15 @@ final class OnboardingFlowUITests: XCTestCase {
     }
 
     /// 완료 기준 검증: 닉네임·한 줄·이모지가 **전부 필수**(F28)라 하나라도 비면 카드 완성이
-    /// 비활성이다. 이모지는 카테고리 피커로 "추천" 묶음 밖 항목에도 닿을 수 있다 (F45).
+    /// 비활성이다. 이모지는 시스템 키보드 필드 하나이고, 이모지가 아닌 글자는 버려진다 (F63).
     @MainActor
-    func testProfileFieldsAreAllRequiredAndCategoryPickerReachesAllEmoji() throws {
+    func testProfileFieldsAreAllRequiredAndEmojiFieldFiltersInput() throws {
         let app = XCUIApplication()
         app.launchArguments = ["-uitest-reset"]
         app.launch()
 
         // 1/3 관심사 — 1개만 선택하고 다음 (프리뷰가 물드는지는 접근성 식별자로 확인)
-        let firstInterest = app.buttons["onboarding.interest.클라이밍"]
+        let firstInterest = app.buttons["onboarding.interest.달리기"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         firstInterest.tap()
         let filledPreview = app.descendants(matching: .any)["onboarding.interests.preview.filled"]
@@ -88,20 +91,18 @@ final class OnboardingFlowUITests: XCTestCase {
         app.buttons["onboarding.interests.next"].tap()
 
         // 2/3 성향 — 선택 후 「다음」
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
-        app.buttons["onboarding.style.next"].tap()
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
+        app.buttons["onboarding.mbti.next"].tap()
 
-        // 3/3 — "추천" 묶음(1차 16개) 밖인 "낚시"는 카테고리를 바꾸면 나타난다 (F45).
-        // 검색 텍스트 필드는 없앴다 — 키보드가 그리드를 가리던 문제 때문 (F45).
-        let recommended = app.buttons["onboarding.emoji.category.추천"]
-        XCTAssertTrue(recommended.waitForExistence(timeout: 5))
-        XCTAssertFalse(app.textFields["onboarding.emoji.search"].exists, "검색 필드가 남아 있음")
-        XCTAssertFalse(app.buttons["onboarding.emoji.낚시"].exists)
-        app.buttons["onboarding.emoji.category.활동"].tap()
-        XCTAssertTrue(app.buttons["onboarding.emoji.낚시"].waitForExistence(timeout: 5))
+        // 3/3 — 이모지 칸은 필드 하나 (F63, 카테고리 그리드 은퇴)
+        let emojiField = app.textFields["onboarding.emoji"]
+        XCTAssertTrue(emojiField.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["onboarding.emoji.category.추천"].exists, "카테고리 칩이 남아 있음")
 
         // 아무것도 안 채우면 카드 완성은 비활성 (F28 — 셋 다 필수)
         let create = app.buttons["onboarding.createCard"]
@@ -119,8 +120,11 @@ final class OnboardingFlowUITests: XCTestCase {
         tagline.typeText("test user")
         XCTAssertFalse(create.isEnabled, "이모지가 비었는데 카드 완성이 활성화됨")
 
-        // 이모지까지 고르면 활성
-        app.buttons["onboarding.emoji.클라이밍"].tap()
+        // 이모지까지 담으면 활성. 이모지가 아닌 글자는 버려진다 (F63)
+        emojiField.tap()
+        emojiField.typeText("a")
+        XCTAssertFalse(create.isEnabled, "이모지가 아닌 글자가 담김")
+        emojiField.typeText("🧗")
         XCTAssertTrue(create.isEnabled)
         create.tap()
 
@@ -155,11 +159,13 @@ final class U2DemoRecordingUITests: XCTestCase {
         }
         app.buttons["onboarding.interests.next"].tap()
 
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
-        app.buttons["onboarding.style.next"].tap()
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
+        app.buttons["onboarding.mbti.next"].tap()
 
         let nickname = app.textFields["onboarding.nickname"]
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))
@@ -168,7 +174,8 @@ final class U2DemoRecordingUITests: XCTestCase {
         let tagline = app.textFields["onboarding.tagline"]
         tagline.tap()
         tagline.typeText("새벽 러닝에 빠졌어요")
-        app.buttons["onboarding.emoji.클라이밍"].tap()
+        app.textFields["onboarding.emoji"].tap()
+        app.textFields["onboarding.emoji"].typeText("🧗")
 
         let create = app.buttons["onboarding.createCard"]
         XCTAssertTrue(create.waitForExistence(timeout: 5))
@@ -183,7 +190,7 @@ final class U2DemoRecordingUITests: XCTestCase {
         app.launchArguments = ["-uitest-reset"]
         app.launch()
 
-        completeOnboarding(app, interests: ["클라이밍", "보드게임", "커피"])
+        completeOnboarding(app, interests: ["달리기", "자전거", "수영"])
 
         let toCollection = app.buttons["reveal.toCollection"]
         XCTAssertTrue(toCollection.waitForExistence(timeout: 5))
@@ -194,7 +201,8 @@ final class U2DemoRecordingUITests: XCTestCase {
     }
 
     /// 장면 2 — 겹! 순간: 융합(goo) → 링 파동 1회 → "겹!" → 겹친 칩 순차 페이드인.
-    /// Mock 상대(하람)의 관심사와 2개 겹치도록 클라이밍·보드게임을 고른다.
+    /// (F66에서 긴 이름이 선택지에서 빠져 Mock 상대(하람)와의 겹침은 데모에서 재현되지 않는다 —
+    /// 겹침 0개 변형이 대신 보인다.)
     @MainActor
     func testScene2_GyeopMoment() throws {
         try guardDemo()
@@ -202,7 +210,7 @@ final class U2DemoRecordingUITests: XCTestCase {
         app.launchArguments = ["-uitest-reset"]
         app.launch()
 
-        completeOnboarding(app, interests: ["클라이밍", "보드게임"])
+        completeOnboarding(app, interests: ["달리기", "자전거"])
 
         let toCollection = app.buttons["reveal.toCollection"]
         XCTAssertTrue(toCollection.waitForExistence(timeout: 5))
@@ -230,7 +238,7 @@ final class U2DemoRecordingUITests: XCTestCase {
         app.launch()
 
         // 칩을 천천히 — 자리표시 → 카드 전환, 고를 때마다 색이 물들고, 해제하면 되돌아온다
-        let first = app.buttons["onboarding.interest.클라이밍"]
+        let first = app.buttons["onboarding.interest.달리기"]
         XCTAssertTrue(first.waitForExistence(timeout: 5))
         first.tap()
         hold(1.2)
@@ -243,12 +251,14 @@ final class U2DemoRecordingUITests: XCTestCase {
         hold(1.2)
         app.buttons["onboarding.interests.next"].tap()
 
-        let energySlider = app.sliders["onboarding.style.energy"]
-        XCTAssertTrue(energySlider.waitForExistence(timeout: 5))
-        energySlider.adjust(toNormalizedSliderPosition: 0.8)
-        app.sliders["onboarding.style.venue"].adjust(toNormalizedSliderPosition: 0.2)
+        let firstAxis = app.buttons["onboarding.mbti.E"]
+        XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
+        firstAxis.tap()
+        app.buttons["onboarding.mbti.N"].tap()
+        app.buttons["onboarding.mbti.T"].tap()
+        app.buttons["onboarding.mbti.P"].tap()
         hold(1.0)
-        app.buttons["onboarding.style.next"].tap()
+        app.buttons["onboarding.mbti.next"].tap()
 
         let nickname = app.textFields["onboarding.nickname"]
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))
@@ -258,9 +268,10 @@ final class U2DemoRecordingUITests: XCTestCase {
         tagline.tap()
         tagline.typeText("새벽 러닝에 빠졌어요")
 
-        let emoji = app.buttons["onboarding.emoji.클라이밍"]
-        XCTAssertTrue(emoji.waitForExistence(timeout: 5))
-        emoji.tap()
+        let emojiField = app.textFields["onboarding.emoji"]
+        XCTAssertTrue(emojiField.waitForExistence(timeout: 5))
+        emojiField.tap()
+        emojiField.typeText("🧗")
         hold(1.0)
         app.buttons["onboarding.createCard"].tap()
 
@@ -269,15 +280,13 @@ final class U2DemoRecordingUITests: XCTestCase {
         hold(1.5)
         toCollection.tap()
 
-        // 컬렉션 ↔ 카드 상세 — matchedTransitionSource + zoom 전환
+        // 홈 카드 플립 (F61) — 탭하면 뒷면(MBTI·관심사), 다시 탭하면 앞면
         let myCard = app.buttons["collection.myCard"]
         XCTAssertTrue(myCard.waitForExistence(timeout: 5))
         hold(1.0)
         myCard.tap()
-        let close = app.buttons["닫기"]
-        XCTAssertTrue(close.waitForExistence(timeout: 5))
         hold(1.5)
-        close.tap()
+        myCard.tap()
         hold(1.5)
     }
 }

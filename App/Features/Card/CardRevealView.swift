@@ -39,7 +39,7 @@ struct CardRevealView: View {
                     .rotation3DEffect(
                         .degrees(appeared ? 0 : 22),
                         axis: (x: 1, y: 0, z: 0),
-                        perspective: 0.55
+                        perspective: 80
                     )
                     .offset(y: leaving ? -140 : (appeared ? 0 : 240))
                     .opacity(appeared ? (leaving ? 0 : 1) : 0)
@@ -56,7 +56,7 @@ struct CardRevealView: View {
             Button {
                 Task { await goToCollection() }
             } label: {
-                Text("컬렉션으로")
+                Text("나의 카드로")
                     .font(DS.Typo.headline)
                     .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
             }
