@@ -29,7 +29,9 @@ targets:
     dependencies:
       - package: GyeopPackages
         products: [Core, DesignSystem, CardKit, GyeopKit, DataKit]
-      - target: GyeopClip
+      # GyeopClip 임베드 제외 (1차 제출 범위 밖 — docs/submission-checklist.md D#2,
+      # docs/mentor-deploy-brief.md Q1/Q2 소유자 결정 2026-08-10). GyeopClip 타깃 자체는
+      # 유지된다 — 도메인 확정 후 이 줄만 되돌리면 재포함.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.gyeop.app

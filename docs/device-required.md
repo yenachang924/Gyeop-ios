@@ -13,7 +13,7 @@
 | 카드 셰이더 60fps 검증 | CardKit | 시뮬레이터 근사 확인만 | 미착수 (S1 오후) |
 | Sign in with Apple 실사용자 플로우(ASAuthorizationController 표시·응답) | DataKit | 없음(시뮬레이터에서 Apple ID로 직접 확인) | 구현 완료, 시뮬레이터 수동 확인 대기 |
 | App Group 실제 공유 컨테이너(AppClip→App 데이터 마이그레이션) | DataKit | `ClipMigrationReceiver`는 UserDefaults(suiteName:) 단위 테스트로 로직만 검증됨 | AppClip 타깃 활성화 완료(통합 세션) — 실기기 교차 프로세스 검증 필요 |
-| App Clip 실제 도메인 인보케이션(Associated Domain 검증) | AppClip | 시뮬레이터는 `_XCAppClipURL` 실행 인자로 커스텀 스킴(`gyeop://`) URL 직접 주입 | 미착수 (도메인 소유자 결정 대기) |
+| App Clip 실제 도메인 인보케이션(Associated Domain 검증) | AppClip | 시뮬레이터는 `_XCAppClipURL` 실행 인자로 커스텀 스킴(`gyeop://`) URL 직접 주입 | **1차 제출 범위 밖** (2026-08-10 소유자 결정 — App Clip을 1차 제출에서 제외, `project.yml`에서 임베드 제거). 도메인 확정·클립 재포함 후 재개 |
 
 ## 통합 실행 계획 (제출 전 실기기 세션 1회, 기기 2대 · 약 2시간)
 
@@ -34,3 +34,8 @@ v0.2 항목(UWB·Live Activity)과 SignalKit 예정 항목(APNs)은 이번 제�
 | 10 | 시연 영상 촬영 | `docs/review-kit.md` §2 촬영 목록 그대로 | 5컷 확보 | – |
 
 ⚠️ 8번의 실도메인 AASA 인보케이션(태그/QR → 클립 자동 실행)은 도메인 확정 후에만 가능 — 제출 리스크 목록에 유지.
+
+**2026-08-10 — App Clip 1차 제출 제외 결정.** 소유자가 도메인 미확정 리스크(D#2)를 App Clip을
+1차 제출에서 빼는 쪽으로 정리했다(`project.yml` Gyeop 타깃 임베드 한 줄 제거). 위 8번 항목의
+로컬 검증(App Group 마이그레이션)은 클립을 재포함할 때를 위해 이미 확보된 유효한 기록으로 남긴다 —
+재검증 불필요, 재포함 시점에만 실도메인 인보케이션(위 항목)을 마저 확인하면 된다.
