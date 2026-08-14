@@ -129,8 +129,7 @@ struct ProfileStepView: View {
             // 키보드 위 「완료」 — 스크롤을 모르는 사용자도 확실히 닫을 수 있다 (F45)
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Button("완료") { focusedField = nil }
-                    .accessibilityIdentifier("onboarding.keyboard.done")
+                
             }
         }
         // F46: Form 전체에 `.animation(value:)`를 걸면 안 된다. `incomplete`가 뒤집히는

@@ -35,11 +35,11 @@ struct CardRevealView: View {
 
                 CardView(card: card)
                     .padding(.horizontal, DS.Spacing.xl)
-                    .scaleEffect(appeared ? (leaving ? 0.92 : 1) : 0.92)
+                    .scaleEffect(appeared ? (leaving ? 0.92 : 1) : 0.95)
                     .rotation3DEffect(
                         .degrees(appeared ? 0 : 22),
-                        axis: (x: 1, y: 0, z: 0),
-                        perspective: 0.55
+                        axis: (x: 10, y: 0, z: 0),
+                        perspective: 90
                     )
                     .offset(y: leaving ? -140 : (appeared ? 0 : 240))
                     .opacity(appeared ? (leaving ? 0 : 1) : 0)

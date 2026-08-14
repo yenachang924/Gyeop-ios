@@ -40,9 +40,9 @@ struct InterestsStepView: View {
         .navigationTitle("1 / 3")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
-            Button("다음 · \(selected.count)/\(UserProfile.maxInterests)") { onNext() }
+            Button("다음") { onNext() }
                 .dsProminentButton()
-                .controlSize(.large)
+                .controlSize(.extraLarge)
                 .frame(maxWidth: .infinity)
                 .padding(DS.Spacing.m)
                 .disabled(selected.isEmpty)
@@ -52,9 +52,9 @@ struct InterestsStepView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
-            Text("요즘 나를 이루는 것")
+            Text("나를 이루는 것")
                 .font(DS.Typo.largeTitle)
-            Text("최대 \(UserProfile.maxInterests)개, 고를수록 화면이 나의 색으로 물들어요")
+            Text("최대 \(UserProfile.maxInterests)개 고를 수 있어요")
                 .font(DS.Typo.body)
                 .foregroundStyle(DS.Palette.secondaryText)
         }
@@ -68,7 +68,7 @@ struct InterestsStepView: View {
     /// 칩에 여유를 준다 (F36) — 폭을 넓혀 이름이 줄바꿈·축소되지 않게.
     private var interestGrid: some View {
         LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: 124), spacing: DS.Spacing.s)],
+            columns: [GridItem(.adaptive(minimum: 87), spacing: DS.Spacing.s)],
             spacing: DS.Spacing.s
         ) {
             ForEach(EmojiCatalog.all) { icon in
@@ -173,7 +173,7 @@ private struct InterestBackdrop: View {
     /// 배경 물듦 튜닝 — 값 조정은 여기서만 (실기기 체감 대상).
     private enum Layout {
         static let blobWidthRatio: CGFloat = 0.95
-        static let blur: CGFloat = 70
+        static let blur: CGFloat = 78
         /// 텍스트 대비를 지키는 상한. 이보다 올리면 본문이 읽히기 어려워진다.
         static let lightOpacity: Double = 0.20
         static let darkOpacity: Double = 0.28
