@@ -7,7 +7,13 @@ public actor MockGyeopRepository: GyeopRepository {
     private var card: CardSnapshot?
     private var records: [String: GyeopRecord] = [:]
 
-    public init(seededGyeops: [GyeopRecord] = []) {
+    public init(
+        seededGyeops: [GyeopRecord] = [],
+        initialProfile: UserProfile? = nil,
+        initialCard: CardSnapshot? = nil
+    ) {
+        profile = initialProfile
+        card = initialCard
         for record in seededGyeops {
             records[record.id] = record
         }

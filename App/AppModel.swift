@@ -61,6 +61,10 @@ final class AppModel {
         let mockFailure: ExchangeFailure? =
             CommandLine.arguments.contains("-mock-exchange-fail") ? .timedOut : nil
 
+        if CommandLine.arguments.contains("-uitest-stale-profile") {
+            return staleProfileUITestModel(mockFailure: mockFailure)
+        }
+
         // UI 테스트는 매번 첫 실행이어야 한다 — 인메모리 저장소 + 로그인 게이트 생략
         if CommandLine.arguments.contains("-uitest-reset") {
             return AppModel(
@@ -105,6 +109,31 @@ final class AppModel {
 
     /// MCPeerID 제약(UTF-8 63바이트)에 맞춘 표시 이름. 닉네임이 겹쳐도 피어가
     /// 구분되도록 ownerID 앞 8자를 붙인다.
+    private static func staleProfileUITestModel(mockFailure: ExchangeFailure?) -> AppModel {
+        let fixedNow = Date(timeIntervalSince1970: 1_785_000_000)
+        let staleUpdatedAt = fixedNow.addingTimeInterval(
+            -(ProfileFreshness.refreshInterval + 24 * 60 * 60)
+        )
+        let profile = UserProfile(
+            id: "uitest-stale-profile",
+            nickname: "유나",
+            tagline: "새 iOS 화면을 만들고 있어요",
+            emoji: "🌱",
+            interests: ["AI", "UX/UI", "개발"],
+            mbti: MBTI(code: "INTJ"),
+            createdAt: staleUpdatedAt,
+            updatedAt: staleUpdatedAt
+        )
+        let cardGenerator = CardGenerator()
+        let card = cardGenerator.makeCard(from: profile)
+        return AppModel(
+            cardGenerator: cardGenerator,
+            repository: MockGyeopRepository(initialProfile: profile, initialCard: card),
+            makeExchangeSession: { _ in MockExchangeSession(failure: mockFailure) },
+            now: { fixedNow }
+        )
+    }
+
     private nonisolated static func exchangeDisplayName(for card: CardSnapshot) -> String {
         let suffix = String(card.ownerID.suffix(8))
         return "\(String(card.nickname.prefix(12)))#\(suffix)"
