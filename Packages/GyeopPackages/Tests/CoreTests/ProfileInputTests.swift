@@ -6,19 +6,18 @@ import Testing
 struct ProfileInputTests {
     @Test("accepts and normalizes valid profile input")
     func normalizesValidInput() throws {
-        let interests = supportedInterests
         let input = try ProfileInput(
             nickname: " Ana ",
             currentStatus: " Building an iOS app ",
             emoji: "🌱",
-            interests: [" \(interests[0]) ", interests[1], " \(interests[2]) "],
+            interests: [" AI ", "UX/UI", " 개발 "],
             mbti: MBTI(code: "INTJ")
         )
 
         #expect(input.nickname == "Ana")
         #expect(input.currentStatus == "Building an iOS app")
         #expect(input.emoji == "🌱")
-        #expect(input.interests == interests)
+        #expect(input.interests == ["AI", "UX/UI", "개발"])
         #expect(input.mbti == MBTI(code: "INTJ"))
     }
 
@@ -51,9 +50,7 @@ struct ProfileInputTests {
 
     @Test("rejects an incorrect interest count")
     func rejectsWrongInterestCount() {
-        let interests = supportedInterests
-
-        for invalidInterests in [[], [interests[0]], Array(interests.prefix(2)), interests + ["one too many"]] {
+        for invalidInterests in [[], ["AI"], ["AI", "UX/UI"], ["AI", "UX/UI", "개발", "금융"]] {
             #expect(throws: ProfileInputError.interestCount(expected: 3)) {
                 try makeInput(interests: invalidInterests)
             }
@@ -63,21 +60,21 @@ struct ProfileInputTests {
     @Test("rejects duplicate interests after trimming")
     func rejectsDuplicateInterestsAfterTrimming() {
         #expect(throws: ProfileInputError.duplicateInterest) {
-            try makeInput(interests: [supportedInterests[0], " \(supportedInterests[0]) ", supportedInterests[2]])
+            try makeInput(interests: ["AI", " AI ", "개발"])
         }
     }
 
     @Test("rejects an interest that is empty after trimming")
     func rejectsEmptyInterestAfterTrimming() {
         #expect(throws: ProfileInputError.emptyInterest) {
-            try makeInput(interests: [supportedInterests[0], " \n ", supportedInterests[2]])
+            try makeInput(interests: ["AI", " \n ", "개발"])
         }
     }
 
     @Test("rejects an unsupported interest after trimming")
     func rejectsUnsupportedInterestAfterTrimming() {
         #expect(throws: ProfileInputError.unsupportedInterest("해외 축구")) {
-            try makeInput(interests: [supportedInterests[0], supportedInterests[1], " 해외 축구 "])
+            try makeInput(interests: ["AI", "UX/UI", " 해외 축구 "])
         }
     }
 
@@ -111,14 +108,8 @@ struct ProfileInputTests {
         #expect(profile.lastUpdatedAt == createdAt)
     }
 
-    private var supportedInterests: [String] {
-        Array(InterestCatalog.categories.flatMap(\.interests).prefix(ProfileInput.interestCount))
-    }
-
-    private func makeInput(nickname: String = "Ana", currentStatus: String = "Building an iOS app", emoji: String = "🌱", interests: [String]? = nil) throws -> ProfileInput {
-        let resolvedInterests = interests ?? supportedInterests
-
-        return try ProfileInput(nickname: nickname, currentStatus: currentStatus, emoji: emoji, interests: resolvedInterests, mbti: nil)
+    private func makeInput(nickname: String = "Ana", currentStatus: String = "Building an iOS app", emoji: String = "🌱", interests: [String] = ["AI", "UX/UI", "개발"]) throws -> ProfileInput {
+        try ProfileInput(nickname: nickname, currentStatus: currentStatus, emoji: emoji, interests: interests, mbti: nil)
     }
 }
 
