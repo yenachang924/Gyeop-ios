@@ -82,15 +82,21 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         ]
         app.launch()
 
-        let longChoice = app.buttons["onboarding.interest.데이터 분석"]
-        var swipes = 0
-        while (!longChoice.exists || !longChoice.isHittable) && swipes < 8 {
-            app.swipeUp()
-            swipes += 1
+        // 카탈로그에서 가장 긴 두 이름 — 한 열을 꽉 채우고 줄바꿈으로 흘러야 한다
+        for name in ["데이터 분석", "사이드 프로젝트"] {
+            let longChoice = app.buttons["onboarding.interest.\(name)"]
+            var swipes = 0
+            while (!longChoice.exists || !longChoice.isHittable) && swipes < 8 {
+                app.swipeUp()
+                swipes += 1
+            }
+            XCTAssertTrue(longChoice.waitForExistence(timeout: 5), "\(name) 칩을 찾지 못했다")
+            XCTAssertTrue(longChoice.isHittable, "\(name) 칩을 탭할 수 없다")
+            XCTAssertGreaterThan(longChoice.frame.width, app.frame.width * 0.7)
+            // 칩이 화면 안에 온전히 들어와야 한다 — 잘리면 여기서 걸린다
+            XCTAssertLessThanOrEqual(longChoice.frame.maxX, app.frame.maxX)
+            snap(app, "ax5-interest-\(name)")
         }
-        XCTAssertTrue(longChoice.waitForExistence(timeout: 5))
-        XCTAssertTrue(longChoice.isHittable)
-        XCTAssertGreaterThan(longChoice.frame.width, app.frame.width * 0.7)
     }
 
     /// Dynamic Type 최소(XS)
@@ -125,10 +131,10 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         let firstInterest = app.buttons["onboarding.interest.AI"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-1-onboarding-interests")
-        firstInterest.tap()
         // AX5에서는 LazyVGrid가 화면 밖 칩을 아직 안 만들었을 수 있다 — 스크롤해서 탭
-        tapEvenIfOffscreen(app, app.buttons["onboarding.interest.UX/UI"])
-        tapEvenIfOffscreen(app, app.buttons["onboarding.interest.개발"])
+        select(app, firstInterest)
+        select(app, app.buttons["onboarding.interest.UX/UI"])
+        select(app, app.buttons["onboarding.interest.개발"])
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
 
         // 2/3 MBTI — 네 축 선택 후 「다음」 (F55)
@@ -179,8 +185,7 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         XCTAssertEqual(editHeading.label, "카드 수정")
         let editableStatus = app.textFields["onboarding.currentStatus"]
         XCTAssertTrue(editableStatus.waitForExistence(timeout: 5))
-        focusTextField(app, editableStatus)
-        editableStatus.typeText(" 업데이트")
+        replaceText(app, editableStatus, with: "첫 iOS 앱을 만들고 있어요 업데이트")
         tapEvenIfOffscreen(app, app.buttons["profile.edit.save"])
         let updatedCard = XCTNSPredicateExpectation(
             predicate: NSPredicate(format: "label CONTAINS %@", "첫 iOS 앱을 만들고 있어요 업데이트"),
@@ -260,19 +265,64 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         var focusTries = 0
         while (field.value(forKey: "hasKeyboardFocus") as? Bool) != true && focusTries < 4 {
             RunLoop.current.run(until: Date().addingTimeInterval(0.5))
+            // AX5에서는 필드가 화면 맨 위(상태바 아래)에 걸쳐 멈춘다 — 그 자리를 탭하면
+            // 상태바가 먼저 먹어 포커스가 안 잡힌다. 아래로 끌어내린 뒤 다시 탭한다.
+            if field.frame.minY < app.frame.minY + 60 {
+                app.swipeDown()
+                RunLoop.current.run(until: Date().addingTimeInterval(0.6))
+            }
             field.tap()
             focusTries += 1
         }
         XCTAssertEqual(field.value(forKey: "hasKeyboardFocus") as? Bool, true)
     }
 
+    /// 관심사 칩 선택. 스크롤 감속과 겹치면 첫 탭이 스크롤 정지로 소비되므로
+    /// (MBTI 알약과 같은 사정) 선택 상태를 확인하고 필요하면 다시 탭한다.
+    @MainActor
+    private func select(_ app: XCUIApplication, _ chip: XCUIElement) {
+        var tries = 0
+        while !chip.isSelected && tries < 4 {
+            tapEvenIfOffscreen(app, chip)
+            RunLoop.current.run(until: Date().addingTimeInterval(0.4))
+            tries += 1
+        }
+        XCTAssertTrue(chip.isSelected, "\(chip) 선택되지 않음")
+    }
+
+    /// 이미 값이 있는 필드는 탭한 자리에 캐럿이 놓인다 — 그냥 치면 글자 사이에 끼어든다.
+    /// 캐럿 위치(=탭 좌표)는 Dynamic Type에 따라 달라지므로 기대지 않고, 세 번 탭으로
+    /// 전체를 고른 뒤 통째로 덮어쓴다.
+    @MainActor
+    private func replaceText(_ app: XCUIApplication, _ field: XCUIElement, with text: String) {
+        focusTextField(app, field)
+        var tries = 0
+        while (field.value as? String) != text && tries < 3 {
+            field.tap(withNumberOfTaps: 3, numberOfTouches: 1)
+            field.typeText(text)
+            tries += 1
+        }
+        XCTAssertEqual(field.value as? String, text, "「지금의 나」 입력이 기대값과 다르다")
+    }
+
     /// Dynamic Type 극단에서는 버튼이 스크롤 밖에 있을 수 있다 — 화면에 들어올 때까지 스크롤.
+    /// AX5에서는 칩이 한 열로 길게 늘어서 목표가 현재 위치보다 **위**에 남기도 한다
+    /// (LazyVGrid가 지나친 칩을 이미 내려놓은 상태). 아래로 훑어 못 찾으면 위로도 훑는다.
     @MainActor
     private func tapEvenIfOffscreen(_ app: XCUIApplication, _ element: XCUIElement) {
         var swipes = 0
         while (!element.exists || !element.isHittable) && swipes < 6 {
             app.swipeUp()
             swipes += 1
+        }
+        var backSwipes = 0
+        while (!element.exists || !element.isHittable) && backSwipes < 12 {
+            app.swipeDown()
+            backSwipes += 1
+        }
+        // 감속(또는 상단 바운스)이 남아 있으면 첫 탭이 "스크롤 정지"로 소비된다 — 멎은 뒤 탭한다
+        if swipes > 0 || backSwipes > 0 {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.6))
         }
         XCTAssertTrue(element.waitForExistence(timeout: 5), "\(element) not reachable")
         element.tap()
