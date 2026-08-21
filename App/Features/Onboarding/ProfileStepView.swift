@@ -48,6 +48,10 @@ struct ProfileStepView: View {
         return false
     }
 
+    private var headingText: String {
+        isEditing ? "카드 수정" : "칸을 모두 채우면\n카드가 완성돼요"
+    }
+
     private var nicknameMissing: Bool {
         draft.nickname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
@@ -72,7 +76,7 @@ struct ProfileStepView: View {
         Form {
             // 강요 문구 대신 제목으로 (F37) — 무엇을 하면 되는지만 담백하게
             Section {
-                Text("칸을 모두 채우면\n카드가 완성돼요")
+                Text(headingText)
                     .font(DS.Typo.largeTitle)
                     .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -80,6 +84,7 @@ struct ProfileStepView: View {
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
                     .accessibilityAddTraits(.isHeader)
+                    .accessibilityIdentifier("profile.heading")
             }
 
             if case let .edit(lastUpdatedAt) = mode {

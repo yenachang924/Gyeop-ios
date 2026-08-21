@@ -147,16 +147,25 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         // 컬렉션 (빈 상태)
         XCTAssertTrue(app.staticTexts["나의 카드"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["collection.editMyCard"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["첫 iOS 앱을 만들고 있어요"].exists)
+        let myCard = app.buttons["collection.myCard"]
+        XCTAssertTrue(myCard.waitForExistence(timeout: 5))
+        XCTAssertTrue(myCard.label.contains("첫 iOS 앱을 만들고 있어요"))
         snap(app, "\(prefix)-5-collection-empty")
 
         app.buttons["collection.editMyCard"].tap()
+        let editHeading = app.staticTexts["profile.heading"]
+        XCTAssertTrue(editHeading.waitForExistence(timeout: 5))
+        XCTAssertEqual(editHeading.label, "카드 수정")
         let editableStatus = app.textFields["onboarding.currentStatus"]
         XCTAssertTrue(editableStatus.waitForExistence(timeout: 5))
         focusTextField(app, editableStatus)
         editableStatus.typeText(" 업데이트")
         tapEvenIfOffscreen(app, app.buttons["profile.edit.save"])
-        XCTAssertTrue(app.staticTexts["첫 iOS 앱을 만들고 있어요 업데이트"].waitForExistence(timeout: 5))
+        let updatedCard = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "label CONTAINS %@", "첫 iOS 앱을 만들고 있어요 업데이트"),
+            object: myCard
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [updatedCard], timeout: 5), .completed)
 
         // 맞대기 — 탐색 중 → 겹 성립
         app.buttons["collection.exchange"].tap()
