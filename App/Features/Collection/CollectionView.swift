@@ -14,6 +14,8 @@ struct CollectionView: View {
     @State private var selectedCard: CardSnapshot?
     @State private var showingExchange = false
     @State private var showingSettings = false
+    @State private var showingProfileEditor = false
+    @State private var editDraft = OnboardingDraft.empty
     /// 삭제 확인을 기다리는 받은 카드 (F65) — 파괴적 액션은 alert로 붙잡는다 (F47 관례).
     @State private var pendingDeletion: GyeopRecord?
     /// 컬렉션 ↔ 카드 상세 줌 전환 — 시스템 zoom 전환이 matchedGeometry 페어링을 대신한다.
@@ -60,6 +62,25 @@ struct CollectionView: View {
                     .presentationBackground(.ultraThinMaterial)
                     .presentationCornerRadius(DS.Radius.card)
                     .presentationDragIndicator(.visible)
+            }
+            .sheet(isPresented: $showingProfileEditor) {
+                if let profile = model.myProfile {
+                    NavigationStack {
+                        ProfileStepView(
+                            draft: $editDraft,
+                            mode: .edit(lastUpdatedAt: profile.lastUpdatedAt),
+                            onCreate: { input in
+                                await model.updateProfile(input: input)
+                            },
+                            onSaved: {
+                                showingProfileEditor = false
+                            }
+                        )
+                    }
+                    .presentationBackground(.ultraThinMaterial)
+                    .presentationCornerRadius(DS.Radius.card)
+                    .presentationDragIndicator(.visible)
+                }
             }
             // 받은 카드 삭제 (F65) — 되돌릴 수 없으므로 alert로 확인 (F47 관례)
             .alert(
@@ -141,12 +162,35 @@ struct CollectionView: View {
                 .overlay { ShimmerFrame().allowsHitTesting(false) }
                 .frame(maxWidth: DS.Layout.homeMyCardMaxWidth)
                 .accessibilityIdentifier("collection.myCard")
+
+            if let profile = model.myProfile,
+               model.shouldPromptForProfileRefresh(profile) {
+                Button("요즘의 내가 달라졌나요?") {
+                    presentProfileEditor(profile)
+                }
+                .font(.body)
+                .buttonStyle(.plain)
+            }
+
+            Button("카드 수정") {
+                guard let profile = model.myProfile else { return }
+                presentProfileEditor(profile)
+            }
+            .font(.body.weight(.semibold))
+            .frame(minWidth: DS.minTapTarget, minHeight: DS.minTapTarget)
+            .buttonStyle(.bordered)
+            .accessibilityIdentifier("collection.editMyCard")
             Text("카드를 탭하면 뒤집혀요")
                 .font(DS.Typo.footnote)
                 .foregroundStyle(DS.Palette.secondaryText)
                 .accessibilityHidden(true) // CardFlipView가 힌트를 전달한다
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private func presentProfileEditor(_ profile: UserProfile) {
+        editDraft = OnboardingDraft(profile: profile)
+        showingProfileEditor = true
     }
 
     private var collectedSection: some View {

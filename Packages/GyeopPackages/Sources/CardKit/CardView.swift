@@ -3,6 +3,13 @@ import DesignSystem
 import Foundation
 import SwiftUI
 
+public enum CardAccessibility {
+    public static func summary(for card: CardSnapshot) -> String {
+        let mbti = card.mbti.map { ". MBTI \($0.code)" } ?? ""
+        return "\(card.nickname)의 카드. 지금의 나 \(card.currentStatus). 관심사 \(card.interests.joined(separator: ", "))\(mbti)"
+    }
+}
+
 /// 정체성 카드 렌더 (앞면). 앱에서 커스텀 비주얼이 허용된 유일한 컴포넌트 (CLAUDE.md UI 원칙).
 ///
 /// 시드 → 비주얼 결정성 계약은 `CardVisual`에 있다.
@@ -62,9 +69,12 @@ public struct CardView: View {
             // 카드는 라이트·다크 동일(R2)이므로 시스템 컬러 대신 고정 잉크를 쓴다.
             Text(card.nickname)
                 .font(DS.Typo.title)
-            if !card.tagline.isEmpty {
-                Text(card.tagline)
-                    .font(DS.Typo.body)
+            if !card.currentStatus.isEmpty {
+                Text(card.currentStatus)
+                    .font(.body)
+                    .fontWeight(.medium)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
             }
 
             if !overlap.isEmpty {
@@ -101,13 +111,7 @@ public struct CardView: View {
         .accessibilityLabel(frontAccessibilityLabel)
     }
 
-    private var frontAccessibilityLabel: String {
-        var parts = ["\(card.nickname)의 카드"]
-        if !card.tagline.isEmpty { parts.append(card.tagline) }
-        if !card.interests.isEmpty { parts.append("관심사 \(card.interests.joined(separator: ", "))") }
-        if let mbti = card.mbti { parts.append("MBTI \(mbti.code)") }
-        return parts.joined(separator: ". ")
-    }
+    private var frontAccessibilityLabel: String { CardAccessibility.summary(for: card) }
 
     /// 위상(0=정지 격자)만큼 내부 제어점을 밀어낸 좌표. 가장자리 점은 고정해
     /// 메시가 카드 밖으로 벌어지지 않는다. 방향은 점 인덱스로 결정적 — 난수 없음.

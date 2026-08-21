@@ -14,6 +14,29 @@ struct SwiftDataGyeopRepositoryTests {
         #expect(try await repo.myCard() == MockData.sampleCards[0])
     }
 
+    @Test("profile updatedAt survives persistence independently from createdAt")
+    func profileUpdatedAtRoundtrip() async throws {
+        let repo = try SwiftDataGyeopRepository.inMemory()
+        let createdAt = Date(timeIntervalSince1970: 1_000)
+        let updatedAt = Date(timeIntervalSince1970: 2_000)
+        let profile = UserProfile(
+            id: "profile-updated-at",
+            nickname: "Yena",
+            tagline: "Building an iOS app",
+            emoji: "🌱",
+            interests: ["AI", "UX/UI", "개발"],
+            mbti: MBTI(code: "ENFP"),
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        )
+
+        try await repo.saveMyProfile(profile)
+
+        let restored = try await repo.myProfile()
+        #expect(restored?.createdAt == createdAt)
+        #expect(restored?.updatedAt == updatedAt)
+    }
+
     @Test("프로필 재저장은 덮어쓴다 (1건 유지)")
     func profileUpsert() async throws {
         let repo = try SwiftDataGyeopRepository.inMemory()

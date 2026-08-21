@@ -13,6 +13,8 @@ final class UserProfileEntity {
     /// MBTI 4글자 코드 — 건너뛴 경우 빈 문자열 (F55, 성향 energy/venue를 대체).
     var mbtiRaw: String = ""
     var createdAt: Date
+    /// Optional for Build 4 stores that predate profile refresh tracking.
+    var updatedAt: Date?
 
     init(profile: UserProfile) {
         id = profile.id
@@ -22,6 +24,7 @@ final class UserProfileEntity {
         interests = profile.interests
         mbtiRaw = profile.mbti?.code ?? ""
         createdAt = profile.createdAt
+        updatedAt = profile.updatedAt
     }
 
     func update(with profile: UserProfile) {
@@ -32,6 +35,7 @@ final class UserProfileEntity {
         interests = profile.interests
         mbtiRaw = profile.mbti?.code ?? ""
         createdAt = profile.createdAt
+        updatedAt = profile.updatedAt
     }
 
     func toDomain() -> UserProfile {
@@ -42,7 +46,8 @@ final class UserProfileEntity {
             emoji: emoji,
             interests: interests,
             mbti: MBTI(code: mbtiRaw),
-            createdAt: createdAt
+            createdAt: createdAt,
+            updatedAt: updatedAt
         )
     }
 }

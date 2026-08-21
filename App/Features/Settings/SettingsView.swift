@@ -21,6 +21,14 @@ struct SettingsView: View {
                     }
                 }
 
+                if let profile = model.myProfile {
+                    Section("카드 정보") {
+                        LabeledContent("마지막 수정") {
+                            Text(profile.lastUpdatedAt, format: .dateTime.year().month().day())
+                        }
+                    }
+                }
+
                 Section {
                     NavigationLink("카드 색 읽는 법") {
                         CardColorGuideView()

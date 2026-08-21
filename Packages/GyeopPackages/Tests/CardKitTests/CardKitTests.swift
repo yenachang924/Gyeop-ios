@@ -2,6 +2,19 @@ import Core
 import Testing
 @testable import CardKit
 
+@Suite("Card accessibility")
+struct CardAccessibilityTests {
+    @Test("summary includes the current status, every interest, and optional MBTI")
+    func cardAccessibilitySummary() {
+        let card = MockData.sampleCards[0]
+        let summary = CardAccessibility.summary(for: card)
+
+        #expect(summary.contains(card.currentStatus))
+        #expect(card.interests.allSatisfy(summary.contains))
+        #expect(card.mbti.map { summary.contains($0.code) } ?? true)
+    }
+}
+
 @Suite("InterestSymbol — 카드 관심사 에셋")
 struct InterestSymbolTests {
     @Test("카탈로그 관심사는 고정 대표 이모지를 낸다")

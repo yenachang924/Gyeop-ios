@@ -44,10 +44,11 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         app.launchArguments = ["-uitest-reset"]
         app.launch()
         // 그리드 상단 두 칩 — 스크롤 없이 선택 상태가 프레임에 남는다
-        let first = app.buttons["onboarding.interest.달리기"]
+        let first = app.buttons["onboarding.interest.AI"]
         XCTAssertTrue(first.waitForExistence(timeout: 5))
         first.tap()
-        app.buttons["onboarding.interest.자전거"].tap()
+        app.buttons["onboarding.interest.UX/UI"].tap()
+        app.buttons["onboarding.interest.개발"].tap()
         snap(app, "default-1b-interests-selected")
 
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
@@ -101,12 +102,13 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
     @MainActor
     private func runFullFlow(_ app: XCUIApplication, prefix: String) throws {
         // 1/3 관심사
-        let firstInterest = app.buttons["onboarding.interest.달리기"]
+        let firstInterest = app.buttons["onboarding.interest.AI"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-1-onboarding-interests")
         firstInterest.tap()
         // AX5에서는 LazyVGrid가 화면 밖 칩을 아직 안 만들었을 수 있다 — 스크롤해서 탭
-        tapEvenIfOffscreen(app, app.buttons["onboarding.interest.자전거"])
+        tapEvenIfOffscreen(app, app.buttons["onboarding.interest.UX/UI"])
+        tapEvenIfOffscreen(app, app.buttons["onboarding.interest.개발"])
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
 
         // 2/3 MBTI — 네 축 선택 후 「다음」 (F55)
@@ -127,9 +129,9 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))
         focusTextField(app, nickname)
         nickname.typeText("yena")
-        let tagline = app.textFields["onboarding.tagline"]
-        focusTextField(app, tagline)
-        tagline.typeText("보드게임 좋아하는 사람")
+        let currentStatus = app.textFields["onboarding.currentStatus"]
+        focusTextField(app, currentStatus)
+        currentStatus.typeText("첫 iOS 앱을 만들고 있어요")
         let emojiField = app.textFields["onboarding.emoji"]
         focusTextField(app, emojiField)
         emojiField.typeText("🧗")
@@ -144,7 +146,17 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
 
         // 컬렉션 (빈 상태)
         XCTAssertTrue(app.staticTexts["나의 카드"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["collection.editMyCard"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["첫 iOS 앱을 만들고 있어요"].exists)
         snap(app, "\(prefix)-5-collection-empty")
+
+        app.buttons["collection.editMyCard"].tap()
+        let editableStatus = app.textFields["onboarding.currentStatus"]
+        XCTAssertTrue(editableStatus.waitForExistence(timeout: 5))
+        focusTextField(app, editableStatus)
+        editableStatus.typeText(" 업데이트")
+        tapEvenIfOffscreen(app, app.buttons["profile.edit.save"])
+        XCTAssertTrue(app.staticTexts["첫 iOS 앱을 만들고 있어요 업데이트"].waitForExistence(timeout: 5))
 
         // 맞대기 — 탐색 중 → 겹 성립
         app.buttons["collection.exchange"].tap()

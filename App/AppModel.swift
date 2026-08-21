@@ -19,6 +19,7 @@ final class AppModel {
     }
 
     private(set) var stage: Stage = .loading
+    private(set) var myProfile: UserProfile?
     private(set) var myCard: CardSnapshot?
     private(set) var gyeops: [GyeopRecord] = []
 
@@ -30,6 +31,7 @@ final class AppModel {
     private let requiresSignIn: Bool
     /// 계정 삭제 실행 (심사 5.1.1(v)). 조립 시점에 실구현이 주입된다.
     private let deleteAccountAction: @Sendable () async throws -> Void
+    private let now: @Sendable () -> Date
 
     private let tokenStore = KeychainTokenStore()
 
@@ -40,13 +42,15 @@ final class AppModel {
             MockExchangeSession()
         },
         requiresSignIn: Bool = false,
-        deleteAccountAction: @escaping @Sendable () async throws -> Void = {}
+        deleteAccountAction: @escaping @Sendable () async throws -> Void = {},
+        now: @escaping @Sendable () -> Date = Date.init
     ) {
         self.cardGenerator = cardGenerator
         self.repository = repository
         self.makeExchangeSession = makeExchangeSession
         self.requiresSignIn = requiresSignIn
         self.deleteAccountAction = deleteAccountAction
+        self.now = now
     }
 
     /// 실기기·시뮬레이터 공통 조립: 카드 생성 CardKit, 저장 SwiftData, 교환은
@@ -62,7 +66,8 @@ final class AppModel {
             return AppModel(
                 cardGenerator: CardGenerator(),
                 repository: MockGyeopRepository(),
-                makeExchangeSession: { _ in MockExchangeSession(failure: mockFailure) }
+                makeExchangeSession: { _ in MockExchangeSession(failure: mockFailure) },
+                now: { Date(timeIntervalSince1970: 1_785_000_000) }
             )
         }
         do {
@@ -110,6 +115,8 @@ final class AppModel {
         clearTokenIfFreshInstall()
         do {
             try await migratePendingClipGyeops()
+            let profile = try await repository.myProfile()
+            myProfile = profile
             if let card = try await repository.myCard() {
                 myCard = card
                 try await refreshGyeops()
@@ -168,6 +175,7 @@ final class AppModel {
     func deleteAccount() async -> Bool {
         do {
             try await deleteAccountAction()
+            myProfile = nil
             myCard = nil
             gyeops = []
             return true
@@ -186,7 +194,7 @@ final class AppModel {
 
     /// 온보딩 완주 → 카드 생성·저장. 반환된 카드를 리빌 화면이 보여준다.
     func completeOnboarding(input: ProfileInput) async -> CardSnapshot? {
-        let saveDate = Date.now
+        let saveDate = now()
         let profile = UserProfile(
             id: "user-\(UUID().uuidString.lowercased())",
             nickname: input.nickname,
@@ -201,12 +209,47 @@ final class AppModel {
         do {
             try await repository.saveMyProfile(profile)
             try await repository.saveMyCard(card)
+            myProfile = profile
             myCard = card
             return card
         } catch {
             Log.sync.error("온보딩 저장 실패")
             return nil
         }
+    }
+
+    func updateProfile(input: ProfileInput) async -> Bool {
+        guard let currentProfile = myProfile, let currentCard = myCard else {
+            Log.sync.error("Profile update unavailable")
+            return false
+        }
+
+        let updatedProfile = UserProfile(
+            id: currentProfile.id,
+            nickname: input.nickname,
+            tagline: input.currentStatus,
+            emoji: input.emoji,
+            interests: input.interests,
+            mbti: input.mbti,
+            createdAt: currentProfile.createdAt,
+            updatedAt: now()
+        )
+        let updatedCard = cardGenerator.makeCard(from: updatedProfile, version: currentCard.version + 1)
+
+        do {
+            try await repository.saveMyProfile(updatedProfile)
+            try await repository.saveMyCard(updatedCard)
+            myProfile = updatedProfile
+            myCard = updatedCard
+            return true
+        } catch {
+            Log.sync.error("Profile update persistence failed")
+            return false
+        }
+    }
+
+    func shouldPromptForProfileRefresh(_ profile: UserProfile) -> Bool {
+        ProfileFreshness.shouldPrompt(updatedAt: profile.lastUpdatedAt, now: now())
     }
 
     func enterCollection() async {

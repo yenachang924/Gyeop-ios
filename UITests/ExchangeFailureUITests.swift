@@ -11,9 +11,11 @@ final class ExchangeFailureUITests: XCTestCase {
         app.launch()
 
         // 최단 경로 온보딩
-        let firstInterest = app.buttons["onboarding.interest.달리기"]
+        let firstInterest = app.buttons["onboarding.interest.AI"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         firstInterest.tap()
+        app.buttons["onboarding.interest.UX/UI"].tap()
+        app.buttons["onboarding.interest.개발"].tap()
         app.buttons["onboarding.interests.next"].tap()
         let firstAxis = app.buttons["onboarding.mbti.E"]
         XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))
@@ -26,8 +28,8 @@ final class ExchangeFailureUITests: XCTestCase {
         XCTAssertTrue(nickname.waitForExistence(timeout: 5))
         nickname.tap()
         nickname.typeText("yena")
-        app.textFields["onboarding.tagline"].tap()
-        app.textFields["onboarding.tagline"].typeText("test")
+        app.textFields["onboarding.currentStatus"].tap()
+        app.textFields["onboarding.currentStatus"].typeText("test")
         app.textFields["onboarding.emoji"].tap()
         app.textFields["onboarding.emoji"].typeText("🧗")
         app.buttons["onboarding.createCard"].tap()

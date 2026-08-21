@@ -1,5 +1,6 @@
 import Core
 import DesignSystem
+import Foundation
 import SwiftUI
 
 /// 온보딩 3/3 — 닉네임 · 지금의 나 · 이모지. **셋 다 필수**다 (F28).
@@ -11,8 +12,15 @@ import SwiftUI
 /// 마지막 이모지 한 글자만 남는다. 137개 카탈로그 제한이 사라진다.
 /// 키보드는 스크롤로 내려가고, 키보드 위 「완료」로도 닫힌다 (F45 계승).
 struct ProfileStepView: View {
+    enum Mode {
+        case create
+        case edit(lastUpdatedAt: Date)
+    }
+
     @Binding var draft: OnboardingDraft
     let onCreate: (ProfileInput) async -> Bool
+    let mode: Mode
+    let onSaved: () -> Void
 
     @State private var isCreating = false
     @State private var submissionError: String?
@@ -21,6 +29,23 @@ struct ProfileStepView: View {
     private enum Field: Hashable {
         case nickname
         case currentStatus
+    }
+
+    init(
+        draft: Binding<OnboardingDraft>,
+        mode: Mode = .create,
+        onCreate: @escaping (ProfileInput) async -> Bool,
+        onSaved: @escaping () -> Void = {}
+    ) {
+        _draft = draft
+        self.mode = mode
+        self.onCreate = onCreate
+        self.onSaved = onSaved
+    }
+
+    private var isEditing: Bool {
+        if case .edit = mode { return true }
+        return false
     }
 
     private var nicknameMissing: Bool {
@@ -55,6 +80,14 @@ struct ProfileStepView: View {
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
                     .accessibilityAddTraits(.isHeader)
+            }
+
+            if case let .edit(lastUpdatedAt) = mode {
+                Section("카드 정보") {
+                    LabeledContent("마지막 수정") {
+                        Text(lastUpdatedAt, format: .dateTime.year().month().day())
+                    }
+                }
             }
 
             Section("닉네임") {
@@ -111,7 +144,7 @@ struct ProfileStepView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
                     } else {
-                        Text("카드 완성")
+                        Text(isEditing ? "카드 저장" : "카드 완성")
                             .font(DS.Typo.headline)
                             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
                     }
@@ -121,7 +154,7 @@ struct ProfileStepView: View {
                 .disabled(isCreating || incomplete)
                 // 비활성 이유는 제목이 이미 말한다 — 버튼 아래 보조 문구는 제거 (F37)
                 .accessibilityHint(incomplete ? missingHint : "")
-                .accessibilityIdentifier("onboarding.createCard")
+                .accessibilityIdentifier(isEditing ? "profile.edit.save" : "onboarding.createCard")
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
                 if let submissionError {
@@ -138,7 +171,7 @@ struct ProfileStepView: View {
         // F46: Form 전체에 `.animation(value:)`를 걸면 안 된다. `incomplete`가 뒤집히는
         // 순간 **폼 안의 모든 행**(이모지 셀 137개 포함)이 위치 애니메이션을 타서 이모지가
         // 칸 밖으로 날아다녔다. 애니메이션은 실제로 변하는 뷰에만 국소적으로 붙인다.
-        .navigationTitle("3 / 3")
+        .navigationTitle(isEditing ? "카드 수정" : "3 / 3")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -175,11 +208,12 @@ struct ProfileStepView: View {
             submissionError = nil
             isCreating = true
             Task {
-                let didCreate = await onCreate(input)
-                if !didCreate {
+                let didSave = await onCreate(input)
+                if !didSave {
                     submissionError = "카드를 저장하지 못했어요. 다시 시도해주세요."
                 }
                 isCreating = false
+                if didSave { onSaved() }
             }
         } catch let error as ProfileInputError {
             submissionError = validationMessage(for: error)

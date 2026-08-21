@@ -25,6 +25,16 @@ struct OnboardingDraft {
         self.emoji = emoji
     }
 
+    init(profile: UserProfile) {
+        self.init(
+            interests: profile.interests,
+            mbti: profile.mbti,
+            nickname: profile.nickname,
+            currentStatus: profile.currentStatus,
+            emoji: profile.emoji
+        )
+    }
+
     func replacing(interests: [String]) -> Self {
         OnboardingDraft(
             interests: interests,
