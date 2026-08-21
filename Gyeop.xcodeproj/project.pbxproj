@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0C5F8F682F8F459D586F288E /* InterestsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77762B5D57F8BEB9881E4F14 /* InterestsStepView.swift */; };
+		10A0DED0D890830904128F7A /* ProfileEditFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A210CC6D32F367E930446938 /* ProfileEditFlowView.swift */; };
 		17DD98D19E804442087A10EE /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BB9415FD921160F6E33BDE5 /* SettingsView.swift */; };
 		27CB1BBE1F9BB44F27395E34 /* EmojiKeyboardField.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCD42BC07FBB77BCE28A621C /* EmojiKeyboardField.swift */; };
 		3141FDC6408BA41C1F32BBF8 /* emoji-icons.csv in Resources */ = {isa = PBXBuildFile; fileRef = EE5F0DB1E684956C240C7993 /* emoji-icons.csv */; };
@@ -19,18 +20,17 @@
 		6FC98FEFE4E15491EFC922D5 /* CardKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6B5D611A45CD9734335D6DC0 /* CardKit */; };
 		78C8AAF2B8FDA2BE3D02B147 /* MBTIStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DEAA5276315497D2A3DD34 /* MBTIStepView.swift */; };
 		7C3FCB18EC57B9D6A053F2FD /* OnboardingFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF3A254426E2CC7FEE77275 /* OnboardingFlowUITests.swift */; };
-		B8D1E6C2F3A4578B90CD5678 /* CurrentCardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9C0F5B7D2E1468A90BC1234 /* CurrentCardUITests.swift */; };
 		85FE6DACB5D7B9031AC44C06 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD63AB1680EBD8241FB337D /* AppModel.swift */; };
 		911B838843CD755B11384B7E /* ProfileStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B532C58FBE7B2E92053F29 /* ProfileStepView.swift */; };
 		A2029DF635635C6E6BD0E03B /* EmojiCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4B1EA1770D8AE18ED44731 /* EmojiCatalog.swift */; };
 		AD283490731BEF482F78C764 /* GyeopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF54E2B1267F18D983CEDFF5 /* GyeopApp.swift */; };
 		AF91342C48377BB0C1A5D98E /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 26CBD19128079A45A2709B14 /* DesignSystem */; };
-		C0B5F10A9D2248ACB7184001 /* ProfileEditFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0B5F10A9D2248ACB7184002 /* ProfileEditFlowView.swift */; };
 		C83929052B6621691135B5BE /* CardRevealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18B40EEA992A9D7F9C8781BE /* CardRevealView.swift */; };
 		CA2EC43AA355E8511F0FCFF7 /* GyeopKit in Frameworks */ = {isa = PBXBuildFile; productRef = 83E8E335BB8635ECB9DA9439 /* GyeopKit */; };
 		CF5C38C0128772C12E175A51 /* ScreenshotAndAccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45DD91276E5EC32C4317322 /* ScreenshotAndAccessibilityUITests.swift */; };
 		D182DE960D0EA71A5C5E2BE3 /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = D602563F4F418C874E302642 /* Core */; };
 		D2A9F6636C1E41DC29A1863E /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE100902A9F49506C6D2A50 /* OnboardingFlowView.swift */; };
+		D90131186899DF59D79507A7 /* CurrentCardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C9F6F23588A25E4BFA0447F /* CurrentCardUITests.swift */; };
 		E612FD2E4388FAADC46B6E5C /* ExchangeFailureUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2825339C19E2BDFFA262E122 /* ExchangeFailureUITests.swift */; };
 		E8FD3EB8967292E2A1C68E51 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C7C9C994FD97CF40E62B6319 /* Assets.xcassets */; };
 		F66944B889FA9929FEC23B41 /* CollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 863A4BB1552A39DBD063E27E /* CollectionView.swift */; };
@@ -53,16 +53,16 @@
 		2B4B1EA1770D8AE18ED44731 /* EmojiCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiCatalog.swift; sourceTree = "<group>"; };
 		3F61AB8788D0608FCA8CD1F6 /* GyeopPackages */ = {isa = PBXFileReference; lastKnownFileType = folder; name = GyeopPackages; path = Packages/GyeopPackages; sourceTree = SOURCE_ROOT; };
 		42DA513B14E1385CA8F5209F /* Gyeop.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Gyeop.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5C9F6F23588A25E4BFA0447F /* CurrentCardUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentCardUITests.swift; sourceTree = "<group>"; };
 		6B8BBBC567132FCFDD3F9BD2 /* OnboardingDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingDraft.swift; sourceTree = "<group>"; };
 		77762B5D57F8BEB9881E4F14 /* InterestsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterestsStepView.swift; sourceTree = "<group>"; };
 		7BB9415FD921160F6E33BDE5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		863A4BB1552A39DBD063E27E /* CollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionView.swift; sourceTree = "<group>"; };
 		8AE100902A9F49506C6D2A50 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
+		A210CC6D32F367E930446938 /* ProfileEditFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditFlowView.swift; sourceTree = "<group>"; };
 		A315153ABBD0D3E154457254 /* CardDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDetailView.swift; sourceTree = "<group>"; };
 		A3DEAA5276315497D2A3DD34 /* MBTIStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBTIStepView.swift; sourceTree = "<group>"; };
-		A9C0F5B7D2E1468A90BC1234 /* CurrentCardUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentCardUITests.swift; sourceTree = "<group>"; };
 		ABD63AB1680EBD8241FB337D /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
-		C0B5F10A9D2248ACB7184002 /* ProfileEditFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditFlowView.swift; sourceTree = "<group>"; };
 		C7C9C994FD97CF40E62B6319 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CF54E2B1267F18D983CEDFF5 /* GyeopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GyeopApp.swift; sourceTree = "<group>"; };
 		D097092EBED5A441532FA073 /* Gyeop.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Gyeop.entitlements; sourceTree = "<group>"; };
@@ -120,7 +120,7 @@
 				A3DEAA5276315497D2A3DD34 /* MBTIStepView.swift */,
 				6B8BBBC567132FCFDD3F9BD2 /* OnboardingDraft.swift */,
 				8AE100902A9F49506C6D2A50 /* OnboardingFlowView.swift */,
-				C0B5F10A9D2248ACB7184002 /* ProfileEditFlowView.swift */,
+				A210CC6D32F367E930446938 /* ProfileEditFlowView.swift */,
 				F2B532C58FBE7B2E92053F29 /* ProfileStepView.swift */,
 			);
 			path = Onboarding;
@@ -129,7 +129,7 @@
 		5F0F4ECA5D998277C9F41044 /* UITests */ = {
 			isa = PBXGroup;
 			children = (
-				A9C0F5B7D2E1468A90BC1234 /* CurrentCardUITests.swift */,
+				5C9F6F23588A25E4BFA0447F /* CurrentCardUITests.swift */,
 				2825339C19E2BDFFA262E122 /* ExchangeFailureUITests.swift */,
 				0FF3A254426E2CC7FEE77275 /* OnboardingFlowUITests.swift */,
 				D45DD91276E5EC32C4317322 /* ScreenshotAndAccessibilityUITests.swift */,
@@ -346,7 +346,7 @@
 				78C8AAF2B8FDA2BE3D02B147 /* MBTIStepView.swift in Sources */,
 				4845F680AABE071714A9F6FC /* OnboardingDraft.swift in Sources */,
 				D2A9F6636C1E41DC29A1863E /* OnboardingFlowView.swift in Sources */,
-				C0B5F10A9D2248ACB7184001 /* ProfileEditFlowView.swift in Sources */,
+				10A0DED0D890830904128F7A /* ProfileEditFlowView.swift in Sources */,
 				911B838843CD755B11384B7E /* ProfileStepView.swift in Sources */,
 				17DD98D19E804442087A10EE /* SettingsView.swift in Sources */,
 				348E0B6EB13908037F956664 /* WelcomeView.swift in Sources */,
@@ -357,7 +357,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B8D1E6C2F3A4578B90CD5678 /* CurrentCardUITests.swift in Sources */,
+				D90131186899DF59D79507A7 /* CurrentCardUITests.swift in Sources */,
 				E612FD2E4388FAADC46B6E5C /* ExchangeFailureUITests.swift in Sources */,
 				7C3FCB18EC57B9D6A053F2FD /* OnboardingFlowUITests.swift in Sources */,
 				CF5C38C0128772C12E175A51 /* ScreenshotAndAccessibilityUITests.swift in Sources */,
