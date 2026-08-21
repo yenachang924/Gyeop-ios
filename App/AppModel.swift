@@ -32,6 +32,7 @@ final class AppModel {
     /// 계정 삭제 실행 (심사 5.1.1(v)). 조립 시점에 실구현이 주입된다.
     private let deleteAccountAction: @Sendable () async throws -> Void
     private let now: @Sendable () -> Date
+    private let shouldMigratePendingClipGyeops: Bool
 
     private let tokenStore = KeychainTokenStore()
 
@@ -43,7 +44,8 @@ final class AppModel {
         },
         requiresSignIn: Bool = false,
         deleteAccountAction: @escaping @Sendable () async throws -> Void = {},
-        now: @escaping @Sendable () -> Date = Date.init
+        now: @escaping @Sendable () -> Date = Date.init,
+        shouldMigratePendingClipGyeops: Bool = true
     ) {
         self.cardGenerator = cardGenerator
         self.repository = repository
@@ -51,6 +53,7 @@ final class AppModel {
         self.requiresSignIn = requiresSignIn
         self.deleteAccountAction = deleteAccountAction
         self.now = now
+        self.shouldMigratePendingClipGyeops = shouldMigratePendingClipGyeops
     }
 
     /// 실기기·시뮬레이터 공통 조립: 카드 생성 CardKit, 저장 SwiftData, 교환은
@@ -107,8 +110,6 @@ final class AppModel {
         }
     }
 
-    /// MCPeerID 제약(UTF-8 63바이트)에 맞춘 표시 이름. 닉네임이 겹쳐도 피어가
-    /// 구분되도록 ownerID 앞 8자를 붙인다.
     private static func staleProfileUITestModel(mockFailure: ExchangeFailure?) -> AppModel {
         let fixedNow = Date(timeIntervalSince1970: 1_785_000_000)
         let staleUpdatedAt = fixedNow.addingTimeInterval(
@@ -130,10 +131,13 @@ final class AppModel {
             cardGenerator: cardGenerator,
             repository: MockGyeopRepository(initialProfile: profile, initialCard: card),
             makeExchangeSession: { _ in MockExchangeSession(failure: mockFailure) },
-            now: { fixedNow }
+            now: { fixedNow },
+            shouldMigratePendingClipGyeops: false
         )
     }
 
+    /// MCPeerID 제약(UTF-8 63바이트)에 맞춘 표시 이름. 닉네임이 겹쳐도 피어가
+    /// 구분되도록 ownerID 앞 8자를 붙인다.
     private nonisolated static func exchangeDisplayName(for card: CardSnapshot) -> String {
         let suffix = String(card.ownerID.suffix(8))
         return "\(String(card.nickname.prefix(12)))#\(suffix)"
@@ -143,7 +147,9 @@ final class AppModel {
         guard stage == .loading else { return }
         clearTokenIfFreshInstall()
         do {
-            try await migratePendingClipGyeops()
+            if shouldMigratePendingClipGyeops {
+                try await migratePendingClipGyeops()
+            }
             let profile = try await repository.myProfile()
             myProfile = profile
             if let card = try await repository.myCard() {

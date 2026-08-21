@@ -27,6 +27,7 @@
 		6FC98FEFE4E15491EFC922D5 /* CardKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6B5D611A45CD9734335D6DC0 /* CardKit */; };
 		78C8AAF2B8FDA2BE3D02B147 /* MBTIStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DEAA5276315497D2A3DD34 /* MBTIStepView.swift */; };
 		7C3FCB18EC57B9D6A053F2FD /* OnboardingFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF3A254426E2CC7FEE77275 /* OnboardingFlowUITests.swift */; };
+		B8D1E6C2F3A4578B90CD5678 /* CurrentCardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9C0F5B7D2E1468A90BC1234 /* CurrentCardUITests.swift */; };
 		8459442DB39B3ED3381C2782 /* GyeopKit in Frameworks */ = {isa = PBXBuildFile; productRef = EEEC028DA695FF306446C566 /* GyeopKit */; };
 		85FE6DACB5D7B9031AC44C06 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD63AB1680EBD8241FB337D /* AppModel.swift */; };
 		911B838843CD755B11384B7E /* ProfileStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B532C58FBE7B2E92053F29 /* ProfileStepView.swift */; };
@@ -87,6 +88,7 @@
 		8B25C63ADE80AD156FF1590D /* GyeopClip.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = GyeopClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A315153ABBD0D3E154457254 /* CardDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDetailView.swift; sourceTree = "<group>"; };
 		A3DEAA5276315497D2A3DD34 /* MBTIStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBTIStepView.swift; sourceTree = "<group>"; };
+		A9C0F5B7D2E1468A90BC1234 /* CurrentCardUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentCardUITests.swift; sourceTree = "<group>"; };
 		ABD63AB1680EBD8241FB337D /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		B550F47054049C5FFB88305E /* AppClipKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AppClipKit; path = AppClip/AppClipKit; sourceTree = SOURCE_ROOT; };
 		C754AAF26F03ED129DC0A3D1 /* AppClipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppClipApp.swift; sourceTree = "<group>"; };
@@ -191,6 +193,7 @@
 		5F0F4ECA5D998277C9F41044 /* UITests */ = {
 			isa = PBXGroup;
 			children = (
+				A9C0F5B7D2E1468A90BC1234 /* CurrentCardUITests.swift */,
 				2825339C19E2BDFFA262E122 /* ExchangeFailureUITests.swift */,
 				0FF3A254426E2CC7FEE77275 /* OnboardingFlowUITests.swift */,
 				D45DD91276E5EC32C4317322 /* ScreenshotAndAccessibilityUITests.swift */,
@@ -516,6 +519,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B8D1E6C2F3A4578B90CD5678 /* CurrentCardUITests.swift in Sources */,
 				E612FD2E4388FAADC46B6E5C /* ExchangeFailureUITests.swift in Sources */,
 				7C3FCB18EC57B9D6A053F2FD /* OnboardingFlowUITests.swift in Sources */,
 				CF5C38C0128772C12E175A51 /* ScreenshotAndAccessibilityUITests.swift in Sources */,
