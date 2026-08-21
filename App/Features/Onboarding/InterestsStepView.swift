@@ -3,7 +3,7 @@ import Core
 import DesignSystem
 import SwiftUI
 
-/// 온보딩 1/3 — 관심사 선택.
+/// 온보딩 1/3 — 관심사 선택. 선택값은 부모의 전체 값 교체 Binding으로 전달된다.
 struct InterestsStepView: View {
     @Binding var selected: [String]
     let onNext: () -> Void

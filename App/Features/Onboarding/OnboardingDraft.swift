@@ -1,12 +1,77 @@
 import Core
 
-/// 온보딩 3단계가 공유하는 입력 초안. 본앱(OnboardingFlowView)과 클립
-/// (ClipOnboardingFlowView — GyeopClip 타깃이 이 파일과 3단계 뷰를 소스 공유)이 함께 쓴다.
+/// 온보딩 3단계가 공유하는 불변 입력 초안.
 struct OnboardingDraft {
-    var interests: [String] = []
-    /// MBTI — 건너뛰면 nil (F55).
-    var mbti: MBTI?
-    var nickname = ""
-    var tagline = ""
-    var emoji = ""
+    let interests: [String]
+    /// MBTI를 건너뛰면 nil (F55).
+    let mbti: MBTI?
+    let nickname: String
+    let currentStatus: String
+    let emoji: String
+
+    static let empty = OnboardingDraft()
+
+    init(
+        interests: [String] = [],
+        mbti: MBTI? = nil,
+        nickname: String = "",
+        currentStatus: String = "",
+        emoji: String = ""
+    ) {
+        self.interests = interests
+        self.mbti = mbti
+        self.nickname = nickname
+        self.currentStatus = currentStatus
+        self.emoji = emoji
+    }
+
+    func replacing(interests: [String]) -> Self {
+        OnboardingDraft(
+            interests: interests,
+            mbti: mbti,
+            nickname: nickname,
+            currentStatus: currentStatus,
+            emoji: emoji
+        )
+    }
+
+    func replacing(mbti: MBTI?) -> Self {
+        OnboardingDraft(
+            interests: interests,
+            mbti: mbti,
+            nickname: nickname,
+            currentStatus: currentStatus,
+            emoji: emoji
+        )
+    }
+
+    func replacing(nickname: String) -> Self {
+        OnboardingDraft(
+            interests: interests,
+            mbti: mbti,
+            nickname: nickname,
+            currentStatus: currentStatus,
+            emoji: emoji
+        )
+    }
+
+    func replacing(currentStatus: String) -> Self {
+        OnboardingDraft(
+            interests: interests,
+            mbti: mbti,
+            nickname: nickname,
+            currentStatus: currentStatus,
+            emoji: emoji
+        )
+    }
+
+    func replacing(emoji: String) -> Self {
+        OnboardingDraft(
+            interests: interests,
+            mbti: mbti,
+            nickname: nickname,
+            currentStatus: currentStatus,
+            emoji: emoji
+        )
+    }
 }

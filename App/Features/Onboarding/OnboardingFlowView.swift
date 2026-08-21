@@ -2,13 +2,13 @@ import Core
 import DesignSystem
 import SwiftUI
 
-/// 온보딩 3단계: 관심사(최대 5) → MBTI(건너뛰기 가능) → 닉네임·한 줄·이모지 원탭 → 카드 리빌.
+/// 온보딩 3단계: 관심사 3개 → MBTI(건너뛰기 가능) → 닉네임·지금의 나·이모지 → 카드 리빌.
 /// 카피 기준은 카드 리디자인 라운드 시안(review/proposals/mbti-card-redesign.html).
 struct OnboardingFlowView: View {
     @Environment(AppModel.self) private var model
 
     @State private var path: [Step] = []
-    @State private var draft = OnboardingDraft()
+    @State private var draft = OnboardingDraft.empty
 
     enum Step: Hashable {
         case mbti
@@ -18,18 +18,18 @@ struct OnboardingFlowView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            InterestsStepView(selected: $draft.interests) {
+            InterestsStepView(selected: interestsBinding) {
                 path.append(.mbti)
             }
             .navigationDestination(for: Step.self) { step in
                 switch step {
                 case .mbti:
-                    MBTIStepView(selected: $draft.mbti, interests: draft.interests) {
+                    MBTIStepView(selected: mbtiBinding, interests: draft.interests) {
                         path.append(.profile)
                     }
                 case .profile:
-                    ProfileStepView(draft: $draft) {
-                        await createCard()
+                    ProfileStepView(draft: $draft) { input in
+                        await createCard(input: input)
                     }
                 case .reveal(let card):
                     CardRevealView(card: card)
@@ -38,17 +38,24 @@ struct OnboardingFlowView: View {
         }
     }
 
-    private func createCard() async {
-        let card = await model.completeOnboarding(
-            nickname: draft.nickname,
-            tagline: draft.tagline,
-            emoji: draft.emoji,
-            interests: draft.interests,
-            mbti: draft.mbti
+    private var interestsBinding: Binding<[String]> {
+        Binding(
+            get: { draft.interests },
+            set: { draft = draft.replacing(interests: $0) }
         )
-        if let card {
-            path.append(.reveal(card))
-        }
+    }
+
+    private var mbtiBinding: Binding<MBTI?> {
+        Binding(
+            get: { draft.mbti },
+            set: { draft = draft.replacing(mbti: $0) }
+        )
+    }
+
+    private func createCard(input: ProfileInput) async -> Bool {
+        guard let card = await model.completeOnboarding(input: input) else { return false }
+        path.append(.reveal(card))
+        return true
     }
 }
 

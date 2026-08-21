@@ -185,21 +185,17 @@ final class AppModel {
     // MARK: - 온보딩
 
     /// 온보딩 완주 → 카드 생성·저장. 반환된 카드를 리빌 화면이 보여준다.
-    func completeOnboarding(
-        nickname: String,
-        tagline: String,
-        emoji: String,
-        interests: [String],
-        mbti: MBTI?
-    ) async -> CardSnapshot? {
+    func completeOnboarding(input: ProfileInput) async -> CardSnapshot? {
+        let saveDate = Date.now
         let profile = UserProfile(
             id: "user-\(UUID().uuidString.lowercased())",
-            nickname: nickname,
-            tagline: tagline,
-            emoji: emoji,
-            interests: Array(interests.prefix(UserProfile.maxInterests)),
-            mbti: mbti,
-            createdAt: .now
+            nickname: input.nickname,
+            tagline: input.currentStatus,
+            emoji: input.emoji,
+            interests: input.interests,
+            mbti: input.mbti,
+            createdAt: saveDate,
+            updatedAt: saveDate
         )
         let card = cardGenerator.makeCard(from: profile)
         do {
@@ -208,7 +204,7 @@ final class AppModel {
             myCard = card
             return card
         } catch {
-            Log.sync.error("온보딩 저장 실패: \(error)")
+            Log.sync.error("온보딩 저장 실패")
             return nil
         }
     }

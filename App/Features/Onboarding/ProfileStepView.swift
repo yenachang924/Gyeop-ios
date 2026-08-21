@@ -2,9 +2,9 @@ import Core
 import DesignSystem
 import SwiftUI
 
-/// 온보딩 3/3 — 닉네임 · 한 줄 · 이모지. **셋 다 필수**다 (F28).
+/// 온보딩 3/3 — 닉네임 · 지금의 나 · 이모지. **셋 다 필수**다 (F28).
 /// 처음 만나는 자리에서 카드가 비어 있으면 대화가 시작되지 않는다 — 강제성은
-/// 주저함을 덜어주는 장치로 받아들인다 (F4를 한 줄·이모지까지 확대).
+/// 주저함을 덜어주는 장치로 받아들인다 (F4를 지금의 나·이모지까지 확대).
 ///
 /// F63 — 이모지 칸을 **연락처 포스터·메시지 그룹 아이콘 방식**으로 (소유자 선택,
 /// F45 카테고리 그리드 은퇴): 필드를 탭하면 시스템 이모지 키보드가 바로 열리고,
@@ -12,28 +12,36 @@ import SwiftUI
 /// 키보드는 스크롤로 내려가고, 키보드 위 「완료」로도 닫힌다 (F45 계승).
 struct ProfileStepView: View {
     @Binding var draft: OnboardingDraft
-    let onCreate: () async -> Void
+    let onCreate: (ProfileInput) async -> Bool
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isCreating = false
+    @State private var submissionError: String?
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable {
         case nickname
-        case tagline
+        case currentStatus
     }
 
     private var nicknameMissing: Bool {
-        draft.nickname.trimmingCharacters(in: .whitespaces).isEmpty
+        draft.nickname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    private var taglineMissing: Bool {
-        draft.tagline.trimmingCharacters(in: .whitespaces).isEmpty
+    private var currentStatusCharacterCount: Int {
+        draft.currentStatus.trimmingCharacters(in: .whitespacesAndNewlines).count
+    }
+
+    private var currentStatusValidationMessage: String? {
+        if currentStatusCharacterCount == 0 { return "지금의 나를 입력해주세요." }
+        if currentStatusCharacterCount > ProfileInput.maximumCurrentStatusLength {
+            return "지금의 나는 \(ProfileInput.maximumCurrentStatusLength)자 이하로 입력해주세요."
+        }
+        return nil
     }
 
     private var emojiMissing: Bool { draft.emoji.isEmpty }
 
-    private var incomplete: Bool { nicknameMissing || taglineMissing || emojiMissing }
+    private var incomplete: Bool { nicknameMissing || currentStatusValidationMessage != nil || emojiMissing }
 
     var body: some View {
         Form {
@@ -50,24 +58,38 @@ struct ProfileStepView: View {
             }
 
             Section("닉네임") {
-                TextField("예나", text: $draft.nickname)
+                TextField("예나", text: nicknameBinding)
                     .focused($focusedField, equals: .nickname)
                     .submitLabel(.next)
-                    .onSubmit { focusedField = .tagline }
+                    .onSubmit { focusedField = .currentStatus }
                     .accessibilityIdentifier("onboarding.nickname")
             }
 
-            Section("요즘의 나, 한 줄") {
-                TextField("새벽 러닝에 빠졌어요", text: $draft.tagline)
-                    .focused($focusedField, equals: .tagline)
+            Section("지금의 나") {
+                TextField("첫 iOS 앱을 만들고 있어요", text: currentStatusBinding, axis: .vertical)
+                    .focused($focusedField, equals: .currentStatus)
                     .submitLabel(.done)
                     .onSubmit { focusedField = nil }
-                    .accessibilityIdentifier("onboarding.tagline")
+                    .lineLimit(1...2)
+                    .accessibilityIdentifier("onboarding.currentStatus")
+                if let currentStatusValidationMessage {
+                    Text(currentStatusValidationMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
+                if currentStatusCharacterCount >= 30 {
+                    Text("\(currentStatusCharacterCount)/\(ProfileInput.maximumCurrentStatusLength)")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                Text("요즘 가장 많은 시간을 쓰는 일이나 빠져 있는 것을 적어주세요.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
 
             Section {
                 // 연락처 포스터 방식 (F63): 필드 하나, 탭하면 이모지 키보드.
-                EmojiKeyboardField(text: $draft.emoji)
+                EmojiKeyboardField(text: emojiBinding)
                     .frame(minHeight: Layout.emojiFieldHeight)
             } header: {
                 Text("나를 나타내는 이모지")
@@ -83,11 +105,7 @@ struct ProfileStepView: View {
                     UIApplication.shared.sendAction(
                         #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
                     )
-                    isCreating = true
-                    Task {
-                        await onCreate()
-                        isCreating = false
-                    }
+                    submit()
                 } label: {
                     if isCreating {
                         ProgressView()
@@ -106,10 +124,15 @@ struct ProfileStepView: View {
                 .accessibilityIdentifier("onboarding.createCard")
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
+                if let submissionError {
+                    Text(submissionError)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
             }
         }
         // 키보드 닫는 길 (F65 — 「완료」 버튼 전면 은퇴, 시스템 기본만 남긴다):
-        // 스크롤로 내려가고(F45), 닉네임·한 줄은 리턴 키(submitLabel)로 닫히며,
+        // 스크롤로 내려가고(F45), 닉네임·지금의 나는 리턴 키(submitLabel)로 닫히며,
         // 이모지는 담기는 순간 스스로 닫힌다(F64).
         .scrollDismissesKeyboard(.interactively)
         // F46: Form 전체에 `.animation(value:)`를 걸면 안 된다. `incomplete`가 뒤집히는
@@ -119,11 +142,72 @@ struct ProfileStepView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
+    private var nicknameBinding: Binding<String> {
+        Binding(
+            get: { draft.nickname },
+            set: { draft = draft.replacing(nickname: $0) }
+        )
+    }
+
+    private var currentStatusBinding: Binding<String> {
+        Binding(
+            get: { draft.currentStatus },
+            set: { draft = draft.replacing(currentStatus: $0) }
+        )
+    }
+
+    private var emojiBinding: Binding<String> {
+        Binding(
+            get: { draft.emoji },
+            set: { draft = draft.replacing(emoji: $0) }
+        )
+    }
+
+    private func submit() {
+        do {
+            let input = try ProfileInput(
+                nickname: draft.nickname,
+                currentStatus: draft.currentStatus,
+                emoji: draft.emoji,
+                interests: draft.interests,
+                mbti: draft.mbti
+            )
+            submissionError = nil
+            isCreating = true
+            Task {
+                let didCreate = await onCreate(input)
+                if !didCreate {
+                    submissionError = "카드를 저장하지 못했어요. 다시 시도해주세요."
+                }
+                isCreating = false
+            }
+        } catch let error as ProfileInputError {
+            submissionError = validationMessage(for: error)
+        } catch {
+            submissionError = "입력 내용을 다시 확인해주세요."
+        }
+    }
+
+    private func validationMessage(for error: ProfileInputError) -> String {
+        switch error {
+        case .emptyNickname:
+            return "닉네임을 입력해주세요."
+        case .emptyCurrentStatus:
+            return "지금의 나를 입력해주세요."
+        case .currentStatusTooLong(let maximum):
+            return "지금의 나는 \(maximum)자 이하로 입력해주세요."
+        case .invalidEmoji:
+            return "이모지를 하나 골라주세요."
+        case .interestCount, .emptyInterest, .duplicateInterest, .unsupportedInterest:
+            return "관심사 3개를 다시 선택해주세요."
+        }
+    }
+
     /// 무엇이 비었는지 알려준다 — 비활성 버튼만 두면 이유를 알 수 없다.
     private var missingHint: String {
         var missing: [String] = []
         if nicknameMissing { missing.append("닉네임") }
-        if taglineMissing { missing.append("한 줄") }
+        if currentStatusValidationMessage != nil { missing.append("지금의 나") }
         if emojiMissing { missing.append("이모지") }
         return "\(missing.joined(separator: " · "))를 채우면 카드가 완성돼요"
     }
@@ -136,6 +220,6 @@ struct ProfileStepView: View {
 
 #Preview {
     NavigationStack {
-        ProfileStepView(draft: .constant(.init())) {}
+        ProfileStepView(draft: .constant(.init())) { _ in true }
     }
 }
