@@ -36,6 +36,18 @@ struct ProfileInputTests {
         #expect(throws: ProfileInputError.invalidEmoji) { try makeInput(emoji: "🌱🌷") }
     }
 
+    @Test(arguments: ["A", "1"])
+    func rejectsSingleNonEmojiGraphemes(_ value: String) {
+        #expect(throws: ProfileInputError.invalidEmoji) { try makeInput(emoji: value) }
+    }
+
+    @Test(arguments: ["🌱", "🛠️", "🇰🇷", "👍🏽", "👨‍👩‍👧‍👦", "👩🏽‍💻", "1️⃣"])
+    func acceptsRepresentativeUnicodeEmojiSequences(_ emoji: String) throws {
+        let input = try makeInput(emoji: emoji)
+
+        #expect(input.emoji == emoji)
+    }
+
     @Test(arguments: [[], ["AI"], ["AI", "Development"], ["AI", "UX/UI", "Development", "Games"]])
     func rejectsWrongInterestCount(_ interests: [String]) {
         #expect(throws: ProfileInputError.interestCount(expected: 3)) { try makeInput(interests: interests) }

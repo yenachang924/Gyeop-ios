@@ -30,7 +30,7 @@ public struct ProfileInput: Equatable, Sendable {
         guard cleanCurrentStatus.count <= Self.maximumCurrentStatusLength else {
             throw ProfileInputError.currentStatusTooLong(maximum: Self.maximumCurrentStatusLength)
         }
-        guard emoji.count == 1, !emoji.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+        guard Self.isEmoji(emoji) else {
             throw ProfileInputError.invalidEmoji
         }
         guard cleanInterests.count == Self.interestCount else {
@@ -46,5 +46,34 @@ public struct ProfileInput: Equatable, Sendable {
         self.emoji = emoji
         self.interests = cleanInterests
         self.mbti = mbti
+    }
+
+    private static func isEmoji(_ value: String) -> Bool {
+        guard value.count == 1 else { return false }
+
+        let scalars = Array(value.unicodeScalars)
+        if isKeycapSequence(scalars) { return true }
+        if scalars.contains(where: { $0.properties.isEmojiPresentation }) { return true }
+
+        let hasEmojiVariationSelector = scalars.contains { $0.value == 0xFE0F }
+        return hasEmojiVariationSelector && scalars.contains {
+            $0.properties.isEmoji && !isKeycapBase($0)
+        }
+    }
+
+    private static func isKeycapSequence(_ scalars: [Unicode.Scalar]) -> Bool {
+        guard let first = scalars.first,
+              scalars.last?.value == 0x20E3,
+              isKeycapBase(first)
+        else { return false }
+
+        return scalars.count == 2
+            || (scalars.count == 3 && scalars[1].value == 0xFE0F)
+    }
+
+    private static func isKeycapBase(_ scalar: Unicode.Scalar) -> Bool {
+        scalar.value == 0x23
+            || scalar.value == 0x2A
+            || (0x30...0x39).contains(scalar.value)
     }
 }

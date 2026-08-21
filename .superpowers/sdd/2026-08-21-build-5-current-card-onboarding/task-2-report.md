@@ -36,3 +36,64 @@ swift test --package-path Packages/GyeopPackages --filter CoreTests
 ## Concerns
 
 Swift compilation and test execution must be performed on macOS. Existing CardKit and GyeopKit test fixtures mutated `UserProfile`; they were changed to construct replacement values so the immutable model compiles across package tests.
+
+---
+
+## Round 1/5 fix — Unicode emoji validation
+
+### Status and commit
+
+Fixed the emoji-validation finding and reverted unrelated `CoreTests.swift` label/format changes. Commit subject: `fix: validate Unicode emoji profile input`.
+
+### Test files
+
+- `Packages/GyeopPackages/Tests/CoreTests/ProfileInputTests.swift` now rejects bare single-grapheme text (`A`, `1`) and accepts plain emoji presentation, VS16, flag, skin-tone, ZWJ family/profession, and keycap sequences.
+- `Packages/GyeopPackages/Tests/CoreTests/CoreTests.swift` retains only the replacement-value fixture required by immutable `UserProfile`.
+
+### Deferred RED/GREEN commands (NOT RUN — Swift unavailable on Windows)
+
+```powershell
+swift test --package-path Packages/GyeopPackages --filter ProfileInputTests
+swift test --package-path Packages/GyeopPackages --filter CoreTests
+swift test --package-path Packages/GyeopPackages
+```
+
+### Static verification
+
+`git diff --check` exact output and exit:
+
+```text
+warning: in the working copy of 'Packages/GyeopPackages/Sources/Core/Models/ProfileInput.swift', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Packages/GyeopPackages/Tests/CoreTests/CoreTests.swift', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Packages/GyeopPackages/Tests/CoreTests/ProfileInputTests.swift', LF will be replaced by CRLF the next time Git touches it
+DIFF_CHECK_EXIT=0
+```
+
+Focused mutation/static scan exact output:
+
+```text
+40:    func rejectsSingleNonEmojiGraphemes(_ value: String) {
+44:    @Test(arguments: ["🌱", "🛠️", "🇰🇷", "👍🏽", "👨‍👩‍👧‍👦", "👩🏽‍💻", "1️⃣"])
+45:    func acceptsRepresentativeUnicodeEmojiSequences(_ emoji: String) throws {
+33:        guard Self.isEmoji(emoji) else {
+51:    private static func isEmoji(_ value: String) -> Bool {
+55:        if isKeycapSequence(scalars) { return true }
+56:        if scalars.contains(where: { $0.properties.isEmojiPresentation }) { return true }
+58:        let hasEmojiVariationSelector = scalars.contains { $0.value == 0xFE0F }
+60:            $0.properties.isEmoji && !isKeycapBase($0)
+64:    private static func isKeycapSequence(_ scalars: [Unicode.Scalar]) -> Bool {
+66:              scalars.last?.value == 0x20E3,
+67:              isKeycapBase(first)
+71:            || (scalars.count == 3 && scalars[1].value == 0xFE0F)
+74:    private static func isKeycapBase(_ scalar: Unicode.Scalar) -> Bool {
+INTEREST_MEMBERSHIP_MATCHES=0
+```
+
+The `CoreTests.swift` diff against the pre-Task-2 base contains only the immutable replacement-value fixture. Interest membership remains intentionally absent for Task 3.
+
+### Mutation check and concerns
+
+- Replacing `Self.isEmoji` with `String.count == 1` makes the `A` and `1` rejection cases fail.
+- Removing emoji-presentation support fails plain emoji, flags, skin tones, and ZWJ examples.
+- Removing VS16 handling fails `🛠️`; removing keycap structure handling fails `1️⃣` while the bare `1` case prevents broad `isEmoji` acceptance.
+- Swift compilation and RED/GREEN execution remain deferred to macOS; static checks cannot prove availability or exact behavior of the host Swift Unicode property tables.
