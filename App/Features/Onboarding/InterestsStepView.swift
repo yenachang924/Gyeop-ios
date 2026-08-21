@@ -3,15 +3,7 @@ import Core
 import DesignSystem
 import SwiftUI
 
-/// 온보딩 1/3 — 관심사 선택 (최대 5개).
-///
-/// F36: 카드 프리뷰를 **화면에서 뺐다**. 대신 **배경이 고른 관심사의 색으로 은은하게
-/// 물들고 천천히 흐른다.** 배경은 저채도·고블러라 텍스트 가독성을 해치지 않는다.
-///
-/// F57 (카드 리디자인 라운드): 칩 무더기를 **카테고리 구획**으로 나눴다 — 섹션 헤더와
-/// 여백만으로 구획하고 흰 컨테이너 칸은 두지 않는다 (소유자 지시). 카테고리는 이모지
-/// 카탈로그의 실분류(활동·취미·음식·동물·자연 등)를 CSV 순서 그대로 쓴다.
-/// 「다음」은 하단 고정 CTA — 어떤 칩보다 크다.
+/// 온보딩 1/3 — 관심사 선택.
 struct InterestsStepView: View {
     @Binding var selected: [String]
     let onNext: () -> Void
@@ -40,9 +32,6 @@ struct InterestsStepView: View {
         .navigationTitle("1 / 3")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
-            // 카운터는 제목 줄로 올라갔다 (F61). CTA는 「다음」 하나만 말하고,
-            // 화면에서 가장 도드라진다 (F62 — 카드 완성 버튼과 같은 전폭 구성).
-            // F65: CTA 뒤에 블러 바 — 스크롤되는 칩이 버튼 밑을 지나가도 읽힌다 (사진 앱 문법).
             Button {
                 onNext()
             } label: {
@@ -52,10 +41,9 @@ struct InterestsStepView: View {
             }
             .dsProminentButton()
             .padding(DS.Spacing.m)
-            .disabled(selected.isEmpty)
+            .disabled(selected.count != ProfileInput.interestCount)
             .accessibilityIdentifier("onboarding.interests.next")
             .frame(maxWidth: .infinity)
-            // F67: 딱 잘린 유리 바 → 아래로 갈수록 짙어져 맨 아래는 불투명한 페이드
             .dsBottomBarFade()
         }
     }
@@ -63,17 +51,16 @@ struct InterestsStepView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
             HStack(alignment: .firstTextBaseline) {
-                Text("요즘 나를 이루는 것")
+                Text("요즘 나를 보여주는 관심사")
                     .font(DS.Typo.largeTitle)
                 Spacer()
-                // 진행 카운터는 제목 줄 오른쪽, 브랜드 레드 (F61 — 소유자 목업 "1/5")
-                Text("\(selected.count)/\(UserProfile.maxInterests)")
+                Text("\(selected.count)/\(ProfileInput.interestCount)")
                     .font(DS.Typo.section)
                     .foregroundStyle(DS.Palette.accent)
                     .monospacedDigit()
-                    .accessibilityLabel("\(UserProfile.maxInterests)개 중 \(selected.count)개 선택")
+                    .accessibilityLabel("\(ProfileInput.interestCount)개 중 \(selected.count)개 선택")
             }
-            Text("최대 \(UserProfile.maxInterests)개 고를 수 있어요")
+            Text("지금의 나와 가까운 관심사 3개를 골라주세요.")
                 .font(DS.Typo.body)
                 .foregroundStyle(DS.Palette.secondaryText)
         }
@@ -84,29 +71,20 @@ struct InterestsStepView: View {
         )
     }
 
-    /// 카테고리 구획 (F57) — 헤더 + 여백이 구획을 만들고, 컨테이너 칸은 없다.
-    /// 칩 폭(F36)은 유지 — 이름이 줄바꿈·축소되지 않게.
     private var interestGrid: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.l) {
-            ForEach(EmojiCatalog.categories, id: \.self) { category in
+            ForEach(InterestCatalog.categories) { category in
                 VStack(alignment: .leading, spacing: DS.Spacing.s) {
-                    Text(category)
+                    Text(category.title)
                         .font(DS.Typo.footnote)
                         .foregroundStyle(DS.Palette.secondaryText)
                         .accessibilityAddTraits(.isHeader)
                     LazyVGrid(
-                        // 컴팩트 칩 (F61 → F64에서 다시 -20%). 폭을 줄이는 대신
-                        // 글자 축소 하한(0.75)이 이름을 지킨다.
-                        columns: [GridItem(.adaptive(minimum: 76), spacing: DS.Spacing.s)],
+                        columns: [GridItem(.adaptive(minimum: Layout.minimumChipWidth), spacing: DS.Spacing.s)],
                         spacing: DS.Spacing.s
                     ) {
-                        // 이름이 긴 항목은 선택지에서 뺀다 (F65·F66) — 칩에서 …로 잘리는
-                        // 문제의 근본 해결 (소유자 결정). 이모지 자체는 3/3 키보드로 여전히 열려 있다.
-                        ForEach(
-                            EmojiCatalog.icons(in: category)
-                                .filter { $0.name.count <= Layout.maxNameLength }
-                        ) { icon in
-                            interestChip(icon)
+                        ForEach(category.interests, id: \.self) { interest in
+                            interestChip(interest)
                         }
                     }
                 }
@@ -115,61 +93,55 @@ struct InterestsStepView: View {
     }
 
     private enum Layout {
-        /// 칩 라벨 높이 (F64 — 스타일 패딩 포함 최종 ≈44pt).
-        static let chipLabelHeight: CGFloat = 30
-        /// 선택지 이름 길이 상한 (F66) — 이모지와 함께 넣을 때 이보다 길면
-        /// 컴팩트 4열 칩에서 …로 잘린다. 137개 중 17개 제외, 120개 노출.
-        static let maxNameLength = 3
+        static let minimumChipWidth: CGFloat = 120
     }
 
-    private func interestChip(_ icon: EmojiIcon) -> some View {
-        let isSelected = selected.contains(icon.name)
-        let isFull = selected.count >= UserProfile.maxInterests
+    private func interestChip(_ interest: String) -> some View {
+        let isSelected = selected.contains(interest)
+        let isFull = selected.count >= ProfileInput.interestCount
 
-        // 선택 상태는 액센트가 아니라 무채 잉크 채움 — 칩 5개 선택 시 화면이 빨강으로
-        // 넘치지 않게 한다 (U1 원칙 1, 프로토타입 chip[aria-pressed] 관습).
         return Group {
             if isSelected {
-                chipButton(icon, isSelected: true)
+                chipButton(interest, isSelected: true)
                     .dsProminentButton()
                     .tint(DS.Palette.selection)
             } else {
-                chipButton(icon, isSelected: false)
+                chipButton(interest, isSelected: false)
                     .dsGlassButton()
                     .tint(.secondary)
             }
         }
-        // 선택 스프링 스케일 — 잦은 인터랙션이라 quick (살짝만 커진다)
+        .overlay {
+            RoundedRectangle(cornerRadius: DS.Radius.chip)
+                .stroke(isSelected ? DS.Palette.selection : DS.Palette.secondaryText.opacity(0.35), lineWidth: isSelected ? 2 : 1)
+        }
         .scaleEffect(isSelected ? 1.04 : 1)
         .animation(reduceMotion ? nil : DS.Motion.quick, value: isSelected)
         .disabled(!isSelected && isFull)
-        .accessibilityLabel("관심사 \(icon.name)")
+        .accessibilityLabel("관심사 \(interest)")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-        .accessibilityIdentifier("onboarding.interest.\(icon.name)")
+        .accessibilityIdentifier("onboarding.interest.\(interest)")
     }
 
-    /// borderedProminent가 다크에서 흰 채움(primary 반전)이 되므로 라벨은 onSelection으로 명시.
-    private func chipButton(_ icon: EmojiIcon, isSelected: Bool) -> some View {
+    private func chipButton(_ interest: String, isSelected: Bool) -> some View {
         Button {
             if isSelected {
-                selected.removeAll { $0 == icon.name }
-            } else if selected.count < UserProfile.maxInterests {
-                selected.append(icon.name)
+                selected = selected.filter { $0 != interest }
+            } else if selected.count < ProfileInput.interestCount {
+                selected = selected + [interest]
             }
         } label: {
-            // F66: 이모지 유지 (소유자 재결정 — F65의 텍스트 전용을 되돌림).
-            // 대신 이모지와 함께 넣으면 …로 넘치는 이름(4글자 이상)은 선택지에서 뺀다.
             HStack(spacing: DS.Spacing.xs) {
-                Text(icon.emoji)
-                Text(icon.name)
+                if isSelected {
+                    Image(systemName: "checkmark")
+                }
+                Text(interest)
                     .font(DS.Typo.footnote)
                     .lineLimit(1)
                     .minimumScaleFactor(0.92)
             }
             .foregroundStyle(isSelected ? DS.Palette.onSelection : Color.secondary)
-            // 라벨 높이를 낮춰도 버튼 스타일 패딩을 더하면 최종 높이가 44pt 언저리 —
-            // 시각은 -20%, 터치 타깃 규칙(HIG 44pt)은 지켜진다.
-            .frame(maxWidth: .infinity, minHeight: Layout.chipLabelHeight)
+            .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
         }
     }
 }
@@ -232,6 +204,8 @@ private struct InterestBackdrop: View {
 
 #Preview {
     NavigationStack {
-        InterestsStepView(selected: .constant(["클라이밍"])) {}
+        InterestsStepView(
+            selected: .constant(Array(InterestCatalog.categories[0].interests.prefix(ProfileInput.interestCount)))
+        ) {}
     }
 }

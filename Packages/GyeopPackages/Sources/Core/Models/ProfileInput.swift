@@ -8,6 +8,7 @@ public enum ProfileInputError: Error, Equatable, Sendable {
     case interestCount(expected: Int)
     case emptyInterest
     case duplicateInterest
+    case unsupportedInterest(String)
 }
 
 public struct ProfileInput: Equatable, Sendable {
@@ -39,6 +40,9 @@ public struct ProfileInput: Equatable, Sendable {
         guard !cleanInterests.contains(where: \.isEmpty) else { throw ProfileInputError.emptyInterest }
         guard Set(cleanInterests).count == Self.interestCount else {
             throw ProfileInputError.duplicateInterest
+        }
+        if let unsupportedInterest = cleanInterests.first(where: { !InterestCatalog.interests.contains($0) }) {
+            throw ProfileInputError.unsupportedInterest(unsupportedInterest)
         }
 
         self.nickname = cleanNickname

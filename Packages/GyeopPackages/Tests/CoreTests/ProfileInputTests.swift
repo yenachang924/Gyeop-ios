@@ -6,18 +6,19 @@ import Testing
 struct ProfileInputTests {
     @Test("accepts and normalizes valid profile input")
     func normalizesValidInput() throws {
+        let interests = supportedInterests
         let input = try ProfileInput(
             nickname: " Ana ",
             currentStatus: " Building an iOS app ",
             emoji: "🌱",
-            interests: [" AI ", "UX/UI", " Development "],
+            interests: [" \(interests[0]) ", interests[1], " \(interests[2]) "],
             mbti: MBTI(code: "INTJ")
         )
 
         #expect(input.nickname == "Ana")
         #expect(input.currentStatus == "Building an iOS app")
         #expect(input.emoji == "🌱")
-        #expect(input.interests == ["AI", "UX/UI", "Development"])
+        #expect(input.interests == interests)
         #expect(input.mbti == MBTI(code: "INTJ"))
     }
 
@@ -48,22 +49,35 @@ struct ProfileInputTests {
         #expect(input.emoji == emoji)
     }
 
-    @Test(arguments: [[], ["AI"], ["AI", "Development"], ["AI", "UX/UI", "Development", "Games"]])
-    func rejectsWrongInterestCount(_ interests: [String]) {
-        #expect(throws: ProfileInputError.interestCount(expected: 3)) { try makeInput(interests: interests) }
+    @Test("rejects an incorrect interest count")
+    func rejectsWrongInterestCount() {
+        let interests = supportedInterests
+
+        for invalidInterests in [[], [interests[0]], Array(interests.prefix(2)), interests + ["one too many"]] {
+            #expect(throws: ProfileInputError.interestCount(expected: 3)) {
+                try makeInput(interests: invalidInterests)
+            }
+        }
     }
 
     @Test("rejects duplicate interests after trimming")
     func rejectsDuplicateInterestsAfterTrimming() {
         #expect(throws: ProfileInputError.duplicateInterest) {
-            try makeInput(interests: ["AI", " AI ", "Development"])
+            try makeInput(interests: [supportedInterests[0], " \(supportedInterests[0]) ", supportedInterests[2]])
         }
     }
 
     @Test("rejects an interest that is empty after trimming")
     func rejectsEmptyInterestAfterTrimming() {
         #expect(throws: ProfileInputError.emptyInterest) {
-            try makeInput(interests: ["AI", " \n ", "Development"])
+            try makeInput(interests: [supportedInterests[0], " \n ", supportedInterests[2]])
+        }
+    }
+
+    @Test("rejects an unsupported interest after trimming")
+    func rejectsUnsupportedInterestAfterTrimming() {
+        #expect(throws: ProfileInputError.unsupportedInterest("해외 축구")) {
+            try makeInput(interests: [supportedInterests[0], supportedInterests[1], " 해외 축구 "])
         }
     }
 
@@ -77,8 +91,8 @@ struct ProfileInputTests {
     @Test("exposes current status aliases and defaults last update time")
     func exposesCompatibilityAliases() {
         let createdAt = Date(timeIntervalSince1970: 1_000)
-        let profile = UserProfile(id: "profile-1", nickname: "Ana", tagline: "Building an iOS app", emoji: "🌱", interests: ["AI", "UX/UI", "Development"], mbti: nil, createdAt: createdAt)
-        let card = CardSnapshot(ownerID: "profile-1", seed: "seed", nickname: "Ana", tagline: "Building an iOS app", emoji: "🌱", interests: ["AI", "UX/UI", "Development"], mbti: nil, version: 1, createdAt: createdAt)
+        let profile = UserProfile(id: "profile-1", nickname: "Ana", tagline: "Building an iOS app", emoji: "🌱", interests: ["alpha", "beta", "gamma"], mbti: nil, createdAt: createdAt)
+        let card = CardSnapshot(ownerID: "profile-1", seed: "seed", nickname: "Ana", tagline: "Building an iOS app", emoji: "🌱", interests: ["alpha", "beta", "gamma"], mbti: nil, version: 1, createdAt: createdAt)
 
         #expect(profile.currentStatus == "Building an iOS app")
         #expect(profile.lastUpdatedAt == createdAt)
@@ -88,7 +102,7 @@ struct ProfileInputTests {
     @Test("decodes a legacy profile without an updated-at value")
     func decodesLegacyProfileWithCreatedAtFallback() throws {
         let createdAt = Date(timeIntervalSince1970: 1_000)
-        let legacyProfile = LegacyUserProfile(id: "profile-1", nickname: "Ana", tagline: "Building an iOS app", emoji: "🌱", interests: ["AI", "UX/UI", "Development"], mbti: nil, createdAt: createdAt)
+        let legacyProfile = LegacyUserProfile(id: "profile-1", nickname: "Ana", tagline: "Building an iOS app", emoji: "🌱", interests: ["alpha", "beta", "gamma"], mbti: nil, createdAt: createdAt)
 
         let data = try JSONEncoder().encode(legacyProfile)
         let profile = try JSONDecoder().decode(UserProfile.self, from: data)
@@ -97,8 +111,14 @@ struct ProfileInputTests {
         #expect(profile.lastUpdatedAt == createdAt)
     }
 
-    private func makeInput(nickname: String = "Ana", currentStatus: String = "Building an iOS app", emoji: String = "🌱", interests: [String] = ["AI", "UX/UI", "Development"]) throws -> ProfileInput {
-        try ProfileInput(nickname: nickname, currentStatus: currentStatus, emoji: emoji, interests: interests, mbti: nil)
+    private var supportedInterests: [String] {
+        Array(InterestCatalog.categories.flatMap(\.interests).prefix(ProfileInput.interestCount))
+    }
+
+    private func makeInput(nickname: String = "Ana", currentStatus: String = "Building an iOS app", emoji: String = "🌱", interests: [String]? = nil) throws -> ProfileInput {
+        let resolvedInterests = interests ?? supportedInterests
+
+        return try ProfileInput(nickname: nickname, currentStatus: currentStatus, emoji: emoji, interests: resolvedInterests, mbti: nil)
     }
 }
 
