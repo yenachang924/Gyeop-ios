@@ -11,22 +11,63 @@ final class OnboardingFlowUITests: XCTestCase {
         app.launch()
 
         let next = app.buttons["onboarding.interests.next"]
-        app.buttons["onboarding.interest.AI"].tap()
+        let firstInterest = app.buttons["onboarding.interest.AI"]
+        XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
+        firstInterest.tap()
         app.buttons["onboarding.interest.UX/UI"].tap()
         XCTAssertFalse(next.isEnabled)
         app.buttons["onboarding.interest.개발"].tap()
         XCTAssertTrue(next.isEnabled)
         next.tap()
 
-        app.buttons["onboarding.mbti.skip"].tap()
-        app.textFields["onboarding.nickname"].tap()
-        app.textFields["onboarding.nickname"].typeText("예나")
-        app.textFields["onboarding.currentStatus"].tap()
-        app.textFields["onboarding.currentStatus"].typeText("첫 iOS 앱을 만들고 있어요")
-        app.textFields["onboarding.emoji"].tap()
-        app.textFields["onboarding.emoji"].typeText("🌱")
+        let skip = app.buttons["onboarding.mbti.skip"]
+        XCTAssertTrue(skip.waitForExistence(timeout: 5))
+        skip.tap()
 
-        XCTAssertTrue(app.buttons["onboarding.createCard"].isEnabled)
+        let nickname = app.textFields["onboarding.nickname"]
+        XCTAssertTrue(nickname.waitForExistence(timeout: 5))
+        nickname.tap()
+        nickname.typeText("예나")
+
+        let currentStatus = app.textFields["onboarding.currentStatus"]
+        XCTAssertTrue(currentStatus.waitForExistence(timeout: 5))
+        currentStatus.tap()
+        currentStatus.typeText("첫 iOS 앱을 만들고 있어요")
+
+        let emoji = app.textFields["onboarding.emoji"]
+        XCTAssertTrue(emoji.waitForExistence(timeout: 5))
+        emoji.tap()
+        emoji.typeText("🌱")
+
+        let create = app.buttons["onboarding.createCard"]
+        XCTAssertTrue(create.isEnabled)
+        create.tap()
+
+        let toCollection = app.buttons["reveal.toCollection"]
+        XCTAssertTrue(toCollection.waitForExistence(timeout: 5))
+        toCollection.tap()
+
+        let exchange = app.buttons["collection.exchange"]
+        XCTAssertTrue(exchange.waitForExistence(timeout: 5))
+        exchange.tap()
+
+        let exchangeDone = app.buttons["exchange.done"]
+        XCTAssertTrue(exchangeDone.waitForExistence(timeout: 15))
+        exchangeDone.tap()
+
+        XCTAssertTrue(app.buttons["collection.myCard"].waitForExistence(timeout: 5))
+        let received = app.buttons["collection.card.하람"]
+        var swipes = 0
+        while !received.exists && swipes < 5 {
+            app.swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(received.waitForExistence(timeout: 5))
+        received.tap()
+
+        let close = app.buttons["닫기"]
+        XCTAssertTrue(close.waitForExistence(timeout: 5))
+        close.tap()
     }
 
     /// 완료 기준 검증: 닉네임·지금의 나·이모지가 **전부 필수**(F28)라 하나라도 비면 카드 완성이
