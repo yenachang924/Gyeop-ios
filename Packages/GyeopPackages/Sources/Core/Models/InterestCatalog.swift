@@ -27,4 +27,14 @@ public enum InterestCatalog {
     ]
 
     public static let interests: Set<String> = Set(categories.flatMap(\.interests))
+
+    public static func sanitizedSelection(from legacyInterests: [String]) -> [String] {
+        legacyInterests.reduce(into: [String]()) { sanitized, interest in
+            guard sanitized.count < ProfileInput.interestCount,
+                  interests.contains(interest),
+                  !sanitized.contains(interest)
+            else { return }
+            sanitized.append(interest)
+        }
+    }
 }

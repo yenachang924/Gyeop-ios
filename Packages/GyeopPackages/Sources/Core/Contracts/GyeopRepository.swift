@@ -10,6 +10,7 @@ public protocol GyeopRepository: Sendable {
     func myProfile() async throws -> UserProfile?
     func saveMyCard(_ card: CardSnapshot) async throws
     func myCard() async throws -> CardSnapshot?
+    func saveProfileAndCard(profile: UserProfile, card: CardSnapshot) async throws
 
     // 겹 기록
     /// 같은 `id`(결정적 GyeopID)로 두 번 기록해도 1건이어야 한다 (멱등).

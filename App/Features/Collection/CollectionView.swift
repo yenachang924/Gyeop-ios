@@ -65,18 +65,12 @@ struct CollectionView: View {
             }
             .sheet(isPresented: $showingProfileEditor) {
                 if let profile = model.myProfile {
-                    NavigationStack {
-                        ProfileStepView(
-                            draft: $editDraft,
-                            mode: .edit(lastUpdatedAt: profile.lastUpdatedAt),
-                            onCreate: { input in
-                                await model.updateProfile(input: input)
-                            },
-                            onSaved: {
-                                showingProfileEditor = false
-                            }
-                        )
-                    }
+                    ProfileEditFlowView(
+                        draft: $editDraft,
+                        lastUpdatedAt: profile.lastUpdatedAt,
+                        onSave: { input in await model.updateProfile(input: input) },
+                        onSaved: { showingProfileEditor = false }
+                    )
                     .presentationBackground(.ultraThinMaterial)
                     .presentationCornerRadius(DS.Radius.card)
                     .presentationDragIndicator(.visible)
@@ -169,6 +163,8 @@ struct CollectionView: View {
                     presentProfileEditor(profile)
                 }
                 .font(.body)
+                .frame(minHeight: DS.minTapTarget)
+                .contentShape(Rectangle())
                 .buttonStyle(.plain)
             }
 
@@ -189,7 +185,7 @@ struct CollectionView: View {
     }
 
     private func presentProfileEditor(_ profile: UserProfile) {
-        editDraft = OnboardingDraft(profile: profile)
+        editDraft = OnboardingDraft(editing: profile)
         showingProfileEditor = true
     }
 

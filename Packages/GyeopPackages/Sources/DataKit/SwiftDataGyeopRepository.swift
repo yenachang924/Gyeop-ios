@@ -37,11 +37,7 @@ public actor SwiftDataGyeopRepository: GyeopRepository {
     // MARK: - GyeopRepository
 
     public func saveMyProfile(_ profile: UserProfile) async throws {
-        if let existing = try fetchSingleton(UserProfileEntity.self) {
-            existing.update(with: profile)
-        } else {
-            modelContext.insert(UserProfileEntity(profile: profile))
-        }
+        try upsert(profile: profile)
         try modelContext.save()
     }
 
@@ -50,16 +46,23 @@ public actor SwiftDataGyeopRepository: GyeopRepository {
     }
 
     public func saveMyCard(_ card: CardSnapshot) async throws {
-        if let existing = try fetchSingleton(MyCardEntity.self) {
-            existing.update(with: card)
-        } else {
-            modelContext.insert(MyCardEntity(card: card))
-        }
+        try upsert(card: card)
         try modelContext.save()
     }
 
     public func myCard() async throws -> CardSnapshot? {
         try fetchSingleton(MyCardEntity.self)?.toDomain()
+    }
+
+    public func saveProfileAndCard(profile: UserProfile, card: CardSnapshot) async throws {
+        do {
+            try upsert(profile: profile)
+            try upsert(card: card)
+            try modelContext.save()
+        } catch {
+            modelContext.rollback()
+            throw error
+        }
     }
 
     /// 멱등 저장. 두 단계로 중복을 걸러낸다:
@@ -121,6 +124,22 @@ public actor SwiftDataGyeopRepository: GyeopRepository {
         var descriptor = FetchDescriptor<T>()
         descriptor.fetchLimit = 1
         return try modelContext.fetch(descriptor).first
+    }
+
+    private func upsert(profile: UserProfile) throws {
+        if let existing = try fetchSingleton(UserProfileEntity.self) {
+            existing.update(with: profile)
+        } else {
+            modelContext.insert(UserProfileEntity(profile: profile))
+        }
+    }
+
+    private func upsert(card: CardSnapshot) throws {
+        if let existing = try fetchSingleton(MyCardEntity.self) {
+            existing.update(with: card)
+        } else {
+            modelContext.insert(MyCardEntity(card: card))
+        }
     }
 
     private func existingEntity(id: String) throws -> GyeopEntity? {

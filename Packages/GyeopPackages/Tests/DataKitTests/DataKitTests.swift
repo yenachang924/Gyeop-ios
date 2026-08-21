@@ -5,6 +5,18 @@ import Testing
 
 @Suite("SwiftDataGyeopRepository (in-memory)")
 struct SwiftDataGyeopRepositoryTests {
+    @Test("profile and card replacements persist through one atomic repository operation")
+    func atomicProfileAndCardSave() async throws {
+        let repo = try SwiftDataGyeopRepository.inMemory()
+        let profile = MockData.sampleProfiles[2]
+        let card = MockData.sampleCards[2]
+
+        try await repo.saveProfileAndCard(profile: profile, card: card)
+
+        #expect(try await repo.myProfile() == profile)
+        #expect(try await repo.myCard() == card)
+    }
+
     @Test("프로필·카드 저장/로드 왕복")
     func profileRoundtrip() async throws {
         let repo = try SwiftDataGyeopRepository.inMemory()

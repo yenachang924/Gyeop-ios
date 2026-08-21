@@ -64,18 +64,8 @@ final class AppModel {
         let mockFailure: ExchangeFailure? =
             CommandLine.arguments.contains("-mock-exchange-fail") ? .timedOut : nil
 
-        if CommandLine.arguments.contains("-uitest-stale-profile") {
-            return staleProfileUITestModel(mockFailure: mockFailure)
-        }
-
-        // UI 테스트는 매번 첫 실행이어야 한다 — 인메모리 저장소 + 로그인 게이트 생략
-        if CommandLine.arguments.contains("-uitest-reset") {
-            return AppModel(
-                cardGenerator: CardGenerator(),
-                repository: MockGyeopRepository(),
-                makeExchangeSession: { _ in MockExchangeSession(failure: mockFailure) },
-                now: { Date(timeIntervalSince1970: 1_785_000_000) }
-            )
+        if let uiTestModel = uiTestModel(mockFailure: mockFailure) {
+            return uiTestModel
         }
         do {
             let repository = try SwiftDataGyeopRepository.live()
@@ -110,6 +100,22 @@ final class AppModel {
         }
     }
 
+    private static func uiTestModel(mockFailure: ExchangeFailure?) -> AppModel? {
+        if CommandLine.arguments.contains("-uitest-stale-profile") {
+            return staleProfileUITestModel(mockFailure: mockFailure)
+        }
+        if CommandLine.arguments.contains("-uitest-legacy-profile") {
+            return legacyProfileUITestModel(mockFailure: mockFailure)
+        }
+        guard CommandLine.arguments.contains("-uitest-reset") else { return nil }
+        return AppModel(
+            cardGenerator: CardGenerator(),
+            repository: MockGyeopRepository(),
+            makeExchangeSession: { _ in MockExchangeSession(failure: mockFailure) },
+            now: { Date(timeIntervalSince1970: 1_785_000_000) }
+        )
+    }
+
     private static func staleProfileUITestModel(mockFailure: ExchangeFailure?) -> AppModel {
         let fixedNow = Date(timeIntervalSince1970: 1_785_000_000)
         let staleUpdatedAt = fixedNow.addingTimeInterval(
@@ -130,6 +136,31 @@ final class AppModel {
         return AppModel(
             cardGenerator: cardGenerator,
             repository: MockGyeopRepository(initialProfile: profile, initialCard: card),
+            makeExchangeSession: { _ in MockExchangeSession(failure: mockFailure) },
+            now: { fixedNow },
+            shouldMigratePendingClipGyeops: false
+        )
+    }
+
+    private static func legacyProfileUITestModel(mockFailure: ExchangeFailure?) -> AppModel {
+        let fixedNow = Date(timeIntervalSince1970: 1_785_000_000)
+        let profile = UserProfile(
+            id: "uitest-legacy-profile",
+            nickname: "유나",
+            tagline: "예전 관심사를 정리하고 있어요",
+            emoji: "🌱",
+            interests: ["AI", "legacy-community", "UX/UI", "legacy-sport", "legacy-food"],
+            mbti: MBTI(code: "INTJ"),
+            createdAt: fixedNow.addingTimeInterval(-365 * 24 * 60 * 60),
+            updatedAt: fixedNow
+        )
+        let cardGenerator = CardGenerator()
+        return AppModel(
+            cardGenerator: cardGenerator,
+            repository: MockGyeopRepository(
+                initialProfile: profile,
+                initialCard: cardGenerator.makeCard(from: profile)
+            ),
             makeExchangeSession: { _ in MockExchangeSession(failure: mockFailure) },
             now: { fixedNow },
             shouldMigratePendingClipGyeops: false
@@ -242,13 +273,12 @@ final class AppModel {
         )
         let card = cardGenerator.makeCard(from: profile)
         do {
-            try await repository.saveMyProfile(profile)
-            try await repository.saveMyCard(card)
+            try await repository.saveProfileAndCard(profile: profile, card: card)
             myProfile = profile
             myCard = card
             return card
         } catch {
-            Log.sync.error("온보딩 저장 실패")
+            Log.sync.error("온보딩 원자 저장 실패: \(String(describing: error), privacy: .public)")
             return nil
         }
     }
@@ -259,26 +289,21 @@ final class AppModel {
             return false
         }
 
-        let updatedProfile = UserProfile(
-            id: currentProfile.id,
-            nickname: input.nickname,
-            tagline: input.currentStatus,
-            emoji: input.emoji,
-            interests: input.interests,
-            mbti: input.mbti,
-            createdAt: currentProfile.createdAt,
-            updatedAt: now()
+        let update = ProfileUpdate.make(
+            currentProfile: currentProfile,
+            currentCard: currentCard,
+            input: input,
+            now: now(),
+            cardGenerator: cardGenerator
         )
-        let updatedCard = cardGenerator.makeCard(from: updatedProfile, version: currentCard.version + 1)
 
         do {
-            try await repository.saveMyProfile(updatedProfile)
-            try await repository.saveMyCard(updatedCard)
-            myProfile = updatedProfile
-            myCard = updatedCard
+            try await repository.saveProfileAndCard(profile: update.profile, card: update.card)
+            myProfile = update.profile
+            myCard = update.card
             return true
         } catch {
-            Log.sync.error("Profile update persistence failed")
+            Log.sync.error("Profile update atomic persistence failed: \(String(describing: error), privacy: .public)")
             return false
         }
     }

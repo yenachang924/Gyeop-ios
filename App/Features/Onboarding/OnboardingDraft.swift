@@ -25,9 +25,9 @@ struct OnboardingDraft {
         self.emoji = emoji
     }
 
-    init(profile: UserProfile) {
+    init(editing profile: UserProfile) {
         self.init(
-            interests: profile.interests,
+            interests: InterestCatalog.sanitizedSelection(from: profile.interests),
             mbti: profile.mbti,
             nickname: profile.nickname,
             currentStatus: profile.currentStatus,

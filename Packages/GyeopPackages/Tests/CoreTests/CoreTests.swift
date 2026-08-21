@@ -113,6 +113,44 @@ struct MockExchangeSessionTests {
 
 @Suite("MockGyeopRepository")
 struct MockGyeopRepositoryTests {
+    @Test("atomic profile and card failure leaves both stored values unchanged")
+    func atomicProfileAndCardFailureRollsBack() async throws {
+        let initialProfile = MockData.sampleProfiles[0]
+        let initialCard = MockData.sampleCards[0]
+        let replacementProfile = MockData.sampleProfiles[1]
+        let replacementCard = MockData.sampleCards[1]
+        let repo = MockGyeopRepository(
+            initialProfile: initialProfile,
+            initialCard: initialCard,
+            failProfileAndCardSave: true
+        )
+
+        do {
+            try await repo.saveProfileAndCard(
+                profile: replacementProfile,
+                card: replacementCard
+            )
+            Issue.record("fault-injected atomic save should throw")
+        } catch {
+            #expect(error as? MockGyeopRepositoryError == .profileAndCardSaveFailed)
+        }
+
+        #expect(try await repo.myProfile() == initialProfile)
+        #expect(try await repo.myCard() == initialCard)
+    }
+
+    @Test("atomic profile and card success publishes both replacement values")
+    func atomicProfileAndCardSuccess() async throws {
+        let repo = MockGyeopRepository()
+        let profile = MockData.sampleProfiles[1]
+        let card = MockData.sampleCards[1]
+
+        try await repo.saveProfileAndCard(profile: profile, card: card)
+
+        #expect(try await repo.myProfile() == profile)
+        #expect(try await repo.myCard() == card)
+    }
+
     @Test("프로필·카드 저장/로드 왕복")
     func profileRoundtrip() async throws {
         let repo = MockGyeopRepository()

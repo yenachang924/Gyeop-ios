@@ -5,10 +5,43 @@ import SwiftUI
 
 /// 온보딩 1/3 — 관심사 선택. 선택값은 부모의 전체 값 교체 Binding으로 전달된다.
 struct InterestsStepView: View {
+    enum Context: Equatable {
+        case onboarding
+        case profileEdit
+
+        var navigationTitle: String { self == .onboarding ? "1 / 3" : "1 / 2" }
+        var heading: String {
+            self == .onboarding ? "요즘 나를 보여주는 관심사" : "관심사를 다시 골라주세요"
+        }
+        var supportingText: String {
+            self == .onboarding
+                ? "지금의 나와 가까운 관심사 3개를 골라주세요."
+                : "예전 선택은 정리했어요. 지금의 나와 가까운 관심사 3개를 골라주세요."
+        }
+        var nextIdentifier: String {
+            self == .onboarding ? "onboarding.interests.next" : "profile.edit.interests.next"
+        }
+        var interestIdentifierPrefix: String {
+            self == .onboarding ? "onboarding.interest" : "profile.edit.interest"
+        }
+    }
+
     @Binding var selected: [String]
+    let context: Context
     let onNext: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    init(
+        selected: Binding<[String]>,
+        context: Context = .onboarding,
+        onNext: @escaping () -> Void
+    ) {
+        _selected = selected
+        self.context = context
+        self.onNext = onNext
+    }
 
     /// 선택으로 만든 카드 색 — 배경 물듦의 원천. 선택이 없으면 배경도 중립이다.
     private var backdropColors: [Color] {
@@ -29,7 +62,7 @@ struct InterestsStepView: View {
                 .animation(reduceMotion ? nil : DS.Motion.dye, value: selected)
         }
         .background(DS.Palette.background)
-        .navigationTitle("1 / 3")
+        .navigationTitle(context.navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
             Button {
@@ -42,7 +75,7 @@ struct InterestsStepView: View {
             .dsProminentButton()
             .padding(DS.Spacing.m)
             .disabled(selected.count != ProfileInput.interestCount)
-            .accessibilityIdentifier("onboarding.interests.next")
+            .accessibilityIdentifier(context.nextIdentifier)
             .frame(maxWidth: .infinity)
             .dsBottomBarFade()
         }
@@ -51,7 +84,7 @@ struct InterestsStepView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.s) {
             HStack(alignment: .firstTextBaseline) {
-                Text("요즘 나를 보여주는 관심사")
+                Text(context.heading)
                     .font(DS.Typo.largeTitle)
                 Spacer()
                 Text("\(selected.count)/\(ProfileInput.interestCount)")
@@ -60,7 +93,7 @@ struct InterestsStepView: View {
                     .monospacedDigit()
                     .accessibilityLabel("\(ProfileInput.interestCount)개 중 \(selected.count)개 선택")
             }
-            Text("지금의 나와 가까운 관심사 3개를 골라주세요.")
+            Text(context.supportingText)
                 .font(DS.Typo.body)
                 .foregroundStyle(DS.Palette.secondaryText)
         }
@@ -80,7 +113,7 @@ struct InterestsStepView: View {
                         .foregroundStyle(DS.Palette.secondaryText)
                         .accessibilityAddTraits(.isHeader)
                     LazyVGrid(
-                        columns: [GridItem(.adaptive(minimum: Layout.minimumChipWidth), spacing: DS.Spacing.s)],
+                        columns: interestColumns,
                         spacing: DS.Spacing.s
                     ) {
                         ForEach(category.interests, id: \.self) { interest in
@@ -94,6 +127,13 @@ struct InterestsStepView: View {
 
     private enum Layout {
         static let minimumChipWidth: CGFloat = 120
+    }
+
+    private var interestColumns: [GridItem] {
+        if dynamicTypeSize.isAccessibilitySize {
+            return [GridItem(.flexible())]
+        }
+        return [GridItem(.adaptive(minimum: Layout.minimumChipWidth), spacing: DS.Spacing.s)]
     }
 
     private func interestChip(_ interest: String) -> some View {
@@ -120,7 +160,7 @@ struct InterestsStepView: View {
         .disabled(!isSelected && isFull)
         .accessibilityLabel("관심사 \(interest)")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-        .accessibilityIdentifier("onboarding.interest.\(interest)")
+        .accessibilityIdentifier("\(context.interestIdentifierPrefix).\(interest)")
     }
 
     private func chipButton(_ interest: String, isSelected: Bool) -> some View {
@@ -137,8 +177,9 @@ struct InterestsStepView: View {
                 }
                 Text(interest)
                     .font(DS.Typo.footnote)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.92)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .foregroundStyle(isSelected ? DS.Palette.onSelection : Color.secondary)
             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)

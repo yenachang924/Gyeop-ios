@@ -73,6 +73,26 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         try runFullFlow(app, prefix: "ax5")
     }
 
+    @MainActor
+    func testInterestsUseFullWidthAtMaxDynamicType() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-uitest-reset",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+        ]
+        app.launch()
+
+        let longChoice = app.buttons["onboarding.interest.데이터 분석"]
+        var swipes = 0
+        while (!longChoice.exists || !longChoice.isHittable) && swipes < 8 {
+            app.swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(longChoice.waitForExistence(timeout: 5))
+        XCTAssertTrue(longChoice.isHittable)
+        XCTAssertGreaterThan(longChoice.frame.width, app.frame.width * 0.7)
+    }
+
     /// Dynamic Type 최소(XS)
     @MainActor
     func testFullFlowAtMinDynamicType() throws {
@@ -153,6 +173,7 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         snap(app, "\(prefix)-5-collection-empty")
 
         app.buttons["collection.editMyCard"].tap()
+        tapEvenIfOffscreen(app, app.buttons["profile.edit.interests.next"])
         let editHeading = app.staticTexts["profile.heading"]
         XCTAssertTrue(editHeading.waitForExistence(timeout: 5))
         XCTAssertEqual(editHeading.label, "카드 수정")
@@ -167,8 +188,20 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         )
         XCTAssertEqual(XCTWaiter.wait(for: [updatedCard], timeout: 5), .completed)
 
+        let editorDismissed = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "exists == false"),
+            object: editHeading
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [editorDismissed], timeout: 5), .completed)
+
         // 맞대기 — 탐색 중 → 겹 성립
-        app.buttons["collection.exchange"].tap()
+        let exchange = app.buttons["collection.exchange"]
+        let exchangeHittable = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "isHittable == true"),
+            object: exchange
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [exchangeHittable], timeout: 5), .completed)
+        exchange.tap()
         snap(app, "\(prefix)-6-exchange-searching")
         let exchangeDone = app.buttons["exchange.done"]
         XCTAssertTrue(exchangeDone.waitForExistence(timeout: 15))

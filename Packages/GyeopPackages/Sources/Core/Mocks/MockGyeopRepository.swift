@@ -1,19 +1,26 @@
 import Foundation
 
+public enum MockGyeopRepositoryError: Error, Equatable, Sendable {
+    case profileAndCardSaveFailed
+}
+
 /// 인메모리 목업 저장소. DataKit의 SwiftData 실구현이 오기 전까지의 접점이자
 /// 테스트·프리뷰의 기본 저장소.
 public actor MockGyeopRepository: GyeopRepository {
     private var profile: UserProfile?
     private var card: CardSnapshot?
     private var records: [String: GyeopRecord] = [:]
+    private let failProfileAndCardSave: Bool
 
     public init(
         seededGyeops: [GyeopRecord] = [],
         initialProfile: UserProfile? = nil,
-        initialCard: CardSnapshot? = nil
+        initialCard: CardSnapshot? = nil,
+        failProfileAndCardSave: Bool = false
     ) {
         profile = initialProfile
         card = initialCard
+        self.failProfileAndCardSave = failProfileAndCardSave
         for record in seededGyeops {
             records[record.id] = record
         }
@@ -30,6 +37,14 @@ public actor MockGyeopRepository: GyeopRepository {
     }
 
     public func myCard() async throws -> CardSnapshot? { card }
+
+    public func saveProfileAndCard(profile: UserProfile, card: CardSnapshot) async throws {
+        guard !failProfileAndCardSave else {
+            throw MockGyeopRepositoryError.profileAndCardSaveFailed
+        }
+        self.profile = profile
+        self.card = card
+    }
 
     public func record(_ gyeop: GyeopRecord) async throws {
         if records[gyeop.id] != nil {
