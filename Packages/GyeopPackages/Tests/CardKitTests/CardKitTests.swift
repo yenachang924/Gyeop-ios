@@ -200,10 +200,19 @@ struct CardSeedTests {
     @Test("관심사가 바뀌면 시드도 바뀐다")
     func changedInterestsChangeSeed() {
         let generator = CardGenerator()
-        var profile = MockData.sampleProfiles[0]
+        let profile = MockData.sampleProfiles[0]
         let before = generator.makeCard(from: profile).seed
-        profile.interests.append("새관심사")
-        let after = generator.makeCard(from: profile).seed
+        let changedProfile = UserProfile(
+            id: profile.id,
+            nickname: profile.nickname,
+            tagline: profile.tagline,
+            emoji: profile.emoji,
+            interests: profile.interests + ["새관심사"],
+            mbti: profile.mbti,
+            createdAt: profile.createdAt,
+            updatedAt: profile.updatedAt
+        )
+        let after = generator.makeCard(from: changedProfile).seed
         #expect(before != after)
     }
 

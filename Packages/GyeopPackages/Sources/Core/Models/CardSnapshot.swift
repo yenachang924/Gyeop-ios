@@ -9,6 +9,7 @@ public struct CardSnapshot: Codable, Hashable, Sendable, Identifiable {
     public let seed: String
     public let nickname: String
     public let tagline: String
+    public var currentStatus: String { tagline }
     public let emoji: String
     public let interests: [String]
     /// MBTI — 카드 뒷면에 4글자로 실린다. 건너뛴 사용자는 nil (F55).

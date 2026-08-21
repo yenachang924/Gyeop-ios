@@ -15,8 +15,17 @@ struct CardPayloadTests {
 
     @Test("상한을 넘는 카드는 인코딩 단계에서 던진다")
     func tooLargeThrowsOnEncode() {
-        var oversizedProfile = MockData.sampleProfiles[0]
-        oversizedProfile.tagline = String(repeating: "a", count: CardPayload.maxByteCount + 1)
+        let profile = MockData.sampleProfiles[0]
+        let oversizedProfile = UserProfile(
+            id: profile.id,
+            nickname: profile.nickname,
+            tagline: String(repeating: "a", count: CardPayload.maxByteCount + 1),
+            emoji: profile.emoji,
+            interests: profile.interests,
+            mbti: profile.mbti,
+            createdAt: profile.createdAt,
+            updatedAt: profile.updatedAt
+        )
         let oversized = MockCardGenerator().makeCard(from: oversizedProfile)
 
         #expect(throws: CardPayloadError.self) {
