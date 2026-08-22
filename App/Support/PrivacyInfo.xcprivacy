@@ -25,6 +25,21 @@
 				<string>CA92.1</string>
 			</array>
 		</dict>
+		<dict>
+			<!--
+				App/Features/Onboarding/EmojiKeyboardField.swift 의 EmojiUITextField가
+				활성 키보드 목록에서 이모지 키보드를 찾아 그 필드에 띄운다 (F63).
+				54BD.1 — 텍스트 입력 필드를 가진 앱이 활성 키보드에 따라 사용자가 관찰
+				가능한 방식으로 다르게 동작하기 위해 접근하는 경우. 읽은 정보는 기기 밖으로
+				나가지 않는다.
+			-->
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryActiveKeyboards</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>54BD.1</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>

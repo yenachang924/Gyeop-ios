@@ -2,7 +2,7 @@
 
 상태: ✅ 완료 · 🔧 이 레포에서 준비됨(외부 작업 남음) · ⏳ 외부 의존 대기 · 미착수
 
-**최종 갱신 2026-08-22 (Build 5).** 이 문서는 App Clip 시절 기준으로 오래 방치돼 있었다 —
+**최종 갱신 2026-08-22 (Build 6).** 이 문서는 App Clip 시절 기준으로 오래 방치돼 있었다 —
 아래는 코드를 직접 확인해 맞춘 값이다.
 
 ## A. 코드·빌드 (레포에서 완결)
@@ -17,8 +17,10 @@
 - [x] ✅ 로컬 네트워크 권한 문구(NSLocalNetworkUsageDescription)·NSBonjourServices
       — 서비스명 `gyeop-exchange`가 `ExchangeConstants.serviceType`과 일치하는지 확인 완료
 - [x] ✅ ITSAppUsesNonExemptEncryption = NO (MPC 암호화는 애플 제공이라 면제)
-- [x] ✅ **프라이버시 매니페스트** `App/Support/PrivacyInfo.xcprivacy` — UserDefaults를 `CA92.1`로
-      선언. 번들 루트 포함 확인. 없으면 업로드가 거부된다 (2024-05 이후)
+- [x] ✅ **프라이버시 매니페스트** `App/Support/PrivacyInfo.xcprivacy` — 필수 사유 API 둘 다 선언.
+      UserDefaults `CA92.1`(앱 자신의 정보 접근), 활성 키보드 `54BD.1`(텍스트 입력 필드를 가진
+      앱이 활성 키보드에 따라 사용자가 관찰 가능하게 다르게 동작 — `EmojiKeyboardField`가
+      이모지 키보드를 찾아 띄운다). 번들 루트 포함 확인. 없으면 업로드가 거부된다 (2024-05 이후)
 - [x] ✅ App Clip 타깃·스킴·`AppClipKit` 의존이 project.yml·pbxproj·공유 스킴 어디에도 없음
 
 ## B. 실기기 검증 (기기 2대, docs/device-required.md 통합 실행 계획)
@@ -27,7 +29,10 @@
 - [x] ✅ SIWA 실사용자 플로우 (계획 §1) — 2026-08-09 합격
 - [x] ✅ 카드 셰이더 60fps (계획 §3) — 2026-08-09 합격
 - [x] ✅ App Group 클립→본앱 마이그레이션 (계획 §8) — 2026-08-09 합격
-- [ ] **재검증 필요 (Build 5)**: 위 합격 이후 맞대기 코드가 두 군데 바뀌었다.
+- [x] ✅ 실기기 설치·실행 스모크 (2026-08-22, iPhone 13 Pro / iOS 26.5) — Build 6 서명·설치·
+      실행 유지 확인. **UI 자동화는 실행 못 했다**: 기기에서 `설정 > 개발자 > UI 자동화 사용`을
+      켜야 한다 (`Timed out while enabling automation mode`)
+- [ ] **재검증 필요 (Build 5~6)**: 위 합격 이후 맞대기 코드가 두 군데 바뀌었다.
       저장소 강등 경로의 교환 팩토리, 그리고 MCPeerID 표시 이름의 바이트 절단
       (이모지 닉네임 크래시 방어). 시뮬레이터에서 도는 코드가 아니라 단위 테스트까지만
       확인했다 — 2대 왕복 한 번 더 돌려볼 것
@@ -35,8 +40,9 @@
 
 ## C. App Store Connect (외부 의존)
 
-- [x] ✅ **TestFlight 업로드 완료 — `1.0 (5)`, 2026-08-22.** Apple Distribution 서명 + iOS Team
-      Store 프로비저닝 프로파일로 아카이브·업로드, App Store Connect 처리 진입까지 확인
+- [x] ✅ **TestFlight 업로드 완료 — `1.0 (6)`, 2026-08-22.** Apple Distribution 서명 + iOS Team
+      Store 프로비저닝 프로파일로 아카이브·업로드, App Store Connect 처리 진입까지 확인.
+      (`1.0 (5)`도 같은 날 올렸으나 활성 키보드 사유가 빠져 있었다 — 6을 쓸 것)
 - [ ] 🔧 TestFlight 처리 완료 확인 후 테스터 배포 (ASC에서 직접)
 - [x] ✅ 스크린샷 재촬영 (2026-08-22) — 6.9" 10장 `docs/screenshots/` 갱신. **이전 세트는
       Build 4 이전 UI(관심사 최대 5개·이모지 칩)라 현재 앱과 달랐다** (심사 2.3.3 위험)
@@ -50,7 +56,7 @@
 
 | # | 리스크 | 영향 | 완화 |
 |---|---|---|---|
-| 1 | **`UITextInputMode.activeInputModes`를 매니페스트에 선언하지 않음** (`EmojiKeyboardField`, 이모지 키보드 강제) | 필수 사유 API의 "활성 키보드" 항목에 해당. 커스텀 키보드 앱이 아니면 승인된 사유가 제한적이라, 사유를 임의로 적으면 그 자체가 반려 사유가 될 수 있어 비워 뒀다 | 애플 문서 확인 후 선언하거나, F63의 이모지 키보드 강제를 걷어낸다 (커스텀 이모지 그리드 복귀 = UX 후퇴) |
+| 1 | ~~활성 키보드 API 미선언~~ **해소 (2026-08-22, Build 6)** — 애플 문서(TN3183)에서 `54BD.1`이 이 사용처에 해당함을 확인하고 선언했다 | – | – |
 | 2 | 아카데미 이메일 검증 미구현 (스펙 ⑤ Lv2의 일부) | 폐쇄형 커뮤니티 보장 없음 — 제품 결정 필요 | 서버 없이는 불가. v1은 개방형으로 제출하고 리뷰 노트에 명시 |
 | 3 | SIWA 토큰을 로컬 검증 없이 저장 (서버 부재로 검증 불가) | 보안상 실해는 없음(로컬 전용), 심사 이슈 아님 | 서버 도입 시 검증 추가 |
 | 4 | `testFullFlowDarkMode`가 실제로는 라이트로 실행된다 | 다크 모드가 자동 검증되지 않는다 | 실행 전 `xcrun simctl ui <udid> appearance dark` (테스트 주석에 절차 있음) |
