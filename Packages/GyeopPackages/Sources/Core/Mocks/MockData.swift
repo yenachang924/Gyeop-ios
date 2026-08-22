@@ -6,13 +6,17 @@ public enum MockData {
     /// 기준 시각: 2026-08-01 00:00 KST 부근 (고정)
     public static let referenceDate = Date(timeIntervalSince1970: 1_785_000_000)
 
+    /// 관심사는 반드시 `InterestCatalog` 안의 이름을 쓴다. 겹침 판정이 정확한 문자열
+    /// 비교라(`CardSnapshot.sharedInterests`) 카탈로그 밖의 이름을 두면 이 상대와는
+    /// **무엇을 골라도 겹이 잡히지 않는다** — 데모와 심사 스크린샷에서 이 앱의 핵심
+    /// 순간인 "겹치는 관심사"가 늘 비어 보이던 원인.
     public static let sampleProfiles: [UserProfile] = [
         UserProfile(
             id: "user-haram",
             nickname: "하람",
             tagline: "퇴근하고 클라이밍 가실 분",
             emoji: "🧗",
-            interests: ["클라이밍", "보드게임", "커피"],
+            interests: ["운동", "게임", "카페"],
             mbti: MBTI(code: "ESTP"),
             createdAt: referenceDate
         ),
@@ -21,7 +25,7 @@ public enum MockData {
             nickname: "도윤",
             tagline: "영일대 일몰 수집 중",
             emoji: "🌅",
-            interests: ["사진", "커피", "여행"],
+            interests: ["사진", "카페", "여행"],
             mbti: MBTI(code: "INFP"),
             createdAt: referenceDate
         ),
@@ -30,7 +34,7 @@ public enum MockData {
             nickname: "세연",
             tagline: "보드게임 정원 채우러 왔습니다",
             emoji: "🎲",
-            interests: ["보드게임", "독서", "요리"],
+            interests: ["게임", "독서", "요리"],
             mbti: nil,
             createdAt: referenceDate
         ),

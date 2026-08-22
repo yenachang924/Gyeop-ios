@@ -46,3 +46,16 @@ struct InterestCatalogTests {
         }
     }
 }
+
+@Suite("목업 상대 카드")
+struct MockPeerInterestTests {
+    /// 데모·심사 스크린샷의 상대 카드는 카탈로그 안의 관심사를 써야 한다. 벗어나면
+    /// 사용자가 무엇을 골라도 겹이 잡히지 않아, 이 앱의 핵심 순간이 한 번도 보이지 않는다.
+    @Test("샘플 프로필의 관심사는 모두 카탈로그 안에 있다")
+    func samplePeersUseCatalogInterests() {
+        for profile in MockData.sampleProfiles {
+            let outsiders = profile.interests.filter { !InterestCatalog.interests.contains($0) }
+            #expect(outsiders.isEmpty, "\(profile.nickname)의 \(outsiders)가 카탈로그 밖이다")
+        }
+    }
+}

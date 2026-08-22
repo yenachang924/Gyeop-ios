@@ -137,7 +137,9 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         // AX5에서는 LazyVGrid가 화면 밖 칩을 아직 안 만들었을 수 있다 — 스크롤해서 탭
         select(app, firstInterest)
         select(app, app.buttons["onboarding.interest.글쓰기"])
-        select(app, app.buttons["onboarding.interest.디자인"])
+        // 하나는 목업 상대(하람)와 겹치는 것을 고른다 — 이 플로우가 심사 스크린샷을
+        // 만들고, 겹이 잡히지 않으면 이 앱의 핵심 순간이 한 컷도 남지 않는다.
+        select(app, app.buttons["onboarding.interest.운동"])
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
 
         // 2/3 MBTI — 네 축 선택 후 「다음」 (F55)
@@ -233,6 +235,12 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         tapEvenIfOffscreen(app, received)
         let close = app.buttons["닫기"]
         XCTAssertTrue(close.waitForExistence(timeout: 5))
+        // 상대와 실제로 겹친 관심사가 상세에 뜬다 — 목업 상대의 관심사가 카탈로그를
+        // 벗어나면 여기서 걸린다.
+        XCTAssertTrue(
+            app.staticTexts["겹치는 관심사"].waitForExistence(timeout: 5),
+            "겹치는 관심사가 잡히지 않았다"
+        )
         snap(app, "\(prefix)-9-card-detail")
 
         // 카드 플립 — 뒷면(hue 유리 + MBTI) 기록 (F54)
