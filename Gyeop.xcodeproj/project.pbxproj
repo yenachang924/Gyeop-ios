@@ -32,6 +32,7 @@
 		D2A9F6636C1E41DC29A1863E /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE100902A9F49506C6D2A50 /* OnboardingFlowView.swift */; };
 		D90131186899DF59D79507A7 /* CurrentCardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C9F6F23588A25E4BFA0447F /* CurrentCardUITests.swift */; };
 		E612FD2E4388FAADC46B6E5C /* ExchangeFailureUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2825339C19E2BDFFA262E122 /* ExchangeFailureUITests.swift */; };
+		E71CC81D27591697E0BB4E2A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 60B8C193F4427293B0F5A80D /* PrivacyInfo.xcprivacy */; };
 		E8FD3EB8967292E2A1C68E51 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C7C9C994FD97CF40E62B6319 /* Assets.xcassets */; };
 		F66944B889FA9929FEC23B41 /* CollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 863A4BB1552A39DBD063E27E /* CollectionView.swift */; };
 /* End PBXBuildFile section */
@@ -54,6 +55,7 @@
 		3F61AB8788D0608FCA8CD1F6 /* GyeopPackages */ = {isa = PBXFileReference; lastKnownFileType = folder; name = GyeopPackages; path = Packages/GyeopPackages; sourceTree = SOURCE_ROOT; };
 		42DA513B14E1385CA8F5209F /* Gyeop.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Gyeop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5C9F6F23588A25E4BFA0447F /* CurrentCardUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentCardUITests.swift; sourceTree = "<group>"; };
+		60B8C193F4427293B0F5A80D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		6B8BBBC567132FCFDD3F9BD2 /* OnboardingDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingDraft.swift; sourceTree = "<group>"; };
 		77762B5D57F8BEB9881E4F14 /* InterestsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterestsStepView.swift; sourceTree = "<group>"; };
 		7BB9415FD921160F6E33BDE5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -195,6 +197,7 @@
 				2B4B1EA1770D8AE18ED44731 /* EmojiCatalog.swift */,
 				D097092EBED5A441532FA073 /* Gyeop.entitlements */,
 				F1208475C4EFF7B6D64C97F8 /* Info.plist */,
+				60B8C193F4427293B0F5A80D /* PrivacyInfo.xcprivacy */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -323,6 +326,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8FD3EB8967292E2A1C68E51 /* Assets.xcassets in Resources */,
+				E71CC81D27591697E0BB4E2A /* PrivacyInfo.xcprivacy in Resources */,
 				3141FDC6408BA41C1F32BBF8 /* emoji-icons.csv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
