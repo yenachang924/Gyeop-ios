@@ -12,16 +12,17 @@ public struct InterestCategory: Equatable, Sendable, Identifiable {
 
 public enum InterestCatalog {
     public static let categories: [InterestCategory] = [
+        // 분류 이름표 대신 묻는 말로 (소유자 지시) — 프로토타입의 말투를 따른다.
         .init(
-            title: "일과 기술",
+            title: "어떤 일을 하고 있나요?",
             interests: ["경영", "테크", "개발", "엔지니어링", "데이터 분석", "서비스 기획", "UX/UI", "디자인", "연구", "AI", "금융"]
         ),
         .init(
-            title: "취향과 일상",
+            title: "쉴 때는 무엇을 하나요?",
             interests: ["맛집 탐방", "카페", "여행", "사진", "독서", "음악", "영화", "게임", "운동", "취미 생활"]
         ),
         .init(
-            title: "사람과 활동",
+            title: "어떤 활동으로 사람을 만나나요?",
             interests: ["네트워킹", "사이드 프로젝트", "창업", "커뮤니티", "링크드인", "인스타그램"]
         ),
     ]

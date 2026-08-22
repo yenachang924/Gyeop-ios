@@ -5,6 +5,9 @@ import XCTest
 /// `xcrun xcresulttool export attachments`로 추출 (docs/review-kit.md).
 final class ScreenshotAndAccessibilityUITests: XCTestCase {
 
+    /// 화면 위아래 가장자리에서 탭이 시스템 제스처에 먹히는 폭.
+    private static let edgeGuard: CGFloat = 60
+
     @MainActor
     func testFullFlowWithScreenshots() throws {
         let app = XCUIApplication()
@@ -179,7 +182,10 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         snap(app, "\(prefix)-5-collection-empty")
 
         app.buttons["collection.editMyCard"].tap()
-        tapEvenIfOffscreen(app, app.buttons["profile.edit.interests.next"])
+        let editInterestsNext = app.buttons["profile.edit.interests.next"]
+        XCTAssertTrue(editInterestsNext.waitForExistence(timeout: 5))
+        snap(app, "\(prefix)-5b-profile-edit-interests")
+        tapEvenIfOffscreen(app, editInterestsNext)
         let editHeading = app.staticTexts["profile.heading"]
         XCTAssertTrue(editHeading.waitForExistence(timeout: 5))
         XCTAssertEqual(editHeading.label, "카드 수정")
@@ -265,10 +271,13 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         var focusTries = 0
         while (field.value(forKey: "hasKeyboardFocus") as? Bool) != true && focusTries < 4 {
             RunLoop.current.run(until: Date().addingTimeInterval(0.5))
-            // AX5에서는 필드가 화면 맨 위(상태바 아래)에 걸쳐 멈춘다 — 그 자리를 탭하면
-            // 상태바가 먼저 먹어 포커스가 안 잡힌다. 아래로 끌어내린 뒤 다시 탭한다.
-            if field.frame.minY < app.frame.minY + 60 {
+            // AX5에서는 필드가 화면 가장자리에 걸친 채 멈춘다 — 그 자리를 탭하면 상태바나
+            // 홈 인디케이터가 먼저 먹어 포커스가 안 잡힌다. 안쪽으로 옮긴 뒤 다시 탭한다.
+            if field.frame.minY < app.frame.minY + Self.edgeGuard {
                 app.swipeDown()
+                RunLoop.current.run(until: Date().addingTimeInterval(0.6))
+            } else if field.frame.maxY > app.frame.maxY - Self.edgeGuard {
+                app.swipeUp()
                 RunLoop.current.run(until: Date().addingTimeInterval(0.6))
             }
             field.tap()

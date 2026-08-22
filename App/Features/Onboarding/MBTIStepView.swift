@@ -80,7 +80,7 @@ struct MBTIStepView: View {
                     onNext()
                 } label: {
                     Text("다음")
-                        .font(DS.Typo.headline)
+                        .font(DS.Typo.section)
                         .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
                 }
                 .dsProminentButton()
@@ -90,7 +90,7 @@ struct MBTIStepView: View {
                     selected = nil
                     onNext()
                 }
-                .font(DS.Typo.footnote)
+                .font(DS.Typo.body)
                 .tint(DS.Palette.secondaryText)
                 .frame(minHeight: DS.minTapTarget)
                 .accessibilityIdentifier("onboarding.mbti.skip")

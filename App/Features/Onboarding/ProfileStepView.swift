@@ -60,17 +60,20 @@ struct ProfileStepView: View {
         draft.currentStatus.trimmingCharacters(in: .whitespacesAndNewlines).count
     }
 
-    private var currentStatusValidationMessage: String? {
-        if currentStatusCharacterCount == 0 { return "지금의 나를 입력해주세요." }
-        if currentStatusCharacterCount > ProfileInput.maximumCurrentStatusLength {
-            return "지금의 나는 \(ProfileInput.maximumCurrentStatusLength)자 이하로 입력해주세요."
-        }
-        return nil
+    /// 화면에 띄우는 경고는 길이 초과뿐이다. 비어 있는 상태는 경고가 아니다.
+    private var currentStatusLengthMessage: String? {
+        guard currentStatusCharacterCount > ProfileInput.maximumCurrentStatusLength else { return nil }
+        return "지금의 나는 \(ProfileInput.maximumCurrentStatusLength)자 이하로 입력해주세요."
+    }
+
+    /// 카드 완성 버튼을 열어줄지 판단하는 기준 — 비어 있어도 여기서는 막는다.
+    private var currentStatusIncomplete: Bool {
+        currentStatusCharacterCount == 0 || currentStatusLengthMessage != nil
     }
 
     private var emojiMissing: Bool { draft.emoji.isEmpty }
 
-    private var incomplete: Bool { nicknameMissing || currentStatusValidationMessage != nil || emojiMissing }
+    private var incomplete: Bool { nicknameMissing || currentStatusIncomplete || emojiMissing }
 
     var body: some View {
         Form {
@@ -104,14 +107,18 @@ struct ProfileStepView: View {
             }
 
             Section("지금의 나") {
-                TextField("첫 iOS 앱을 만들고 있어요", text: currentStatusBinding, axis: .vertical)
+                // 여러 줄(axis: .vertical)이면 리턴 키가 줄바꿈으로 먹혀 `onSubmit`이
+                // 영영 오지 않는다 — 칸 안에서 글이 계속 늘어나고 다음으로 못 넘어갔다.
+                // 한 줄 필드로 되돌려 리턴 키가 제 일(키보드 내리기)을 하게 한다.
+                TextField("첫 iOS 앱을 만들고 있어요", text: currentStatusBinding)
                     .focused($focusedField, equals: .currentStatus)
                     .submitLabel(.done)
                     .onSubmit { focusedField = nil }
-                    .lineLimit(1...2)
                     .accessibilityIdentifier("onboarding.currentStatus")
-                if let currentStatusValidationMessage {
-                    Text(currentStatusValidationMessage)
+                // 아직 비어 있다는 건 빨간 경고가 아니라 그냥 시작 상태다 (소유자 지시) —
+                // 비활성 버튼과 플레이스홀더가 이미 할 일을 말한다. 길이 초과만 알린다.
+                if let currentStatusLengthMessage {
+                    Text(currentStatusLengthMessage)
                         .font(.footnote)
                         .foregroundStyle(.red)
                 }
@@ -150,7 +157,7 @@ struct ProfileStepView: View {
                             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
                     } else {
                         Text(isEditing ? "카드 저장" : "카드 완성")
-                            .font(DS.Typo.headline)
+                            .font(DS.Typo.section)
                             .frame(maxWidth: .infinity, minHeight: DS.minTapTarget)
                     }
                 }
@@ -246,7 +253,7 @@ struct ProfileStepView: View {
     private var missingHint: String {
         var missing: [String] = []
         if nicknameMissing { missing.append("닉네임") }
-        if currentStatusValidationMessage != nil { missing.append("지금의 나") }
+        if currentStatusIncomplete { missing.append("지금의 나") }
         if emojiMissing { missing.append("이모지") }
         return "\(missing.joined(separator: " · "))를 채우면 카드가 완성돼요"
     }
