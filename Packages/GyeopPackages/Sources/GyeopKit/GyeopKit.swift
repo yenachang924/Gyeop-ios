@@ -29,4 +29,29 @@ public enum ExchangeConstants {
     public static let transferTimeout: Duration = .seconds(5)
     /// 연결 실패 시 같은 판에서 재시도할 최대 횟수 (초과하면 peerLost로 실패)
     public static let maxConnectionRetries = 2
+
+    /// `MCPeerID(displayName:)`의 상한. **UTF-8 바이트 기준**이며, 넘기면 초기화가
+    /// 예외를 던져 앱이 죽는다 (글자 수 제한이 아니다).
+    public static let maximumPeerNameBytes = 63
+    /// 상대 화면에 읽히기 좋은 닉네임 길이 상한 (글자 수).
+    public static let maximumPeerNicknameCharacters = 12
+}
+
+/// 맞대기에 쓸 피어 표시 이름을 만든다.
+///
+/// 닉네임에는 길이 제한이 없고(`ProfileInput`은 「지금의 나」만 40자로 막는다) 이모지
+/// 한 글자가 25바이트를 넘기도 한다. 글자 수로 자르면 바이트 상한을 넘겨
+/// `MCPeerID`가 예외를 던지므로 **바이트를 세면서** 자른다.
+///
+/// 닉네임이 겹쳐도 피어가 구분되도록 소유자 ID 뒤 8자를 항상 붙인다. 닉네임이 통째로
+/// 잘려 나가도 접미사는 남아 이름이 비지 않는다 (빈 이름 역시 `MCPeerID`가 거부한다).
+public func makeExchangePeerName(nickname: String, ownerID: String) -> String {
+    let suffix = String(ownerID.suffix(8))
+    let budget = ExchangeConstants.maximumPeerNameBytes - suffix.utf8.count - 1 // "#"
+    var name = ""
+    for character in nickname.prefix(ExchangeConstants.maximumPeerNicknameCharacters) {
+        guard name.utf8.count + character.utf8.count <= budget else { break }
+        name.append(character)
+    }
+    return "\(name)#\(suffix)"
 }

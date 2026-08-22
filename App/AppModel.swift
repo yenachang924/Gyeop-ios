@@ -73,15 +73,7 @@ final class AppModel {
             return AppModel(
                 cardGenerator: CardGenerator(),
                 repository: repository,
-                makeExchangeSession: { card in
-                    #if targetEnvironment(simulator)
-                    // MPC는 실기기 전용 (docs/device-required.md) — 시뮬레이터는 스크립트 Mock
-                    _ = card
-                    return MockExchangeSession(failure: mockFailure)
-                    #else
-                    return MultipeerExchangeSession(displayName: exchangeDisplayName(for: card))
-                    #endif
-                },
+                makeExchangeSession: liveExchangeSessionFactory(mockFailure: mockFailure),
                 requiresSignIn: true,
                 deleteAccountAction: {
                     try await AccountDeletionService(repository: repository, tokenStore: tokenStore)
@@ -92,9 +84,14 @@ final class AppModel {
             Log.sync.error("SwiftData 컨테이너 생성 실패, 인메모리로 강등: \(error)")
             // 저장소가 강등돼도 로그인 게이트는 유지한다 (F44) — 기본값(false)에 기대면
             // 이 경로에서만 웰컴 화면이 통째로 사라진다.
+            //
+            // 교환 팩토리도 같은 이유로 반드시 넘긴다. 기본값(MockExchangeSession)에 기대면
+            // **실기기에서도** 가상 상대와 교환이 성사된 것처럼 보인다 — 저장이 강등된 것과
+            // 눈앞의 사람과 실제로 겹쳤는지는 전혀 다른 문제다.
             return AppModel(
                 cardGenerator: CardGenerator(),
                 repository: MockGyeopRepository(),
+                makeExchangeSession: liveExchangeSessionFactory(mockFailure: mockFailure),
                 requiresSignIn: true
             )
         }
@@ -167,11 +164,22 @@ final class AppModel {
         )
     }
 
-    /// MCPeerID 제약(UTF-8 63바이트)에 맞춘 표시 이름. 닉네임이 겹쳐도 피어가
-    /// 구분되도록 ownerID 앞 8자를 붙인다.
-    private nonisolated static func exchangeDisplayName(for card: CardSnapshot) -> String {
-        let suffix = String(card.ownerID.suffix(8))
-        return "\(String(card.nickname.prefix(12)))#\(suffix)"
+    /// 교환 세션 팩토리 — 실기기는 MPC, 시뮬레이터는 스크립트 Mock
+    /// (MPC는 실기기 전용, docs/device-required.md). 정상 경로와 저장소 강등 경로가
+    /// **같은** 팩토리를 써야 실기기에서 가짜 교환이 도는 일이 없다.
+    private nonisolated static func liveExchangeSessionFactory(
+        mockFailure: ExchangeFailure?
+    ) -> @Sendable (CardSnapshot) -> any ExchangeSession {
+        { card in
+            #if targetEnvironment(simulator)
+            _ = card
+            return MockExchangeSession(failure: mockFailure)
+            #else
+            return MultipeerExchangeSession(
+                displayName: makeExchangePeerName(nickname: card.nickname, ownerID: card.ownerID)
+            )
+            #endif
+        }
     }
 
     func bootstrap() async {
