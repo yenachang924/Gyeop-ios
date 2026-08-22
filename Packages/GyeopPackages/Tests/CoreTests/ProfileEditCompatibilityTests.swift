@@ -7,19 +7,19 @@ struct ProfileEditCompatibilityTests {
     @Test("mixed legacy interests retain only supported values in profile order")
     func sanitizesMixedLegacyInterests() {
         let sanitized = InterestCatalog.sanitizedSelection(
-            from: ["AI", "legacy-community", "UX/UI"]
+            from: ["연구", "legacy-community", "글쓰기"]
         )
 
-        #expect(sanitized == ["AI", "UX/UI"])
+        #expect(sanitized == ["연구", "글쓰기"])
     }
 
     @Test("Build 4 five-interest profiles retain only the first three supported values")
     func sanitizesFiveInterestProfile() {
         let sanitized = InterestCatalog.sanitizedSelection(
-            from: ["개발", "AI", "UX/UI", "데이터 분석", "사진"]
+            from: ["디자인", "연구", "글쓰기", "테크", "사진"]
         )
 
-        #expect(sanitized == ["개발", "AI", "UX/UI"])
+        #expect(sanitized == ["디자인", "연구", "글쓰기"])
     }
 
     @Test("profile update preserves identity and creation date while advancing freshness and version")
@@ -31,7 +31,7 @@ struct ProfileEditCompatibilityTests {
             nickname: "Before",
             tagline: "Before status",
             emoji: "🌱",
-            interests: ["AI", "UX/UI", "개발"],
+            interests: ["연구", "글쓰기", "디자인"],
             mbti: MBTI(code: "INTJ"),
             createdAt: createdAt,
             updatedAt: createdAt

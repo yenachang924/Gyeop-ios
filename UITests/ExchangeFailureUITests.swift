@@ -11,11 +11,11 @@ final class ExchangeFailureUITests: XCTestCase {
         app.launch()
 
         // 최단 경로 온보딩
-        let firstInterest = app.buttons["onboarding.interest.AI"]
+        let firstInterest = app.buttons["onboarding.interest.연구"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         firstInterest.tap()
-        app.buttons["onboarding.interest.UX/UI"].tap()
-        app.buttons["onboarding.interest.개발"].tap()
+        app.buttons["onboarding.interest.글쓰기"].tap()
+        app.buttons["onboarding.interest.디자인"].tap()
         app.buttons["onboarding.interests.next"].tap()
         let firstAxis = app.buttons["onboarding.mbti.E"]
         XCTAssertTrue(firstAxis.waitForExistence(timeout: 5))

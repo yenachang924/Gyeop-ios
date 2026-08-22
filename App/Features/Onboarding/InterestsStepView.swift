@@ -58,8 +58,8 @@ struct InterestsStepView: View {
             }
             .padding(DS.Spacing.m)
         }
-        // 헤더의 카운터가 위로 밀려나면 같은 카운터가 상단에 남는다 — 스크롤을 내리는
-        // 동안에도 몇 개 골랐는지 보인다 (소유자 지시).
+        // 헤더의 카운터가 위로 밀려나면 같은 카운터가 내비게이션 바에 남는다 — 스크롤을
+        // 내리는 동안에도 몇 개 골랐는지 보인다 (소유자 지시).
         .onScrollGeometryChange(for: CGFloat.self) { geometry in
             geometry.contentOffset.y + geometry.contentInsets.top
         } action: { _, offset in
@@ -67,7 +67,19 @@ struct InterestsStepView: View {
             guard scrolledAway != counterPinned else { return }
             withAnimation(reduceMotion ? nil : DS.Motion.quick) { counterPinned = scrolledAway }
         }
-        .overlay(alignment: .topTrailing) { pinnedCounter }
+        // 직접 그린 페이드 띠는 아래쪽에 경계선을 남겼다. 내비게이션 바에 얹으면 시스템이
+        // 스크롤 엣지 처리를 대신해 주고, 화면에 새 경계가 생기지 않는다.
+        // 숨길 때는 항목을 통째로 빼야 한다 — opacity만 0으로 두면 유리 배경이 남아
+        // 빈 원이 떠 있다.
+        .toolbar {
+            if counterPinned {
+                ToolbarItem(placement: .topBarTrailing) {
+                    counterText
+                        // 헤더의 카운터가 이미 같은 값을 읽어준다 — 두 번 들리지 않게.
+                        .accessibilityHidden(true)
+                }
+            }
+        }
         .background {
             InterestBackdrop(colors: backdropColors)
                 .animation(reduceMotion ? nil : DS.Motion.dye, value: selected)
@@ -122,33 +134,6 @@ struct InterestsStepView: View {
             .monospacedDigit()
     }
 
-    /// 스크롤을 따라 내려오는 카운터. 헤더가 보이는 동안에는 없는 것처럼 비켜 있다가
-    /// 헤더가 밀려나면 자리를 잡는다. 알약 배경을 얹으면 화면 위에 뜬 딱지처럼 보여서,
-    /// 하단 바(`dsBottomBarFade`)와 같은 문법으로 **화면 배경이 위에서 옅어지는 띠**만
-    /// 깔고 그 위에 숫자를 올린다 — 글자는 읽히고 경계는 보이지 않는다.
-    private var pinnedCounter: some View {
-        counterText
-            .padding(.trailing, DS.Spacing.m)
-            .padding(.top, DS.Spacing.xs)
-            .frame(maxWidth: .infinity, alignment: .trailing)
-            .background(alignment: .top) {
-                LinearGradient(
-                    stops: [
-                        .init(color: DS.Palette.background, location: 0),
-                        .init(color: DS.Palette.background.opacity(0.85), location: 0.45),
-                        .init(color: DS.Palette.background.opacity(0), location: 1),
-                    ],
-                    startPoint: .top, endPoint: .bottom
-                )
-                .frame(height: Layout.pinnedCounterFadeHeight)
-                .allowsHitTesting(false)
-            }
-            .opacity(counterPinned ? 1 : 0)
-            .allowsHitTesting(false)
-            // 헤더의 카운터가 이미 같은 값을 읽어준다 — 보이스오버에 두 번 들리지 않게.
-            .accessibilityHidden(true)
-    }
-
     private var interestGrid: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.l) {
             ForEach(InterestCatalog.categories) { category in
@@ -176,8 +161,6 @@ struct InterestsStepView: View {
         static let counterRevealOffset: CGFloat = 44
         /// 3개를 다 골라 더 담을 수 없는 칩의 흐림 정도.
         static let unavailableChipOpacity: CGFloat = 0.45
-        /// 고정 카운터 뒤에서 배경이 옅어지며 사라지는 띠의 높이.
-        static let pinnedCounterFadeHeight: CGFloat = 76
     }
 
     private var interestColumns: [GridItem] {
@@ -223,7 +206,7 @@ struct InterestsStepView: View {
                 .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
-                .foregroundStyle(isSelected ? AnyShapeStyle(.white) : AnyShapeStyle(.primary))
+                .foregroundStyle(isSelected ? DS.Palette.onSelection : Color.primary)
                 .frame(maxWidth: .infinity, minHeight: DS.Layout.primaryActionHeight)
                 .contentShape(Capsule())
         }
@@ -232,14 +215,18 @@ struct InterestsStepView: View {
 }
 
 /// 관심사 알약 표면 — MBTI 알약(`MBTIPillSurface`)과 같은 모양·같은 원리.
-/// 선택은 액센트 틴트로만 말하고, 미선택은 맨 유리다. 하드 스트로크를 두지 않는다.
+/// 선택은 채움으로만 말하고, 미선택은 맨 유리다. 하드 스트로크를 두지 않는다.
+///
+/// 채움은 **무채 잉크**(`DS.Palette.selection`, U1)다. 브랜드 레드로 채웠더니 고른 알약과
+/// 화면을 넘기는 「다음」 버튼이 같은 색·같은 모양이 되어 구분되지 않았다. 레드는 진행
+/// 버튼 한 곳에만 남긴다 — 무채는 상태, 레드는 행동.
 private struct InterestChipSurface: ViewModifier {
     let isSelected: Bool
 
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *) {
             content.glassEffect(
-                isSelected ? .regular.tint(DS.Palette.accent) : .regular,
+                isSelected ? .regular.tint(DS.Palette.selection) : .regular,
                 in: Capsule()
             )
         } else {
@@ -247,7 +234,7 @@ private struct InterestChipSurface: ViewModifier {
                 .background {
                     ZStack {
                         Capsule().fill(.ultraThinMaterial)
-                        Capsule().fill(DS.Palette.accent)
+                        Capsule().fill(DS.Palette.selection)
                             .opacity(isSelected ? 1 : 0)
                     }
                 }

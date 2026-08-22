@@ -10,14 +10,14 @@ struct ProfileInputTests {
             nickname: " Ana ",
             currentStatus: " Building an iOS app ",
             emoji: "🌱",
-            interests: [" AI ", "UX/UI", " 개발 "],
+            interests: [" 연구 ", "글쓰기", " 디자인 "],
             mbti: MBTI(code: "INTJ")
         )
 
         #expect(input.nickname == "Ana")
         #expect(input.currentStatus == "Building an iOS app")
         #expect(input.emoji == "🌱")
-        #expect(input.interests == ["AI", "UX/UI", "개발"])
+        #expect(input.interests == ["연구", "글쓰기", "디자인"])
         #expect(input.mbti == MBTI(code: "INTJ"))
     }
 
@@ -50,7 +50,7 @@ struct ProfileInputTests {
 
     @Test("rejects an incorrect interest count")
     func rejectsWrongInterestCount() {
-        for invalidInterests in [[], ["AI"], ["AI", "UX/UI"], ["AI", "UX/UI", "개발", "금융"]] {
+        for invalidInterests in [[], ["연구"], ["연구", "글쓰기"], ["연구", "글쓰기", "디자인", "투자"]] {
             #expect(throws: ProfileInputError.interestCount(expected: 3)) {
                 try makeInput(interests: invalidInterests)
             }
@@ -60,21 +60,21 @@ struct ProfileInputTests {
     @Test("rejects duplicate interests after trimming")
     func rejectsDuplicateInterestsAfterTrimming() {
         #expect(throws: ProfileInputError.duplicateInterest) {
-            try makeInput(interests: ["AI", " AI ", "개발"])
+            try makeInput(interests: ["연구", " 연구 ", "디자인"])
         }
     }
 
     @Test("rejects an interest that is empty after trimming")
     func rejectsEmptyInterestAfterTrimming() {
         #expect(throws: ProfileInputError.emptyInterest) {
-            try makeInput(interests: ["AI", " \n ", "개발"])
+            try makeInput(interests: ["연구", " \n ", "디자인"])
         }
     }
 
     @Test("rejects an unsupported interest after trimming")
     func rejectsUnsupportedInterestAfterTrimming() {
         #expect(throws: ProfileInputError.unsupportedInterest("해외 축구")) {
-            try makeInput(interests: ["AI", "UX/UI", " 해외 축구 "])
+            try makeInput(interests: ["연구", "글쓰기", " 해외 축구 "])
         }
     }
 
@@ -108,7 +108,7 @@ struct ProfileInputTests {
         #expect(profile.lastUpdatedAt == createdAt)
     }
 
-    private func makeInput(nickname: String = "Ana", currentStatus: String = "Building an iOS app", emoji: String = "🌱", interests: [String] = ["AI", "UX/UI", "개발"]) throws -> ProfileInput {
+    private func makeInput(nickname: String = "Ana", currentStatus: String = "Building an iOS app", emoji: String = "🌱", interests: [String] = ["연구", "글쓰기", "디자인"]) throws -> ProfileInput {
         try ProfileInput(nickname: nickname, currentStatus: currentStatus, emoji: emoji, interests: interests, mbti: nil)
     }
 }

@@ -47,11 +47,11 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         app.launchArguments = ["-uitest-reset"]
         app.launch()
         // 그리드 상단 두 칩 — 스크롤 없이 선택 상태가 프레임에 남는다
-        let first = app.buttons["onboarding.interest.AI"]
+        let first = app.buttons["onboarding.interest.연구"]
         XCTAssertTrue(first.waitForExistence(timeout: 5))
         first.tap()
-        app.buttons["onboarding.interest.UX/UI"].tap()
-        app.buttons["onboarding.interest.개발"].tap()
+        app.buttons["onboarding.interest.글쓰기"].tap()
+        app.buttons["onboarding.interest.디자인"].tap()
         snap(app, "default-1b-interests-selected")
 
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
@@ -86,7 +86,7 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
         app.launch()
 
         // 카탈로그에서 가장 긴 두 이름 — 한 열을 꽉 채우고 줄바꿈으로 흘러야 한다
-        for name in ["데이터 분석", "사이드 프로젝트"] {
+        for name in ["스포츠 관람", "사이드 프로젝트"] {
             let longChoice = app.buttons["onboarding.interest.\(name)"]
             var swipes = 0
             while (!longChoice.exists || !longChoice.isHittable) && swipes < 8 {
@@ -131,13 +131,13 @@ final class ScreenshotAndAccessibilityUITests: XCTestCase {
     @MainActor
     private func runFullFlow(_ app: XCUIApplication, prefix: String) throws {
         // 1/3 관심사
-        let firstInterest = app.buttons["onboarding.interest.AI"]
+        let firstInterest = app.buttons["onboarding.interest.연구"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         snap(app, "\(prefix)-1-onboarding-interests")
         // AX5에서는 LazyVGrid가 화면 밖 칩을 아직 안 만들었을 수 있다 — 스크롤해서 탭
         select(app, firstInterest)
-        select(app, app.buttons["onboarding.interest.UX/UI"])
-        select(app, app.buttons["onboarding.interest.개발"])
+        select(app, app.buttons["onboarding.interest.글쓰기"])
+        select(app, app.buttons["onboarding.interest.디자인"])
         tapEvenIfOffscreen(app, app.buttons["onboarding.interests.next"])
 
         // 2/3 MBTI — 네 축 선택 후 「다음」 (F55)

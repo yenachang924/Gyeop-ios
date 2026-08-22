@@ -50,7 +50,7 @@ final class CurrentCardUITests: XCTestCase {
         XCTAssertTrue(interestsNext.waitForExistence(timeout: 5))
         XCTAssertFalse(interestsNext.isEnabled)
 
-        let replacement = app.buttons["profile.edit.interest.개발"]
+        let replacement = app.buttons["profile.edit.interest.디자인"]
         tapEvenIfOffscreen(app, replacement)
         XCTAssertTrue(replacement.isSelected)
         XCTAssertTrue(interestsNext.isEnabled)

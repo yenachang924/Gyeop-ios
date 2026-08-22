@@ -123,7 +123,7 @@ final class AppModel {
             nickname: "유나",
             tagline: "새 iOS 화면을 만들고 있어요",
             emoji: "🌱",
-            interests: ["AI", "UX/UI", "개발"],
+            interests: ["연구", "글쓰기", "디자인"],
             mbti: MBTI(code: "INTJ"),
             createdAt: staleUpdatedAt,
             updatedAt: staleUpdatedAt
@@ -146,7 +146,7 @@ final class AppModel {
             nickname: "유나",
             tagline: "예전 관심사를 정리하고 있어요",
             emoji: "🌱",
-            interests: ["AI", "legacy-community", "UX/UI", "legacy-sport", "legacy-food"],
+            interests: ["연구", "legacy-community", "글쓰기", "legacy-sport", "legacy-food"],
             mbti: MBTI(code: "INTJ"),
             createdAt: fixedNow.addingTimeInterval(-365 * 24 * 60 * 60),
             updatedAt: fixedNow

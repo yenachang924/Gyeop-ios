@@ -11,12 +11,12 @@ final class OnboardingFlowUITests: XCTestCase {
         app.launch()
 
         let next = app.buttons["onboarding.interests.next"]
-        let firstInterest = app.buttons["onboarding.interest.AI"]
+        let firstInterest = app.buttons["onboarding.interest.연구"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         firstInterest.tap()
-        app.buttons["onboarding.interest.UX/UI"].tap()
+        app.buttons["onboarding.interest.글쓰기"].tap()
         XCTAssertFalse(next.isEnabled)
-        app.buttons["onboarding.interest.개발"].tap()
+        app.buttons["onboarding.interest.디자인"].tap()
         XCTAssertTrue(next.isEnabled)
         next.tap()
 
@@ -79,13 +79,13 @@ final class OnboardingFlowUITests: XCTestCase {
         app.launch()
 
         // 1/3 관심사 — 1개 선택하면 프리뷰가 물든다.
-        let firstInterest = app.buttons["onboarding.interest.AI"]
+        let firstInterest = app.buttons["onboarding.interest.연구"]
         XCTAssertTrue(firstInterest.waitForExistence(timeout: 5))
         firstInterest.tap()
         let filledPreview = app.descendants(matching: .any)["onboarding.interests.preview.filled"]
         XCTAssertTrue(filledPreview.waitForExistence(timeout: 5))
-        app.buttons["onboarding.interest.UX/UI"].tap()
-        app.buttons["onboarding.interest.개발"].tap()
+        app.buttons["onboarding.interest.글쓰기"].tap()
+        app.buttons["onboarding.interest.디자인"].tap()
         app.buttons["onboarding.interests.next"].tap()
 
         // 2/3 성향 — 건너뛰기는 항상 가능하다.
@@ -145,7 +145,7 @@ final class U2DemoRecordingUITests: XCTestCase {
     /// 온보딩을 최소 동작으로 통과 — 장면 1·2의 공통 준비.
     @MainActor
     private func completeOnboarding(_ app: XCUIApplication) {
-        let interests = ["AI", "UX/UI", "개발"]
+        let interests = ["연구", "글쓰기", "디자인"]
         let first = app.buttons["onboarding.interest.\(interests[0])"]
         XCTAssertTrue(first.waitForExistence(timeout: 5))
         for name in interests {
@@ -228,18 +228,18 @@ final class U2DemoRecordingUITests: XCTestCase {
         app.launch()
 
         // 칩을 천천히 — 자리표시 → 카드 전환, 고를 때마다 색이 물들고, 해제하면 되돌아온다
-        let first = app.buttons["onboarding.interest.AI"]
+        let first = app.buttons["onboarding.interest.연구"]
         XCTAssertTrue(first.waitForExistence(timeout: 5))
         first.tap()
         hold(1.2)
         // LazyVGrid는 화면 밖 요소를 만들지 않는다 — 첫 화면에 보이는 칩만 쓴다
-        app.buttons["onboarding.interest.UX/UI"].tap()
+        app.buttons["onboarding.interest.글쓰기"].tap()
         hold(1.2)
-        app.buttons["onboarding.interest.AI"].tap()
+        app.buttons["onboarding.interest.연구"].tap()
         hold(1.2)
-        app.buttons["onboarding.interest.AI"].tap() // 해제 — 색이 다시 물든다
+        app.buttons["onboarding.interest.연구"].tap() // 해제 — 색이 다시 물든다
         hold(1.2)
-        app.buttons["onboarding.interest.개발"].tap()
+        app.buttons["onboarding.interest.디자인"].tap()
         app.buttons["onboarding.interests.next"].tap()
 
         let skip = app.buttons["onboarding.mbti.skip"]

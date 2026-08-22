@@ -36,7 +36,7 @@ struct SwiftDataGyeopRepositoryTests {
             nickname: "Yena",
             tagline: "Building an iOS app",
             emoji: "🌱",
-            interests: ["AI", "UX/UI", "개발"],
+            interests: ["연구", "글쓰기", "디자인"],
             mbti: MBTI(code: "ENFP"),
             createdAt: createdAt,
             updatedAt: updatedAt
