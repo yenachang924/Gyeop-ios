@@ -18,6 +18,9 @@ struct CollectionView: View {
     @State private var editDraft = OnboardingDraft.empty
     /// 삭제 확인을 기다리는 받은 카드 (F65) — 파괴적 액션은 alert로 붙잡는다 (F47 관례).
     @State private var pendingDeletion: GyeopRecord?
+    @State private var reportingCard: CardSnapshot?
+    @State private var blockingCard: CardSnapshot?
+    @State private var blockFailed = false
     /// 컬렉션 ↔ 카드 상세 줌 전환 — 시스템 zoom 전환이 matchedGeometry 페어링을 대신한다.
     @Namespace private var cardZoom
 
@@ -29,6 +32,14 @@ struct CollectionView: View {
 
                     if let myCard = model.myCard {
                         myCardSection(myCard)
+                    } else if let profile = model.myProfile {
+                        VStack(alignment: .leading, spacing: DS.Spacing.s) {
+                            Text("카드 내용을 확인해주세요")
+                                .font(DS.Typo.headline)
+                            Text("기존 카드에 사용할 수 없는 내용이 있어 표시와 교환을 중단했어요.")
+                                .font(DS.Typo.body)
+                            Button("카드 수정") { presentProfileEditor(profile) }
+                        }
                     }
 
                     collectedSection
@@ -63,6 +74,7 @@ struct CollectionView: View {
                     .presentationCornerRadius(DS.Radius.card)
                     .presentationDragIndicator(.visible)
             }
+            .sheet(item: $reportingCard) { card in CardReportView(card: card) }
             .sheet(isPresented: $showingProfileEditor) {
                 if let profile = model.myProfile {
                     ProfileEditFlowView(
@@ -91,6 +103,21 @@ struct CollectionView: View {
                 Button("취소", role: .cancel) {}
             } message: { record in
                 Text("\(record.counterpartCard.nickname)님의 카드와 겹 기록이 사라져요. 되돌릴 수 없어요.")
+            }
+            .alert("이 사용자를 차단할까요?", isPresented: Binding(
+                get: { blockingCard != nil }, set: { if !$0 { blockingCard = nil } }
+            ), presenting: blockingCard) { card in
+                Button("차단", role: .destructive) {
+                    Task { blockFailed = !(await model.blockUser(card)) }
+                }
+                Button("취소", role: .cancel) {}
+            } message: { _ in
+                Text("이 사용자의 모든 카드와 기록을 이 기기에서 지우고 이후 교환을 차단합니다. 상대 기기의 내 카드는 지우지 못해요.")
+            }
+            .alert("차단 처리를 확인해주세요", isPresented: $blockFailed) {
+                Button("확인", role: .cancel) {}
+            } message: {
+                Text("일부 처리를 완료하지 못했어요. 설정의 차단 목록을 확인하고 다시 시도해주세요.")
             }
         }
     }
@@ -137,6 +164,7 @@ struct CollectionView: View {
             .frame(maxWidth: .infinity, minHeight: DS.Layout.primaryActionHeight)
         }
         .dsProminentButton()
+        .disabled(model.myCard == nil || model.moderationLoadFailed)
         .controlSize(.large)
         .padding(.horizontal, DS.Spacing.m)
         .padding(.bottom, DS.Spacing.s)
@@ -202,7 +230,15 @@ struct CollectionView: View {
                 }
             }
 
-            if model.gyeops.isEmpty {
+            if model.moderationLoadFailed {
+                ContentUnavailableView {
+                    Label("카드를 불러오지 못했어요", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text("차단 목록과 저장 정보를 확인할 수 없어 받은 카드를 표시하지 않았어요.")
+                } actions: {
+                    Button("다시 시도") { Task { await model.enterCollection() } }
+                }
+            } else if model.gyeops.isEmpty {
                 ContentUnavailableView(
                     "아직 겹이 없어요",
                     systemImage: "person.2",
@@ -229,6 +265,10 @@ struct CollectionView: View {
                         .buttonStyle(.plain)
                         // 받은 카드 삭제 (F65) — 길게 눌러 지우는 시스템 관례 (사진·메시지)
                         .contextMenu {
+                            Button("카드 신고", systemImage: "flag") { reportingCard = gyeop.counterpartCard }
+                            Button("사용자 차단", systemImage: "person.crop.circle.badge.xmark", role: .destructive) {
+                                blockingCard = gyeop.counterpartCard
+                            }
                             Button("카드 삭제", systemImage: "trash", role: .destructive) {
                                 pendingDeletion = gyeop
                             }

@@ -236,6 +236,8 @@ struct ProfileStepView: View {
 
     private func validationMessage(for error: ProfileInputError) -> String {
         switch error {
+        case .objectionableContent:
+            return "서로를 존중하는 닉네임과 소개를 입력해주세요."
         case .emptyNickname:
             return "닉네임을 입력해주세요."
         case .emptyCurrentStatus:

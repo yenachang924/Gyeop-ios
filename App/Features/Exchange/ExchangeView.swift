@@ -233,8 +233,8 @@ struct ExchangeView: View {
 
     private func run() async {
         phase = .searching
-        guard let session = model.startExchange() else {
-            dismiss()
+        guard let session = await model.startExchange() else {
+            phase = .failed(.transferCorrupted)
             return
         }
         self.session = session
@@ -255,8 +255,11 @@ struct ExchangeView: View {
             case .cardReceived:
                 break // completed가 바로 뒤따른다
             case .completed(let record):
-                await model.recordGyeop(record)
-                phase = .merging(record)
+                if await model.recordGyeop(record) {
+                    phase = .merging(record)
+                } else {
+                    phase = .failed(.transferCorrupted)
+                }
             case .failed(let failure):
                 if failure == .cancelled { return } // 닫기 버튼 경로 — 화면도 곧 사라진다
                 phase = .failed(failure)

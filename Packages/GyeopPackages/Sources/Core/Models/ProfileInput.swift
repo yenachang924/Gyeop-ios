@@ -9,6 +9,7 @@ public enum ProfileInputError: Error, Equatable, Sendable {
     case emptyInterest
     case duplicateInterest
     case unsupportedInterest(String)
+    case objectionableContent
 }
 
 public struct ProfileInput: Equatable, Sendable {
@@ -44,6 +45,10 @@ public struct ProfileInput: Equatable, Sendable {
         if let unsupportedInterest = cleanInterests.first(where: { !InterestCatalog.interests.contains($0) }) {
             throw ProfileInputError.unsupportedInterest(unsupportedInterest)
         }
+        guard ContentModerationPolicy.isAllowed(
+            nickname: cleanNickname, currentStatus: cleanCurrentStatus,
+            emoji: emoji, interests: cleanInterests
+        ) else { throw ProfileInputError.objectionableContent }
 
         self.nickname = cleanNickname
         self.currentStatus = cleanCurrentStatus
@@ -52,7 +57,7 @@ public struct ProfileInput: Equatable, Sendable {
         self.mbti = mbti
     }
 
-    private static func isEmoji(_ value: String) -> Bool {
+    static func isEmoji(_ value: String) -> Bool {
         guard value.count == 1 else { return false }
 
         let scalars = Array(value.unicodeScalars)

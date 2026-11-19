@@ -1,3 +1,4 @@
+import AuthenticationServices
 import CardKit
 import Core
 import DataKit
@@ -10,6 +11,9 @@ import Observation
 @MainActor
 @Observable
 final class AppModel {
+    private enum LiveStorageError: Error {
+        case unavailable
+    }
     /// 연관값이 없어 Equatable이 자동 합성된다 — `RootView`가 `animation(value:)`로 쓴다.
     enum Stage {
         case loading
@@ -22,11 +26,16 @@ final class AppModel {
     private(set) var myProfile: UserProfile?
     private(set) var myCard: CardSnapshot?
     private(set) var gyeops: [GyeopRecord] = []
+    private(set) var blockedUsers: [BlockedUser] = []
+    private(set) var moderationLoadFailed = false
+    private var storedCard: CardSnapshot?
 
     private let cardGenerator: any CardGenerating
     private let repository: any GyeopRepository
     /// 교환 세션 팩토리 — 판마다 새 세션. 실기기는 MPC, 시뮬레이터·프리뷰는 Mock.
-    private let makeExchangeSession: @Sendable (CardSnapshot) -> any ExchangeSession
+    private let makeExchangeSession: @Sendable (CardSnapshot, Set<String>) -> any ExchangeSession
+    private let blockedUserStore: BlockedUserStore
+    private var activeExchange: (any ExchangeSession)?
     /// 온보딩 전 로그인 게이트를 건너뛸지 (UI 테스트·프리뷰 전용)
     private let requiresSignIn: Bool
     /// 계정 삭제 실행 (심사 5.1.1(v)). 조립 시점에 실구현이 주입된다.
@@ -35,23 +44,29 @@ final class AppModel {
     private let shouldMigratePendingClipGyeops: Bool
 
     private let tokenStore = KeychainTokenStore()
+    private let sessionStore = AppleSignInSessionStore()
+    private var authenticationRevision = UUID()
+    private var deletingLocalAccount = false
 
     init(
         cardGenerator: any CardGenerating,
         repository: any GyeopRepository,
-        makeExchangeSession: @escaping @Sendable (CardSnapshot) -> any ExchangeSession = { _ in
+        makeExchangeSession: @escaping @Sendable (CardSnapshot, Set<String>) -> any ExchangeSession = { _, _ in
             MockExchangeSession()
         },
         requiresSignIn: Bool = false,
-        deleteAccountAction: @escaping @Sendable () async throws -> Void = {},
+        deleteAccountAction: (@Sendable () async throws -> Void)? = nil,
         now: @escaping @Sendable () -> Date = Date.init,
-        shouldMigratePendingClipGyeops: Bool = true
+        shouldMigratePendingClipGyeops: Bool = true,
+        blockedUserStore: BlockedUserStore? = nil
     ) {
         self.cardGenerator = cardGenerator
         self.repository = repository
         self.makeExchangeSession = makeExchangeSession
         self.requiresSignIn = requiresSignIn
-        self.deleteAccountAction = deleteAccountAction
+        let moderationStore = blockedUserStore ?? BlockedUserStore(inMemory: !requiresSignIn)
+        self.blockedUserStore = moderationStore
+        self.deleteAccountAction = deleteAccountAction ?? { try await moderationStore.clear() }
         self.now = now
         self.shouldMigratePendingClipGyeops = shouldMigratePendingClipGyeops
     }
@@ -70,15 +85,19 @@ final class AppModel {
         do {
             let repository = try SwiftDataGyeopRepository.live()
             let tokenStore = KeychainTokenStore()
+            let blockedUserStore = BlockedUserStore()
             return AppModel(
                 cardGenerator: CardGenerator(),
                 repository: repository,
                 makeExchangeSession: liveExchangeSessionFactory(mockFailure: mockFailure),
                 requiresSignIn: true,
                 deleteAccountAction: {
-                    try await AccountDeletionService(repository: repository, tokenStore: tokenStore)
+                    try await AccountDeletionService(
+                        repository: repository, tokenStore: tokenStore, blockedUserStore: blockedUserStore
+                    )
                         .deleteAccount()
-                }
+                },
+                blockedUserStore: blockedUserStore
             )
         } catch {
             Log.sync.error("SwiftData 컨테이너 생성 실패, 인메모리로 강등: \(error)")
@@ -92,7 +111,8 @@ final class AppModel {
                 cardGenerator: CardGenerator(),
                 repository: MockGyeopRepository(),
                 makeExchangeSession: liveExchangeSessionFactory(mockFailure: mockFailure),
-                requiresSignIn: true
+                requiresSignIn: true,
+                deleteAccountAction: { throw LiveStorageError.unavailable }
             )
         }
     }
@@ -108,7 +128,7 @@ final class AppModel {
         return AppModel(
             cardGenerator: CardGenerator(),
             repository: MockGyeopRepository(),
-            makeExchangeSession: { _ in MockExchangeSession(failure: mockFailure) },
+            makeExchangeSession: { _, _ in MockExchangeSession(failure: mockFailure) },
             now: { Date(timeIntervalSince1970: 1_785_000_000) }
         )
     }
@@ -133,7 +153,7 @@ final class AppModel {
         return AppModel(
             cardGenerator: cardGenerator,
             repository: MockGyeopRepository(initialProfile: profile, initialCard: card),
-            makeExchangeSession: { _ in MockExchangeSession(failure: mockFailure) },
+            makeExchangeSession: { _, _ in MockExchangeSession(failure: mockFailure) },
             now: { fixedNow },
             shouldMigratePendingClipGyeops: false
         )
@@ -158,7 +178,7 @@ final class AppModel {
                 initialProfile: profile,
                 initialCard: cardGenerator.makeCard(from: profile)
             ),
-            makeExchangeSession: { _ in MockExchangeSession(failure: mockFailure) },
+            makeExchangeSession: { _, _ in MockExchangeSession(failure: mockFailure) },
             now: { fixedNow },
             shouldMigratePendingClipGyeops: false
         )
@@ -169,46 +189,57 @@ final class AppModel {
     /// **같은** 팩토리를 써야 실기기에서 가짜 교환이 도는 일이 없다.
     private nonisolated static func liveExchangeSessionFactory(
         mockFailure: ExchangeFailure?
-    ) -> @Sendable (CardSnapshot) -> any ExchangeSession {
-        { card in
+    ) -> @Sendable (CardSnapshot, Set<String>) -> any ExchangeSession {
+        { card, blockedOwnerIDs in
             #if targetEnvironment(simulator)
             _ = card
             return MockExchangeSession(failure: mockFailure)
             #else
             return MultipeerExchangeSession(
-                displayName: makeExchangePeerName(nickname: card.nickname, ownerID: card.ownerID)
+                displayName: makeExchangePeerName(nickname: "겹", ownerID: card.ownerID),
+                ownerID: card.ownerID, blockedOwnerIDs: blockedOwnerIDs
             )
             #endif
         }
     }
 
-    func bootstrap() async {
+    func bootstrap() async throws {
         guard stage == .loading else { return }
-        clearTokenIfFreshInstall()
-        do {
-            if shouldMigratePendingClipGyeops {
-                try await migratePendingClipGyeops()
-            }
-            let profile = try await repository.myProfile()
-            myProfile = profile
-            if let card = try await repository.myCard() {
-                myCard = card
-                try await refreshGyeops()
-                stage = .home
-            } else {
-                stage = signedIn ? .onboarding : .signIn
-            }
-        } catch {
-            Log.sync.error("부트스트랩 실패: \(error)")
-            stage = signedIn ? .onboarding : .signIn
+        if shouldMigratePendingClipGyeops {
+            try await migratePendingClipGyeops()
         }
+        guard try await restoreLocalState(revision: authenticationRevision) else { return }
+        stage = storedCard == nil ? (signedIn ? .onboarding : .signIn) : .home
     }
 
     // MARK: - 로그인 (Sign in with Apple)
 
     private var signedIn: Bool {
         guard requiresSignIn else { return true }
-        return (try? tokenStore.loadToken()) != nil
+        return (try? sessionStore.load()) != nil
+    }
+
+    /// 저장한 Apple 사용자 식별자를 Apple에 조회한다. JWT 본문이나 토큰 유무만으로 인증하지 않는다.
+    func credentialLaunchDecision() async throws -> AppleCredentialLaunchPolicy.Decision {
+        guard requiresSignIn else { return .restoreLocalData }
+        try clearCredentialsIfFreshInstall()
+        let session: AppleSignInSession?
+        do {
+            session = try sessionStore.load()
+        } catch AppleSignInSessionStore.Error.invalidStoredSession {
+            return .reauthenticate
+        }
+        guard let session else { return .reauthenticate }
+        let state = try await ASAuthorizationAppleIDProvider().credentialState(
+            forUserID: session.userIdentifier
+        )
+        switch state {
+        case .authorized: return AppleCredentialLaunchPolicy.decision(for: .authorized)
+        case .revoked: return AppleCredentialLaunchPolicy.decision(for: .revoked)
+        case .notFound: return AppleCredentialLaunchPolicy.decision(for: .notFound)
+        case .transferred: return AppleCredentialLaunchPolicy.decision(for: .transferred)
+        @unknown default: return AppleCredentialLaunchPolicy.decision(for: .unavailable)
+        }
     }
 
     /// **Keychain은 앱을 삭제해도 기기에 남는다** (iOS 설계). 그래서 앱을 지우고 다시 깔아도
@@ -217,29 +248,36 @@ final class AppModel {
     /// UserDefaults는 앱과 함께 지워지므로, 이 플래그가 없다는 것은 곧 "재설치 후 첫 실행"이다.
     /// 그때 토큰을 비워 웰컴 화면부터 시작하게 한다 — 사용자에게도 맞는 동작이다(기기에서
     /// 앱을 지운 뒤 다시 깔면 새로 로그인하는 게 자연스럽다).
-    private func clearTokenIfFreshInstall() {
+    private func clearCredentialsIfFreshInstall() throws {
         let defaults = UserDefaults.standard
         guard !defaults.bool(forKey: Self.installedFlagKey) else { return }
-        do {
-            try tokenStore.deleteToken()
-        } catch {
-            Log.sync.error("재설치 첫 실행 토큰 정리 실패: \(error)")
-        }
+        try sessionStore.delete()
+        try tokenStore.deleteToken()
         defaults.set(true, forKey: Self.installedFlagKey)
     }
 
     /// 재설치 감지 플래그 — 앱 삭제 시 UserDefaults와 함께 사라진다.
     private static let installedFlagKey = "gyeop.hasLaunchedSinceInstall"
 
-    /// WelcomeView가 SIWA 성공 후 호출. 토큰은 Keychain에만 저장한다.
-    func completeSignIn(identityToken: String) {
+    /// 기존 빌드의 로컬 카드는 보존하고, Apple 재인증 후 다시 불러온다.
+    func completeSignIn(identityToken: String, userIdentifier: String) async -> Bool {
+        guard !deletingLocalAccount else { return false }
+        authenticationRevision = UUID()
+        let revision = authenticationRevision
         do {
-            try tokenStore.save(identityToken)
+            try sessionStore.save(AppleSignInSession(
+                userIdentifier: userIdentifier, identityToken: identityToken
+            ))
+            try tokenStore.deleteToken()
+            guard try await restoreLocalState(revision: revision) else { return false }
+            stage = storedCard == nil ? .onboarding : .home
+            return true
         } catch {
-            // Keychain 실패는 진행을 막지 않는다 — 다음 실행에서 재로그인
-            Log.sync.error("토큰 저장 실패: \(error)")
+            Log.sync.error("Apple 로그인 저장 또는 복원 실패: \(error)")
+            guard revision == authenticationRevision else { return false }
+            stage = .signIn
+            return false
         }
-        stage = .onboarding
     }
 
     /// 계정 삭제 — 프로필·카드·겹·토큰 전부. **화면 단계는 바꾸지 않는다** (F50).
@@ -247,16 +285,27 @@ final class AppModel {
     /// 설정 시트가 닫히는 동안 루트까지 함께 갈아치우면 전환이 거칠어져서, 단계 이동은
     /// 호출부가 시트를 닫은 뒤 `returnToEntry()`로 따로 시킨다.
     func deleteAccount() async -> Bool {
+        invalidateAuthentication()
+        deletingLocalAccount = true
+        defer { deletingLocalAccount = false }
         do {
             try await deleteAccountAction()
+            await activeExchange?.cancel()
+            activeExchange = nil
             myProfile = nil
             myCard = nil
+            storedCard = nil
             gyeops = []
+            blockedUsers = []
             return true
         } catch {
             Log.sync.error("계정 삭제 실패: \(error)")
             return false
         }
+    }
+
+    func invalidateAuthentication() {
+        authenticationRevision = UUID()
     }
 
     /// 삭제 후 처음 화면으로 — 로그인 게이트가 켜져 있으면 웰컴, 아니면 온보딩.
@@ -284,6 +333,7 @@ final class AppModel {
             try await repository.saveProfileAndCard(profile: profile, card: card)
             myProfile = profile
             myCard = card
+            storedCard = card
             return card
         } catch {
             Log.sync.error("온보딩 원자 저장 실패: \(String(describing: error), privacy: .public)")
@@ -292,7 +342,7 @@ final class AppModel {
     }
 
     func updateProfile(input: ProfileInput) async -> Bool {
-        guard let currentProfile = myProfile, let currentCard = myCard else {
+        guard let currentProfile = myProfile, let currentCard = storedCard ?? myCard else {
             Log.sync.error("Profile update unavailable")
             return false
         }
@@ -309,6 +359,7 @@ final class AppModel {
             try await repository.saveProfileAndCard(profile: update.profile, card: update.card)
             myProfile = update.profile
             myCard = update.card
+            storedCard = update.card
             return true
         } catch {
             Log.sync.error("Profile update atomic persistence failed: \(String(describing: error), privacy: .public)")
@@ -321,20 +372,40 @@ final class AppModel {
     }
 
     func enterCollection() async {
+        guard !deletingLocalAccount, myCard != nil,
+              stage == .home || stage == .onboarding else { return }
+        let revision = authenticationRevision
         do {
             try await refreshGyeops()
         } catch {
+            guard revision == authenticationRevision else { return }
+            gyeops = []
+            moderationLoadFailed = true
             Log.sync.error("겹 로드 실패: \(error)")
         }
+        guard revision == authenticationRevision else { return }
         stage = .home
     }
 
     // MARK: - 교환 (카드 맞대기)
 
     /// 맞대기 한 판 세션. 내 카드가 없으면 nil (교환 진입 버튼이 이미 막지만 방어).
-    func startExchange() -> (any ExchangeSession)? {
-        guard let myCard else { return nil }
-        return makeExchangeSession(myCard)
+    func startExchange() async -> (any ExchangeSession)? {
+        guard !deletingLocalAccount, !Task.isCancelled,
+              let myCard, ContentModerationPolicy.isAllowed(card: myCard) else { return nil }
+        let revision = authenticationRevision
+        do {
+            let blocked = try await blockedUserStore.list()
+            guard !Task.isCancelled, revision == authenticationRevision else { return nil }
+            blockedUsers = blocked
+            let session = makeExchangeSession(myCard, Set(blocked.map(\.ownerID)))
+            activeExchange = session
+            return session
+        } catch {
+            Log.sync.error("차단 목록 확인 실패: \(error)")
+            moderationLoadFailed = true
+            return nil
+        }
     }
 
     /// 받은 카드 개별 삭제 (F65 — 원치 않는 카드를 지울 수 있어야 한다, 심사 1.2 대비).
@@ -348,17 +419,104 @@ final class AppModel {
     }
 
     /// 교환 성립 기록. `record`는 멱등(같은 GyeopID·24시간 동일 상대 규칙은 리포지토리 소관).
-    func recordGyeop(_ record: GyeopRecord) async {
+    func recordGyeop(_ record: GyeopRecord) async -> Bool {
+        guard !deletingLocalAccount, !Task.isCancelled, stage == .home else { return false }
+        let revision = authenticationRevision
         do {
+            let blocked = try await blockedUserStore.list()
+            guard revision == authenticationRevision, !Task.isCancelled,
+                  !blocked.contains(where: { $0.ownerID == record.counterpartCard.ownerID }),
+                  ContentModerationPolicy.isAllowed(card: record.counterpartCard) else { return false }
             try await repository.record(record)
             try await refreshGyeops()
+            return revision == authenticationRevision
+                && !blockedUsers.contains { $0.ownerID == record.counterpartCard.ownerID }
         } catch {
             Log.sync.error("겹 기록 실패: \(error)")
+            return false
         }
     }
 
     private func refreshGyeops() async throws {
-        gyeops = try await repository.gyeops()
+        let revision = authenticationRevision
+        let blocked = try await blockedUserStore.list()
+        let records = try await repository.gyeops()
+        guard revision == authenticationRevision else { throw CancellationError() }
+        blockedUsers = blocked
+        gyeops = visibleRecords(records, blocked: blocked)
+        moderationLoadFailed = false
+    }
+
+    private func restoreLocalState(revision: UUID) async throws -> Bool {
+        let profile = try await repository.myProfile()
+        let card = try await repository.myCard()
+        let blocked = try await blockedUserStore.list()
+        let records = try await repository.gyeops()
+        guard revision == authenticationRevision else { return false }
+        myProfile = profile
+        storedCard = card
+        myCard = card.flatMap { ContentModerationPolicy.isAllowed(card: $0) ? $0 : nil }
+        blockedUsers = blocked
+        gyeops = visibleRecords(records, blocked: blocked)
+        moderationLoadFailed = false
+        return true
+    }
+
+    private func visibleRecords(_ records: [GyeopRecord], blocked: [BlockedUser]) -> [GyeopRecord] {
+        let blockedIDs = Set(blocked.map(\.ownerID))
+        return records.filter {
+            !blockedIDs.contains($0.counterpartCard.ownerID)
+                && ContentModerationPolicy.isAllowed(card: $0.counterpartCard)
+        }
+    }
+
+    func blockUser(_ card: CardSnapshot) async -> Bool {
+        guard !deletingLocalAccount, stage == .home, myProfile != nil,
+              card.ownerID != myProfile?.id else { return false }
+        let revision = authenticationRevision
+        do {
+            try await blockedUserStore.block(ownerID: card.ownerID, nickname: card.nickname)
+            guard revision == authenticationRevision else { return false }
+            gyeops = gyeops.filter { $0.counterpartCard.ownerID != card.ownerID }
+            blockedUsers = try await blockedUserStore.list()
+            await activeExchange?.cancel()
+            activeExchange = nil
+            let records = try await repository.gyeops()
+            for record in records where record.counterpartCard.ownerID == card.ownerID {
+                try await repository.deleteGyeop(id: record.id)
+            }
+            return true
+        } catch {
+            Log.sync.error("사용자 차단 또는 기록 정리 실패: \(error)")
+            return false
+        }
+    }
+
+    func unblockUser(_ ownerID: String) async -> Bool {
+        guard !deletingLocalAccount, stage == .home else { return false }
+        do {
+            // 이전 차단 시 기록 정리가 실패했더라도 해제 후 과거 카드가 다시 나타나지 않게 한다.
+            let records = try await repository.gyeops()
+            for record in records where record.counterpartCard.ownerID == ownerID {
+                try await repository.deleteGyeop(id: record.id)
+            }
+            try await blockedUserStore.unblock(ownerID: ownerID)
+            blockedUsers = try await blockedUserStore.list()
+            return true
+        } catch {
+            Log.sync.error("차단 해제 실패: \(error)")
+            return false
+        }
+    }
+
+    func reloadBlockedUsers() async -> Bool {
+        do {
+            blockedUsers = try await blockedUserStore.list()
+            return true
+        } catch {
+            Log.sync.error("차단 목록 불러오기 실패: \(error)")
+            return false
+        }
     }
 
     /// App Clip이 App Group에 남긴 겹을 본앱 저장소로 병합 (멱등).

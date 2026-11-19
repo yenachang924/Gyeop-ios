@@ -116,7 +116,7 @@ struct ExchangeStateMachine: Sendable {
             state = .failed(.peerLost)
             return [.emit(.failed(.peerLost)), .finish]
 
-        case (.awaitingCard, .transferFailed):
+        case (_, .transferFailed):
             state = .failed(.transferCorrupted)
             return [.emit(.failed(.transferCorrupted)), .finish]
 
@@ -148,7 +148,7 @@ struct ExchangeStateMachine: Sendable {
 
 /// 두 기기가 서로를 동시에 초대하는 경합을 막는 결정적 규칙.
 /// 대칭 프로토콜(양쪽 다 advertiser+browser)에서 누가 초대를 보낼지는
-/// 순전히 표시 이름 비교로 정한다 — 별도 조율 없이 양쪽이 같은 결론에 도달해야 한다.
+/// 전체 로컬 소유자 ID를 비교한다. 표시 이름이나 짧은 접미사가 같아도 양쪽 결론은 반대여야 한다.
 enum ExchangeTieBreak {
     static func shouldInitiate(local: String, remote: String) -> Bool {
         local < remote

@@ -5,6 +5,18 @@ import Testing
 
 @Suite("CardPayload — 직렬화")
 struct CardPayloadTests {
+    @Test("JSON 구조가 맞아도 부적절한 카드 내용은 수신하지 않는다")
+    func rejectsObjectionableCardPayload() throws {
+        let original = MockData.sampleCards[0]
+        let card = CardSnapshot(
+            ownerID: original.ownerID, seed: original.seed, nickname: "씨발",
+            tagline: original.tagline, emoji: original.emoji, interests: original.interests,
+            mbti: original.mbti, version: original.version, createdAt: original.createdAt
+        )
+        let data = try JSONEncoder().encode(card)
+        #expect(throws: CardPayloadError.objectionableContent) { try CardPayload.decode(data) }
+    }
+
     @Test("인코딩 후 디코딩하면 원본과 같다")
     func roundTrip() throws {
         let card = MockData.sampleCards[0]

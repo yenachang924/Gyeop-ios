@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- 겹은 서버가 없다. 카드·겹 기록은 기기 안(SwiftData)에만 남고 어디로도 나가지 않는다. -->
+	<!-- 겹 운영자의 서버로 수집하지 않는다. 카드는 사용자가 교환하면 근처 상대 기기로 전달된다. -->
 	<key>NSPrivacyTracking</key>
 	<false/>
 	<key>NSPrivacyTrackingDomains</key>
@@ -14,15 +14,17 @@
 		<dict>
 			<!--
 				UserDefaults 사용처:
-				- App/AppModel.swift  재설치 감지 플래그 (앱 자신이 쓴 값만 읽고 쓴다)
+				- CA92.1: App/AppModel.swift 재설치 감지·인증 취소 정리 대기 플래그
+				  (앱 자신이 쓴 값만 읽고 쓴다)
 				- Packages/.../DataKit/ClipMigrationReceiver.swift
-				  App Group(group.com.gyeop.app) 우편함에서 클립이 남긴 겹 기록을 회수
+				  1C8F.1: 같은 App Group(group.com.gyeop.app)의 클립이 남긴 겹 기록을 회수
 			-->
 			<key>NSPrivacyAccessedAPIType</key>
 			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
 			<key>NSPrivacyAccessedAPITypeReasons</key>
 			<array>
 				<string>CA92.1</string>
+				<string>1C8F.1</string>
 			</array>
 		</dict>
 		<dict>

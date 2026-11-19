@@ -5,15 +5,26 @@ import Foundation
 public struct AccountDeletionService: Sendable {
     private let repository: SwiftDataGyeopRepository
     private let tokenStore: KeychainTokenStore
+    private let sessionStore: AppleSignInSessionStore
+    private let blockedUserStore: BlockedUserStore
 
-    public init(repository: SwiftDataGyeopRepository, tokenStore: KeychainTokenStore = KeychainTokenStore()) {
+    public init(
+        repository: SwiftDataGyeopRepository,
+        tokenStore: KeychainTokenStore = KeychainTokenStore(),
+        sessionStore: AppleSignInSessionStore = AppleSignInSessionStore(),
+        blockedUserStore: BlockedUserStore = BlockedUserStore()
+    ) {
         self.repository = repository
         self.tokenStore = tokenStore
+        self.sessionStore = sessionStore
+        self.blockedUserStore = blockedUserStore
     }
 
     /// 실행 후 프로필·카드·겹 기록·Apple 토큰이 전부 사라져야 한다.
     public func deleteAccount() async throws {
         try await repository.deleteAllLocalData()
+        try await blockedUserStore.clear()
+        try sessionStore.delete()
         try tokenStore.deleteToken()
     }
 }

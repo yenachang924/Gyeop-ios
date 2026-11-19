@@ -6,10 +6,12 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
 
     @State private var confirmingDeletion = false
     @State private var deleting = false
     @State private var deletionFailed = false
+    @State private var deletionCompleted = false
 
     var body: some View {
         NavigationStack {
@@ -36,6 +38,24 @@ struct SettingsView: View {
                     .accessibilityIdentifier("settings.cardColorGuide")
                 } footer: {
                     Text("카드 색이 무엇을 담는지, 겹의 공식 규칙을 알려드려요.")
+                }
+
+                Section("도움말") {
+                    NavigationLink("차단한 사용자") {
+                        BlockedUsersView()
+                    }
+                    .accessibilityIdentifier("settings.blockedUsers")
+                    if let privacyURL = SupportLinks.privacyPolicy {
+                        Link("개인정보처리방침", destination: privacyURL)
+                            .accessibilityIdentifier("settings.privacyPolicy")
+                    }
+                    if let supportURL = SupportLinks.support {
+                        Link("고객지원", destination: supportURL)
+                            .accessibilityIdentifier("settings.support")
+                    }
+                    if let communityURL = SupportLinks.community {
+                        Link("커뮤니티 이용 안내", destination: communityURL)
+                    }
                 }
 
                 Section {
@@ -74,10 +94,22 @@ struct SettingsView: View {
         } message: {
             Text("잠시 후 다시 시도해 주세요.")
         }
+        .alert("이 기기의 데이터를 삭제했어요", isPresented: $deletionCompleted) {
+            Button("Apple 연결 해제 안내") {
+                if let helpURL = SupportLinks.appleAuthorization {
+                    openURL(helpURL)
+                }
+                Task { await finishDeletion() }
+            }
+            Button("완료") {
+                Task { await finishDeletion() }
+            }
+        } message: {
+            Text("Apple로 로그인 연결도 해제하려면 iPhone 설정에서 Apple 계정 > Apple로 로그인 > 겹을 선택해 사용을 중단해 주세요. 이미 상대에게 전달된 카드는 상대 기기에 남을 수 있어요.")
+        }
     }
 
-    /// 삭제 → **시트 닫힘 → 루트 전환** 순서로 나눈다 (F50). 둘이 겹치면 화면이 거칠게
-    /// 끊긴다. 실패는 시트가 살아 있는 동안 알려야 하므로 삭제를 먼저 시도한다.
+    /// 로컬 삭제 후 Apple의 수동 연결 해제 방법을 알린다 (TN3194).
     private func deleteAccount() async {
         deleting = true
         defer { deleting = false }
@@ -85,9 +117,21 @@ struct SettingsView: View {
             deletionFailed = true
             return
         }
+        deletionCompleted = true
+    }
+
+    /// 안내 확인 → 시트 닫힘 → 루트 전환 순서를 유지한다 (F50).
+    private func finishDeletion() async {
         dismiss()
         try? await Task.sleep(for: .seconds(Timing.sheetDismiss))
         model.returnToEntry()
+    }
+
+    private enum SupportLinks {
+        static let privacyPolicy = URL(string: "https://gyeop-support.yenachang924.chatgpt.site/privacy/")
+        static let support = URL(string: "https://gyeop-support.yenachang924.chatgpt.site/support/")
+        static let community = URL(string: "https://gyeop-support.yenachang924.chatgpt.site/community/")
+        static let appleAuthorization = URL(string: "https://support.apple.com/102571")
     }
 
     private enum Timing {

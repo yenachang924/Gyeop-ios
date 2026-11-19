@@ -7,6 +7,7 @@ import Foundation
 enum CardPayloadError: Error, Sendable, Equatable {
     case tooLarge(byteCount: Int, limit: Int)
     case decodingFailed
+    case objectionableContent
 }
 
 enum CardPayload {
@@ -14,6 +15,9 @@ enum CardPayload {
     static let maxByteCount = 16 * 1024
 
     static func encode(_ card: CardSnapshot) throws -> Data {
+        guard ContentModerationPolicy.isAllowed(card: card) else {
+            throw CardPayloadError.objectionableContent
+        }
         let data = try JSONEncoder().encode(card)
         guard data.count <= maxByteCount else {
             throw CardPayloadError.tooLarge(byteCount: data.count, limit: maxByteCount)
@@ -25,10 +29,15 @@ enum CardPayload {
         guard data.count <= maxByteCount else {
             throw CardPayloadError.tooLarge(byteCount: data.count, limit: maxByteCount)
         }
+        let card: CardSnapshot
         do {
-            return try JSONDecoder().decode(CardSnapshot.self, from: data)
+            card = try JSONDecoder().decode(CardSnapshot.self, from: data)
         } catch {
             throw CardPayloadError.decodingFailed
         }
+        guard ContentModerationPolicy.isAllowed(card: card) else {
+            throw CardPayloadError.objectionableContent
+        }
+        return card
     }
 }

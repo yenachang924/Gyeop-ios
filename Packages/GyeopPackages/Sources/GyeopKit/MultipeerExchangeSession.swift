@@ -1,7 +1,6 @@
 import Core
 import Foundation
 @preconcurrency import MultipeerConnectivity
-import Synchronization
 
 /// 카드 맞대기(MPC) 실구현. 상태 전이 로직은 ExchangeStateMachine(순수·테스트 가능)이
 /// 갖고 있고, 이 액터는 MC delegate 콜백을 상태 머신 입력으로 번역하고 머신이 요청한
@@ -16,7 +15,7 @@ public actor MultipeerExchangeSession: ExchangeSession {
     public nonisolated let events: AsyncStream<ExchangeEvent>
     private let continuation: AsyncStream<ExchangeEvent>.Continuation
 
-    private let localPeerID: MCPeerID
+    private let localOwnerID: String
     private let session: MCSession
     private let advertiser: MCNearbyServiceAdvertiser
     private let browser: MCNearbyServiceBrowser
@@ -38,13 +37,16 @@ public actor MultipeerExchangeSession: ExchangeSession {
     private var transferSpan: SignpostSpan?
 
     /// - Parameter displayName: 상대에게 보일 이름. MCPeerID 제약상 UTF-8 63바이트 이내여야 한다.
-    public init(displayName: String) {
+    public init(displayName: String, ownerID: String, blockedOwnerIDs: Set<String> = []) {
         let peerID = MCPeerID(displayName: displayName)
-        localPeerID = peerID
+        localOwnerID = ownerID
         session = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: .required)
-        advertiser = MCNearbyServiceAdvertiser(peer: peerID, discoveryInfo: nil, serviceType: ExchangeConstants.serviceType)
+        advertiser = MCNearbyServiceAdvertiser(
+            peer: peerID, discoveryInfo: PeerIdentity(ownerID: ownerID)?.discoveryInfo,
+            serviceType: ExchangeConstants.serviceType
+        )
         browser = MCNearbyServiceBrowser(peer: peerID, serviceType: ExchangeConstants.serviceType)
-        let gate = InvitationGate()
+        let gate = InvitationGate(localOwnerID: ownerID, blockedOwnerIDs: blockedOwnerIDs)
         invitationGate = gate
         delegateProxy = ExchangeDelegateProxy(session: session, gate: gate)
         (events, continuation) = AsyncStream.makeStream(of: ExchangeEvent.self)
@@ -57,6 +59,9 @@ public actor MultipeerExchangeSession: ExchangeSession {
 
     public func start(broadcasting card: CardSnapshot) async throws {
         guard machine.state == .idle else { return }
+        guard card.ownerID == localOwnerID, PeerIdentity(ownerID: localOwnerID) != nil else {
+            throw CardPayloadError.decodingFailed
+        }
         _ = try CardPayload.encode(card) // 상한 초과 시 광고 시작 전에 던진다
         myCard = card
         await haptics.prepare()
@@ -90,15 +95,23 @@ public actor MultipeerExchangeSession: ExchangeSession {
     private func perform(_ effect: ExchangeEffect) {
         switch effect {
         case .invitePeer(let name):
-            guard let peer = knownPeers[name] else { return }
-            let timeout = TimeInterval(connectionTimeoutSeconds)
-            browser.invitePeer(peer, to: session, withContext: nil, timeout: timeout)
+            guard let peer = knownPeers[name], invitationGate.approveOutgoing(name),
+                  let identity = PeerIdentity(ownerID: localOwnerID) else {
+                apply(.transferFailed)
+                return
+            }
+            do {
+                let context = try identity.encodedContext()
+                browser.invitePeer(peer, to: session, withContext: context, timeout: connectionTimeoutSeconds)
+            } catch {
+                apply(.transferFailed)
+            }
 
         case .sendCard:
             sendMyCard()
 
         case .emit(let event):
-            continuation.yield(event)
+            continuation.yield(safeEvent(event))
             if let pattern = Self.hapticPattern(for: event) {
                 Task { await haptics.play(pattern) }
             }
@@ -113,6 +126,8 @@ public actor MultipeerExchangeSession: ExchangeSession {
 
         case .retried:
             setActivePeer(nil)
+            browser.stopBrowsingForPeers()
+            browser.startBrowsingForPeers()
             Task { await MetricCounter.shared.increment(Metric.exchangeRetry) }
 
         case .releasePeer:
@@ -124,7 +139,13 @@ public actor MultipeerExchangeSession: ExchangeSession {
     }
 
     private func completeExchange(with counterpart: CardSnapshot) async {
-        guard let myCard else { return }
+        guard let myCard, let name = activePeerName,
+              invitationGate.matchesPayloadOwner(counterpart.ownerID, from: name),
+              ContentModerationPolicy.isAllowed(card: counterpart) else {
+            continuation.yield(.failed(.transferCorrupted))
+            teardown()
+            return
+        }
         let shared = myCard.sharedInterests(with: counterpart)
         Log.nearby.info("exchange overlap: \(shared.count, privacy: .public) shared interests")
 
@@ -164,6 +185,14 @@ public actor MultipeerExchangeSession: ExchangeSession {
         case .cardReceived: .connected
         case .failed: .failed
         case .searching, .connecting, .completed: nil
+        }
+    }
+
+    private func safeEvent(_ event: ExchangeEvent) -> ExchangeEvent {
+        switch event {
+        case .peerFound: .peerFound(name: "근처 상대")
+        case .connecting: .connecting(name: "근처 상대")
+        default: event
         }
     }
 
@@ -225,10 +254,11 @@ public actor MultipeerExchangeSession: ExchangeSession {
     // MARK: - MC delegate 콜백 (delegateProxy가 호출)
 
     fileprivate func handleFoundPeer(_ peerID: MCPeerID) {
+        guard let remoteOwnerID = invitationGate.ownerID(for: peerID.displayName) else { return }
         knownPeers[peerID.displayName] = peerID
         guard activePeerName == nil else { return }
         setActivePeer(peerID.displayName)
-        let shouldInvite = ExchangeTieBreak.shouldInitiate(local: localPeerID.displayName, remote: peerID.displayName)
+        let shouldInvite = ExchangeTieBreak.shouldInitiate(local: localOwnerID, remote: remoteOwnerID)
         apply(.peerDiscovered(name: peerID.displayName, shouldInvite: shouldInvite))
     }
 
@@ -248,13 +278,23 @@ public actor MultipeerExchangeSession: ExchangeSession {
 
     fileprivate func handleSessionStateChange(_ peerID: MCPeerID, state: MCSessionState) {
         knownPeers[peerID.displayName] = peerID
-        if activePeerName == nil { setActivePeer(peerID.displayName) }
+        if activePeerName == nil, invitationGate.allowsSending(to: peerID.displayName) {
+            setActivePeer(peerID.displayName)
+        }
         guard activePeerName == peerID.displayName else { return }
 
         switch state {
         case .connecting:
+            guard invitationGate.allowsSending(to: peerID.displayName) else {
+                apply(.transferFailed)
+                return
+            }
             apply(.peerConnecting(name: peerID.displayName))
         case .connected:
+            guard invitationGate.allowsSending(to: peerID.displayName) else {
+                apply(.transferFailed)
+                return
+            }
             apply(.peerConnected(name: peerID.displayName))
         case .notConnected:
             apply(.peerDisconnected(name: peerID.displayName))
@@ -267,6 +307,10 @@ public actor MultipeerExchangeSession: ExchangeSession {
         guard activePeerName == peerID.displayName else { return }
         do {
             let card = try CardPayload.decode(data)
+            guard invitationGate.matchesPayloadOwner(card.ownerID, from: peerID.displayName) else {
+                apply(.transferFailed)
+                return
+            }
             apply(.cardDataReceived(card))
         } catch {
             Log.nearby.error("card decode failed: \(String(describing: error), privacy: .public)")
@@ -275,7 +319,12 @@ public actor MultipeerExchangeSession: ExchangeSession {
     }
 
     private func sendMyCard() {
-        guard let myCard, let name = activePeerName, let peer = knownPeers[name] else { return }
+        guard let myCard, let name = activePeerName, let peer = knownPeers[name],
+              invitationGate.allowsSending(to: name),
+              ContentModerationPolicy.isAllowed(card: myCard) else {
+            apply(.transferFailed)
+            return
+        }
         do {
             let data = try CardPayload.encode(myCard)
             try session.send(data, toPeers: [peer], with: .reliable)
@@ -323,51 +372,18 @@ private final class ExchangeDelegateProxy: NSObject, MCSessionDelegate, MCNearby
         // tie-break는 초대 '발신' 방향만 정한다 — 다자 환경에서 제3자 초대를 걸러내는 건
         // 수신 측 몫이다. 이미 다른 상대와 진행 중이거나 종료 후면 거절한다; 거절받은
         // 초대자는 didChange(.notConnected)를 받고 자기 쪽에서 재시도한다.
-        let accepted = gate.tryAccept(peerID.displayName)
+        let accepted = gate.tryAccept(peerID.displayName, context: context)
         invitationHandler(accepted, accepted ? session : nil)
         Task { [target] in await target?.handleReceivedInvitation(from: peerID, accepted: accepted) }
     }
 
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
+        guard gate.registerDiscovery(peerID.displayName, info: info) != nil else { return }
         Task { [target] in await target?.handleFoundPeer(peerID) }
     }
 
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
+        gate.forget(peerID.displayName)
         Task { [target] in await target?.handleLostPeer(peerID) }
-    }
-}
-
-/// 초대 수락 여부를 델리게이트 큐에서 즉시(동기) 판정하기 위한 락 미러.
-/// invitationHandler는 non-Sendable 클로저라 액터로 넘겨 비동기 판정할 수 없다 —
-/// 대신 액터가 activePeerName을 바꿀 때마다 sync(lockedPeer:)로 이 미러를 갱신하고,
-/// 프록시는 여기서 바로 수락/거절을 결정한다. 진실 원천은 어디까지나 액터다.
-final class InvitationGate: Sendable {
-    private struct State {
-        var lockedPeer: String?
-        var isFinished = false
-    }
-
-    private let state = Mutex(State())
-
-    /// 미잠금이면 이 피어로 잠그며 수락, 잠겨 있으면 같은 피어일 때만 수락, 종료 후엔 항상 거절.
-    func tryAccept(_ peerName: String) -> Bool {
-        state.withLock { state in
-            guard !state.isFinished else { return false }
-            guard let locked = state.lockedPeer else {
-                state.lockedPeer = peerName
-                return true
-            }
-            return locked == peerName
-        }
-    }
-
-    /// 액터의 activePeerName 변경을 반영한다 (setActivePeer 전용).
-    func sync(lockedPeer: String?) {
-        state.withLock { $0.lockedPeer = lockedPeer }
-    }
-
-    /// teardown 이후 도착하는 모든 초대를 거절 상태로 만든다.
-    func finish() {
-        state.withLock { $0.isFinished = true }
     }
 }

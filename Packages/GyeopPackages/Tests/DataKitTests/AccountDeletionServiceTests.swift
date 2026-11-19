@@ -16,13 +16,26 @@ struct AccountDeletionServiceTests {
             service: "com.gyeop.app.tests.auth", account: "test-\(UUID().uuidString)"
         )
         try tokenStore.save("dummy-identity-token")
+        let sessionStore = AppleSignInSessionStore(store: KeychainTokenStore(
+            service: "com.gyeop.app.tests.auth", account: "session-\(UUID().uuidString)"
+        ))
+        try sessionStore.save(AppleSignInSession(
+            userIdentifier: "apple-user", identityToken: "dummy-identity-token"
+        ))
 
-        let service = AccountDeletionService(repository: repo, tokenStore: tokenStore)
+        let blockedUserStore = BlockedUserStore(inMemory: true)
+        try await blockedUserStore.block(ownerID: "blocked-user")
+        let service = AccountDeletionService(
+            repository: repo, tokenStore: tokenStore, sessionStore: sessionStore,
+            blockedUserStore: blockedUserStore
+        )
         try await service.deleteAccount()
 
         #expect(try await repo.myProfile() == nil)
         #expect(try await repo.myCard() == nil)
         #expect(try await repo.gyeops().isEmpty)
         #expect(try tokenStore.loadToken() == nil)
+        #expect(try sessionStore.load() == nil)
+        #expect(try await blockedUserStore.list().isEmpty)
     }
 }

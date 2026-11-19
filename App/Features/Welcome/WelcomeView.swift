@@ -111,8 +111,12 @@ struct WelcomeView: View {
                 failed = true
                 return
             }
-            failed = false
-            model.completeSignIn(identityToken: token)
+            let userIdentifier = credential.user
+            Task {
+                failed = !(await model.completeSignIn(
+                    identityToken: token, userIdentifier: userIdentifier
+                ))
+            }
         case .failure:
             // 사용자 취소 포함 — 조용히 게이트에 남는다
             failed = true

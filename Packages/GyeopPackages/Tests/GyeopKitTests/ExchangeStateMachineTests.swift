@@ -229,37 +229,50 @@ struct ExchangeStateMachineTests {
 
 @Suite("InvitationGate — 초대 수락 판정")
 struct InvitationGateTests {
+    private func makeGate() -> InvitationGate {
+        let gate = InvitationGate(localOwnerID: "local")
+        for name in ["A", "B", "상대", "제3자"] {
+            _ = gate.registerDiscovery(name, info: PeerIdentity(ownerID: name == "A" ? "owner-a" : name == "B" ? "owner-b" : name == "상대" ? "owner-c" : "owner-d")?.discoveryInfo)
+        }
+        return gate
+    }
+
+    private func context(_ name: String) -> Data? {
+        let owner = name == "A" ? "owner-a" : name == "B" ? "owner-b" : name == "상대" ? "owner-c" : "owner-d"
+        return try? PeerIdentity(ownerID: owner)?.encodedContext()
+    }
+
     @Test("미잠금 상태의 첫 초대는 수락하며 그 피어로 잠근다")
     func firstInvitationAcceptsAndLocks() {
-        let gate = InvitationGate()
-        #expect(gate.tryAccept("A"))
-        #expect(!gate.tryAccept("B")) // 이미 A로 잠김
-        #expect(gate.tryAccept("A"))  // 같은 피어는 계속 수락
+        let gate = makeGate()
+        #expect(gate.tryAccept("A", context: context("A")))
+        #expect(!gate.tryAccept("B", context: context("B")))
+        #expect(gate.tryAccept("A", context: context("A")))
     }
 
     @Test("락온한 상대가 아닌 제3자의 초대는 거절한다")
     func rejectsThirdPartyWhileLocked() {
-        let gate = InvitationGate()
+        let gate = makeGate()
         gate.sync(lockedPeer: "상대")
-        #expect(!gate.tryAccept("제3자"))
-        #expect(gate.tryAccept("상대"))
+        #expect(!gate.tryAccept("제3자", context: context("제3자")))
+        #expect(gate.tryAccept("상대", context: context("상대")))
     }
 
     @Test("락 해제(sync nil) 후에는 새 피어를 수락한다")
     func acceptsNewPeerAfterRelease() {
-        let gate = InvitationGate()
-        #expect(gate.tryAccept("A"))
+        let gate = makeGate()
+        #expect(gate.tryAccept("A", context: context("A")))
         gate.sync(lockedPeer: nil) // releasePeer/retried 경로
-        #expect(gate.tryAccept("B"))
+        #expect(gate.tryAccept("B", context: context("B")))
     }
 
     @Test("finish 후에는 모든 초대를 거절한다")
     func rejectsEverythingAfterFinish() {
-        let gate = InvitationGate()
+        let gate = makeGate()
         gate.finish()
-        #expect(!gate.tryAccept("A"))
+        #expect(!gate.tryAccept("A", context: context("A")))
         gate.sync(lockedPeer: nil)
-        #expect(!gate.tryAccept("A"))
+        #expect(!gate.tryAccept("A", context: context("A")))
     }
 }
 
