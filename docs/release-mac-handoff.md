@@ -1,12 +1,26 @@
 # iMac에서 출시 수정본 검증하기
 
-2026-11-20 사용자가 먼저 GitHub에 올린 뒤 iMac에서 빌드·검증하도록 지시한 작업본이다. **Windows 정적 검사만 수행했으며 Xcode 빌드·테스트·실기기 검증·서명·업로드는 아직 하지 않았다.** 이 브랜치는 정식 출시 완료본이 아니다.
+2026-11-20 사용자가 먼저 GitHub에 올린 뒤 iMac에서 빌드·업로드하도록 지시한 작업본이다. 이후 별도 테스트 생략과 버전 번호 사전 수정을 요청했다. **Windows 정적 검사만 수행했으며 Xcode 빌드·테스트·실기기 검증·서명·업로드는 아직 하지 않았다.** 이 브랜치는 정식 출시 완료본이 아니다.
 
 - 저장소: https://github.com/yenachang924/Gyeop-ios
 - 작업 브랜치: `codex/app-store-release`
 - 기준: 실제 TestFlight 1.0(6)의 `3e442ccceaa5e9921bd9c48b0d7c493e6fa558a7`
 - 별도 패치를 적용하지 않고 아래 브랜치를 받는다.
 - 기존 작업이 있는 폴더를 덮어쓰지 않고 새 폴더에서 시작한다.
+- 버전 `1.0.0`, 빌드 `7`은 `project.yml`과 `App/Support/Info.plist`에 설정해 두었다. iMac에서 번호를 다시 바꿀 필요는 없다.
+
+## 빌드·업로드만 진행하는 경우
+
+사용자 요청에 따라 아래 테스트 절차는 별도로 실행하지 않고 진행할 수 있다. 프로젝트 생성, 실제 Archive 컴파일, 배포 서명, Apple 업로드 처리는 필요하다.
+
+1. 아래 소스 받기 절차로 작업 브랜치를 받는다. 이미 같은 브랜치를 받은 폴더라면 `git status --short`로 로컬 변경이 없는지 확인하고 `git pull --ff-only`를 실행한다.
+2. Xcode 26 이상과 XcodeGen을 준비하고 프로젝트 루트에서 `xcodegen generate`를 실행한다. 새 소스 파일을 포함하기 위한 절차다.
+3. `open Gyeop.xcodeproj`로 열고 Gyeop 타깃의 개발자 Team과 자동 서명을 설정한다. Bundle ID는 `com.gyeop.app`이다.
+4. Gyeop 스킴과 실제 iOS 기기용 대상을 선택한 뒤 Product → Archive를 실행한다.
+5. Organizer에서 Distribute App → TestFlight & App Store를 선택한다. 정식 출시에도 사용할 빌드이므로 TestFlight Internal Only는 선택하지 않는다.
+6. Apple 처리 완료 후 TestFlight 테스터 그룹에 새 빌드를 배포한다. 외부 테스팅 심사가 표시되면 제출한다.
+
+버전과 빌드 번호를 추가로 수정할 필요는 없다. 단, 이 브랜치 공유 이후 같은 빌드 번호로 다른 업로드를 진행했다면 새 번호가 필요하다. 아래 3·4절은 테스트를 실행할 때 사용할 참고 절차다.
 
 ## 1. 소스 받기
 
@@ -71,13 +85,13 @@ xcodebuild -project Gyeop.xcodeproj -scheme Gyeop \
 
 ## 5. 새 빌드 준비와 업로드
 
-검증한 뒤 `project.yml`의 `CFBundleShortVersionString`을 App Store 버전과 맞추고 `CFBundleVersion`을 아직 사용하지 않은 값으로 올린다. 준비 목표는 `1.0.0(7)`이며, 7이 이미 쓰였다면 더 높은 번호를 쓴다. 생성 `pbxproj`를 손으로 고치지 않는다.
+`project.yml`과 `App/Support/Info.plist`에는 버전 `1.0.0`, 빌드 `7`을 설정해 두었다. 번호 수동 수정은 생략한다. 새 파일을 포함하도록 iMac에서 프로젝트를 다시 생성한다. 생성 `pbxproj`를 손으로 고치지 않는다.
 
 ```bash
 xcodegen generate
 ```
 
-검증 후 Xcode에서 Release Archive를 만들고 Organizer에서 App Store Connect로 업로드한다. 실제 Apple Developer 계정과 배포 서명이 필요하다. 최종 개인정보 보고서에서 UserDefaults `CA92.1`·`1C8F.1`, ActiveKeyboards `54BD.1`이 실제 사용과 맞는지 확인한다.
+Xcode에서 Release Archive를 만들고 Organizer에서 App Store Connect로 업로드한다. 실제 Apple Developer 계정과 배포 서명이 필요하다. 최종 개인정보 보고서에서 UserDefaults `CA92.1`·`1C8F.1`, ActiveKeyboards `54BD.1`이 실제 사용과 맞는지 확인한다.
 
 App Clip은 이번 타깃·스킴에 포함하지 않는다. 제외된 기존 소스를 다시 활성화하려면 별도 교환 API 전환과 안전성 검증이 필요하다.
 
